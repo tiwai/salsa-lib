@@ -863,3 +863,97 @@ int snd_pcm_hw_free(snd_pcm_t *pcm)
 	pcm->setup = 0;
 	return 0;
 }
+
+int snd_pcm_sw_params(snd_pcm_t *pcm, snd_pcm_sw_params_t *params)
+{
+	if (!pcm->setup)
+		return -EBADFD;
+	if (ioctl(fd, SNDRV_PCM_IOCTL_SW_PARAMS, params) < 0)
+		return -errno;
+	pcm->sw_params = *params;
+	return 0;
+}
+
+/*
+ * DUMP
+ */
+void snd_pcm_hw_param_dump(const snd_pcm_hw_params_t *params,
+			   snd_pcm_hw_param_t var, snd_output_t *out)
+{
+	if (hw_is_mask(var)) {
+		const snd_mask_t *mask = hw_param_mask_c(params, var);
+		if (snd_mask_empty(mask))
+			snd_output_puts(out, " NONE");
+		else if (snd_mask_full(mask))
+			snd_output_puts(out, " ALL");
+		else {
+			unsigned int k;
+			for (k = 0; k <= SND_MASK_MAX; ++k) {
+				if (snd_mask_test(mask, k)) {
+					const char *s;
+					switch (var) {
+					case SND_PCM_HW_PARAM_ACCESS:
+						s = snd_pcm_access_name(k);
+						break;
+					case SND_PCM_HW_PARAM_FORMAT:
+						s = snd_pcm_format_name(k);
+						break;
+					case SND_PCM_HW_PARAM_SUBFORMAT:
+						s = snd_pcm_subformat_name(k);
+						break;
+					default:
+						s = NULL;
+					}
+					if (s) {
+						snd_output_putc(out, ' ');
+						snd_output_puts(out, s);
+					}
+				}
+			}
+		}
+		return;
+	}
+	if (hw_is_interval(var)) {
+		snd_interval_print(hw_param_interval_c(params, var), out);
+		return;
+	}
+}
+
+static void dump_one_param(snd_pcm_hw_params_t *params, unsigned int k,
+			   snd_output_t *out)
+{
+	snd_output_printf(out, "%s: ", snd_pcm_hw_param_name(k));
+	snd_pcm_hw_param_dump(params, k, out);
+	snd_output_putc(out, '\n');
+}
+
+int snd_pcm_hw_params_dump(snd_pcm_hw_params_t *params, snd_output_t *out)
+{
+	unsigned int k;
+	for (k = SND_PCM_HW_PARAM_FIRST_MASK; k <= SND_PCM_HW_PARAM_LAST_MASK; k++)
+		dump_one_param(params, k, out);
+	for (k = SND_PCM_HW_PARAM_FIRST_INTERVAL; k <= SND_PCM_HW_PARAM_LAST_INTERVAL; k++)
+		dump_one_param(params, k, out);
+	return 0;
+}
+
+int snd_pcm_sw_params_dump(snd_pcm_sw_params_t *params, snd_output_t *out)
+{
+	snd_output_printf(out, "tstamp_mode: %s\n",
+			  snd_pcm_tstamp_mode_name(params->tstamp_mode));
+	snd_output_printf(out, "period_step: %u\n",
+			  params->period_step);
+	snd_output_printf(out, "sleep_min: %u\n",
+			  params->sleep_min);
+	snd_output_printf(out, "avail_min: %lu\n",
+			  params->avail_min);
+	snd_output_printf(out, "xfer_align: %lu\n",
+			  params->xfer_align);
+	snd_output_printf(out, "silence_threshold: %lu\n",
+			  params->silence_threshold);
+	snd_output_printf(out, "silence_size: %lu\n",
+			  params->silence_size);
+	snd_output_printf(out, "boundary: %lu\n",
+			  params->boundary);
+	return 0;
+}

@@ -25,19 +25,39 @@
 #include <stdarg.h>
 #include <signal.h>
 #include <sys/poll.h>
+#include "local.h"
 
-static int get_device(const char *name, int *cardp, int *devp, int *subdevp)
+static int open_with_subdev(const char *filename, int fmode,
+			    int card, int subdev)
 {
-	*cardp = 0;
-	*devp = 0;
-	*subdevp = -1;
-	if (!strcmp(name, "hw") || !strcmp(name, "default"))
-		return 0;
-	if (sscanf(name, "default:%d", cardp) > 0)
-		return 0;
-	if (sscanf(name, "hw:%d,%d,%d", cardp, devp, subdevp) > 0)
-		return 0;
-	return -EINVAL;
+	snd_pcm_info_t info;
+	char ctlfile[8];
+	int err;
+
+	sprintf(ctlfile, "hw:%d", card);
+	err = snd_ctl_open(&ctl, ctlfile, 0);
+	if (err < 0)
+		return err;
+
+	err = snd_ctl_pcm_prefer_subdevice(ctl, subdevice);
+	if (err < 0)
+		return err;
+
+	for (counts = 0; counts < 3; counts++) {
+		fd = open(filename, fmode);
+		if (fd < 0)
+		        return -errno;
+		memset(&info, 0, sizeof(info));
+		if (ioctl(fd, SNDRV_PCM_IOCTL_INFO, &info) < 0)
+			return -errno;
+		if (info.subdevice == subdev) {
+			snd_ctl_close(ctl);
+			return fd;
+		}
+		close(fd);
+	}
+	snd_ctl_close(ctl);
+	return -EBUSY;
 }
 
 int snd_pcm_open(snd_pcm_t **pcmp, const char *name, 
@@ -46,19 +66,11 @@ int snd_pcm_open(snd_pcm_t **pcmp, const char *name,
 	char filename[32];
 	int card, dev, subdev;
 	snd_ctl_t *ctl = NULL;
-	int fd = -1, err, counts = 0;
+	int fd = -1, err, counts = 0, fmode;
 
-	err = get_device(name, &card, &dev, &subdev);
+	err = _snd_dev_get_device(name, &card, &dev, &subdev);
 	if (err < 0)
 		return err;
-
-	if (subdev >= 0) {
-		char ctlfile[8];
-		sprintf(ctlfile, "hw:%d", card);
-		err = snd_ctl_open(&ctl, ctlfile, 0);
-		if (err < 0)
-			return err;
-	}
 
 	snprintf(filename, sizeof(filename), "%s/pcmC%dD%d%c",
 		 DEVPATH, card, dev,
@@ -67,31 +79,14 @@ int snd_pcm_open(snd_pcm_t **pcmp, const char *name,
 	if (mode & SND_PCM_ASYNC)
 		fmode |= O_ASYNC;
 
- again:
-	fd = open(filename, fmode);
+	if (subdev >= 0)
+		fd = open_with_subdev(filename, fmode, card, subdev);
+	else
+		fd = open(filename, fmode);
 	if (fd < 0) {
 		err = -errno;
 		goto error;
 	}
-
-	if (subdev >= 0) {
-		memset(&info, 0, sizeof(info));
-		if (ioctl(fd, SNDRV_PCM_IOCTL_INFO, &info) < 0) {
-			err = -errno;
-			goto error;
-		}
-		if (info.subdevice != subdev) {
-			close(fd);
-			fd = -1;
-			if (counts++ > 3) {
-				err = -EAGAIN;
-				goto error;
-			}
-			goto again;
-		}
-		snd_ctl_close(ctl);
-	}
-
 	if (!(mode & SND_PCM_NONBLOCK)) {
 		fmode &= ~O_NONBLOCK;
 		fcntl(fd, F_SETFD, fmode);
@@ -105,13 +100,27 @@ int snd_pcm_open(snd_pcm_t **pcmp, const char *name,
 		err = -SND_ERROR_INCOMPATIBLE_VERSION;
 		goto error;
 	}
+	if (subdev < 0) {
+		snd_pcm_info_t info;
+		memset(&info, 0, sizeof(info));
+		if (ioctl(fd, SNDRV_PCM_IOCTL_INFO, &info) < 0) {
+			return -errno;
+			goto error;
+		}
+		subdev = info.subdevice;
+	}
 
-	pcm = create_pcm(name, fd);
+	pcm = calloc(1, sizeof(*pcm));
 	if (!pcm) {
 		err = -ENOMEM;
 		goto error;
 	}
 
+	pcm->card = card;
+	pcm->device = device;
+	pcm->subdevice = subdevice;
+	pcm->protocol = ver;
+	pcm->fd = fd;
 	pcm->pollfd.fd = fd;
 	pcm->pollfd.events =
 		(stream == SND_PCM_STREAM_PLAYBACK ? POLLOUT : POLLIN)
@@ -120,8 +129,6 @@ int snd_pcm_open(snd_pcm_t **pcmp, const char *name,
 	return 0;
 
  error:
-	if (ctl)
-		snd_ctl_close(ctl);
 	if (fd >= 0)
 		close(fd);
 	return err;
@@ -142,7 +149,7 @@ int snd_pcm_close(snd_pcm_t *pcm)
 	}
 #endif
 	close(pcm->fd);
-	snd_pcm_free(pcm);
+	free(pcm);
 	return 0;
 }	
 
@@ -526,92 +533,6 @@ int snd_pcm_dump(snd_pcm_t *pcm, snd_output_t *out)
 }
 
 
-void snd_pcm_hw_param_dump(const snd_pcm_hw_params_t *params,
-			   snd_pcm_hw_param_t var, snd_output_t *out)
-{
-	if (hw_is_mask(var)) {
-		const snd_mask_t *mask = hw_param_mask_c(params, var);
-		if (snd_mask_empty(mask))
-			snd_output_puts(out, " NONE");
-		else if (snd_mask_full(mask))
-			snd_output_puts(out, " ALL");
-		else {
-			unsigned int k;
-			for (k = 0; k <= SND_MASK_MAX; ++k) {
-				if (snd_mask_test(mask, k)) {
-					const char *s;
-					switch (var) {
-					case SND_PCM_HW_PARAM_ACCESS:
-						s = snd_pcm_access_name(k);
-						break;
-					case SND_PCM_HW_PARAM_FORMAT:
-						s = snd_pcm_format_name(k);
-						break;
-					case SND_PCM_HW_PARAM_SUBFORMAT:
-						s = snd_pcm_subformat_name(k);
-						break;
-					default:
-						s = NULL;
-					}
-					if (s) {
-						snd_output_putc(out, ' ');
-						snd_output_puts(out, s);
-					}
-				}
-			}
-		}
-		return;
-	}
-	if (hw_is_interval(var)) {
-		snd_interval_print(hw_param_interval_c(params, var), out);
-		return;
-	}
-}
-
-static void dump_one_param(snd_pcm_hw_params_t *params, unsigned int k,
-			   snd_output_t *out)
-{
-	snd_output_printf(out, "%s: ", snd_pcm_hw_param_name(k));
-	snd_pcm_hw_param_dump(params, k, out);
-	snd_output_putc(out, '\n');
-}
-
-int snd_pcm_hw_params_dump(snd_pcm_hw_params_t *params, snd_output_t *out)
-{
-	unsigned int k;
-	for (k = SND_PCM_HW_PARAM_FIRST_MASK; k <= SND_PCM_HW_PARAM_LAST_MASK; k++)
-		dump_one_param(params, k, out);
-	for (k = SND_PCM_HW_PARAM_FIRST_INTERVAL; k <= SND_PCM_HW_PARAM_LAST_INTERVAL; k++)
-		dump_one_param(params, k, out);
-	return 0;
-}
-
-int snd_pcm_sw_params_dump(snd_pcm_sw_params_t *params, snd_output_t *out)
-{
-	snd_output_printf(out, "start_mode: %s\n",
-			  snd_pcm_start_mode_name(snd_pcm_sw_params_get_start_mode(params)));
-	snd_output_printf(out, "xrun_mode: %s\n",
-			  snd_pcm_xrun_mode_name(snd_pcm_sw_params_get_xrun_mode(params)));
-	snd_output_printf(out, "tstamp_mode: %s\n",
-			  snd_pcm_tstamp_mode_name(params->tstamp_mode));
-	snd_output_printf(out, "period_step: %u\n",
-			  params->period_step);
-	snd_output_printf(out, "sleep_min: %u\n",
-			  params->sleep_min);
-	snd_output_printf(out, "avail_min: %lu\n",
-			  params->avail_min);
-	snd_output_printf(out, "xfer_align: %lu\n",
-			  params->xfer_align);
-	snd_output_printf(out, "silence_threshold: %lu\n",
-			  params->silence_threshold);
-	snd_output_printf(out, "silence_size: %lu\n",
-			  params->silence_size);
-	snd_output_printf(out, "boundary: %lu\n",
-			  params->boundary);
-	return 0;
-}
-
-
 #if 0 // ASYNC
 /*
  * ASYNC
@@ -864,7 +785,7 @@ static inline snd_pcm_uframes_t snd_pcm_mmap_avail(snd_pcm_t *pcm)
 int snd_pcm_wait(snd_pcm_t *pcm, int timeout)
 {
 	struct pollfd pfd;
-	int i, npfds, err, err_poll;
+	int err;
 	
 	if (snd_pcm_mmap_avail(pcm) >= pcm->sw_params.avail_min)
 		return correct_pcm_error(pcm, 1);
@@ -943,6 +864,9 @@ snd_pcm_sframes_t snd_pcm_mmap_commit(snd_pcm_t *pcm,
 	return pcm->fast_ops->mmap_commit(pcm->fast_op_arg, offset, frames);
 }
 
+
+/*
+ */
 
 int snd_pcm_recover(snd_pcm_t *pcm, int err, int silent)
 {

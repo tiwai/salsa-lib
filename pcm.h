@@ -10,66 +10,25 @@
 
 int snd_pcm_open(snd_pcm_t **pcm, const char *name, 
 		 snd_pcm_stream_t stream, int mode);
-int snd_pcm_open_lconf(snd_pcm_t **pcm, const char *name, 
-		       snd_pcm_stream_t stream, int mode,
-		       snd_config_t *lconf);
-
 int snd_pcm_close(snd_pcm_t *pcm);
-int snd_pcm_poll_descriptors(snd_pcm_t *pcm, struct pollfd *pfds,
-			     unsigned int space);
-int snd_pcm_poll_descriptors_revents(snd_pcm_t *pcm, struct pollfd *pfds,
-				     unsigned int nfds,
-				     unsigned short *revents);
 int snd_pcm_nonblock(snd_pcm_t *pcm, int nonblock);
 int snd_async_add_pcm_handler(snd_async_handler_t **handler, snd_pcm_t *pcm, 
 			      snd_async_callback_t callback,
 			      void *private_data);
 snd_pcm_t *snd_async_handler_get_pcm(snd_async_handler_t *handler);
 int snd_pcm_info(snd_pcm_t *pcm, snd_pcm_info_t *info);
-int snd_pcm_hw_params_current(snd_pcm_t *pcm, snd_pcm_hw_params_t *params);
 int snd_pcm_hw_params(snd_pcm_t *pcm, snd_pcm_hw_params_t *params);
 int snd_pcm_hw_free(snd_pcm_t *pcm);
-int snd_pcm_sw_params_current(snd_pcm_t *pcm, snd_pcm_sw_params_t *params);
 int snd_pcm_sw_params(snd_pcm_t *pcm, snd_pcm_sw_params_t *params);
-int snd_pcm_prepare(snd_pcm_t *pcm);
-int snd_pcm_reset(snd_pcm_t *pcm);
-int snd_pcm_status(snd_pcm_t *pcm, snd_pcm_status_t *status);
-int snd_pcm_start(snd_pcm_t *pcm);
-int snd_pcm_drop(snd_pcm_t *pcm);
-int snd_pcm_drain(snd_pcm_t *pcm);
-int snd_pcm_pause(snd_pcm_t *pcm, int enable);
-snd_pcm_state_t snd_pcm_state(snd_pcm_t *pcm);
-int snd_pcm_hwsync(snd_pcm_t *pcm);
-int snd_pcm_delay(snd_pcm_t *pcm, snd_pcm_sframes_t *delayp);
-int snd_pcm_resume(snd_pcm_t *pcm);
+
 snd_pcm_sframes_t snd_pcm_avail_update(snd_pcm_t *pcm);
-snd_pcm_sframes_t snd_pcm_rewind(snd_pcm_t *pcm, snd_pcm_uframes_t frames);
-snd_pcm_sframes_t snd_pcm_forward(snd_pcm_t *pcm, snd_pcm_uframes_t frames);
 snd_pcm_sframes_t snd_pcm_writei(snd_pcm_t *pcm, const void *buffer, snd_pcm_uframes_t size);
 snd_pcm_sframes_t snd_pcm_readi(snd_pcm_t *pcm, void *buffer, snd_pcm_uframes_t size);
 snd_pcm_sframes_t snd_pcm_writen(snd_pcm_t *pcm, void **bufs, snd_pcm_uframes_t size);
 snd_pcm_sframes_t snd_pcm_readn(snd_pcm_t *pcm, void **bufs, snd_pcm_uframes_t size);
 int snd_pcm_wait(snd_pcm_t *pcm, int timeout);
 
-int snd_pcm_link(snd_pcm_t *pcm1, snd_pcm_t *pcm2);
-int snd_pcm_unlink(snd_pcm_t *pcm);
-
 int snd_pcm_recover(snd_pcm_t *pcm, int err, int silent);
-
-#define snd_pcm_info_alloca(ptr) do { *ptr = (snd_pcm_info_t *) alloca(snd_pcm_info_sizeof()); memset(*ptr, 0, snd_pcm_info_sizeof()); } while (0)
-
-#define snd_pcm_hw_params_alloca(ptr) do { *ptr = (snd_pcm_hw_params_t *) alloca(snd_pcm_hw_params_sizeof()); memset(*ptr, 0, snd_pcm_hw_params_sizeof()); } while (0)
-
-#define snd_pcm_sw_params_alloca(ptr) do { *ptr = (snd_pcm_sw_params_t *) alloca(snd_pcm_sw_params_sizeof()); memset(*ptr, 0, snd_pcm_sw_params_sizeof()); } while (0)
-
-#define snd_pcm_access_mask_alloca(ptr) do { *ptr = (snd_pcm_access_mask_t *) alloca(snd_pcm_access_mask_sizeof()); memset(*ptr, 0, snd_pcm_access_mask_sizeof()); } while (0)
-
-#define snd_pcm_format_mask_alloca(ptr) do { *ptr = (snd_pcm_format_mask_t *) alloca(snd_pcm_format_mask_sizeof()); memset(*ptr, 0, snd_pcm_format_mask_sizeof()); } while (0)
-
-#define snd_pcm_subformat_mask_alloca(ptr) do { *ptr = (snd_pcm_subformat_mask_t *) alloca(snd_pcm_subformat_mask_sizeof()); memset(*ptr, 0, snd_pcm_subformat_mask_sizeof()); } while (0)
-
-#define snd_pcm_status_alloca(ptr) do { *ptr = (snd_pcm_status_t *) alloca(snd_pcm_status_sizeof()); memset(*ptr, 0, snd_pcm_status_sizeof()); } while (0)
-
 
 int snd_pcm_dump(snd_pcm_t *pcm, snd_output_t *out);
 int snd_pcm_dump_hw_setup(snd_pcm_t *pcm, snd_output_t *out);
