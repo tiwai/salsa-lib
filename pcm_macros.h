@@ -336,8 +336,16 @@ int snd_pcm_hw_params_get_fifo_size(const snd_pcm_hw_params_t *params)
 extern int _snd_pcm_hw_param_get(const snd_pcm_hw_params_t *params, int type,
 				 unsigned int *val, int *dir);
 extern int _snd_pcm_hw_param_set(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
-				 int mode, int type, unsigned int val, int *dir);
+				 int type, unsigned int val, int *dir);
+extern int _snd_pcm_hw_param_test(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
+				  int type, unsigned int val, int *dir);
+extern int _snd_pcm_hw_param_set_integer(snd_pcm_t *pcm,
+					 snd_pcm_hw_params_t *params, int type);
+extern int _snd_pcm_hw_param_get_min(const snd_pcm_hw_params_t *params,
+				     int type, unsigned int *val, int *dir);
 extern int _snd_pcm_hw_param_set_min(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
+				     int type, unsigned int *val, int *dir);
+extern int _snd_pcm_hw_param_get_max(const snd_pcm_hw_params_t *params,
 				     int type, unsigned int *val, int *dir);
 extern int _snd_pcm_hw_param_set_max(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				     int type, unsigned int *val, int *dir);
@@ -728,15 +736,15 @@ static inline
 int snd_pcm_hw_params_test_access(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				  snd_pcm_access_t access)
 {
-	return _snd_pcm_hw_param_set(pcm, params, SND_TEST, SND_PCM_HW_PARAM_ACCESS,
-				    access, 0);
+	return _snd_pcm_hw_param_test(pcm, params, SND_PCM_HW_PARAM_ACCESS,
+				      access, 0);
 }
 
 static inline
 int snd_pcm_hw_params_set_access(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				 snd_pcm_access_t access)
 {
-	return _snd_pcm_hw_param_set(pcm, params, SND_TRY, SND_PCM_HW_PARAM_ACCESS,
+	return _snd_pcm_hw_param_set(pcm, params, SND_PCM_HW_PARAM_ACCESS,
 				    access, 0);
 }
 
@@ -760,7 +768,7 @@ static inline
 int snd_pcm_hw_params_set_access_mask(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				      snd_pcm_access_mask_t *mask)
 {
-	return _snd_pcm_hw_param_set_mask(pcm, params, SND_TRY,SND_PCM_HW_PARAM_ACCESS,
+	return _snd_pcm_hw_param_set_mask(pcm, params, SND_PCM_HW_PARAM_ACCESS,
 					 (snd_mask_t *) mask);
 }
 
@@ -787,15 +795,15 @@ static inline
 int snd_pcm_hw_params_test_format(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				  snd_pcm_format_t format)
 {
-	return _snd_pcm_hw_param_set(pcm, params, SND_TEST, SND_PCM_HW_PARAM_FORMAT,
-				    format, 0);
+	return _snd_pcm_hw_param_test(pcm, params, SND_PCM_HW_PARAM_FORMAT,
+				      format, 0);
 }
 
 static inline
 int snd_pcm_hw_params_set_format(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				 snd_pcm_format_t format)
 {
-	return _snd_pcm_hw_param_set(pcm, params, SND_TRY, SND_PCM_HW_PARAM_FORMAT,
+	return _snd_pcm_hw_param_set(pcm, params, SND_PCM_HW_PARAM_FORMAT,
 				    format, 0);
 }
 
@@ -819,7 +827,7 @@ static inline
 int snd_pcm_hw_params_set_format_mask(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				      snd_pcm_format_mask_t *mask)
 {
-	return _snd_pcm_hw_param_set_mask(pcm, params, SND_TRY, SND_PCM_HW_PARAM_FORMAT,
+	return _snd_pcm_hw_param_set_mask(pcm, params, SND_PCM_HW_PARAM_FORMAT,
 					 (snd_mask_t *) mask);
 }
 
@@ -843,15 +851,15 @@ static inline
 int snd_pcm_hw_params_test_subformat(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				     snd_pcm_subformat_t subformat)
 {
-	return _snd_pcm_hw_param_set(pcm, params, SND_TEST, SND_PCM_HW_PARAM_SUBFORMAT,
-				    subformat, 0);
+	return _snd_pcm_hw_param_test(pcm, params, SND_PCM_HW_PARAM_SUBFORMAT,
+				      subformat, 0);
 }
 
 static inline
 int snd_pcm_hw_params_set_subformat(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				    snd_pcm_subformat_t subformat)
 {
-	return _snd_pcm_hw_param_set(pcm, params, SND_TRY, SND_PCM_HW_PARAM_SUBFORMAT,
+	return _snd_pcm_hw_param_set(pcm, params, SND_PCM_HW_PARAM_SUBFORMAT,
 				    subformat, 0);
 }
 
@@ -875,7 +883,7 @@ static inline
 int snd_pcm_hw_params_set_subformat_mask(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					 snd_pcm_subformat_mask_t *mask)
 {
-	return _snd_pcm_hw_param_set_mask(pcm, params, SND_TRY,
+	return _snd_pcm_hw_param_set_mask(pcm, params,
 					 SND_PCM_HW_PARAM_SUBFORMAT,
 					 (snd_mask_t *) mask);
 }
@@ -913,15 +921,15 @@ static inline
 int snd_pcm_hw_params_test_channels(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				    unsigned int val)
 {
-	return _snd_pcm_hw_param_set(pcm, params, SND_TEST,
-				    SND_PCM_HW_PARAM_CHANNELS, val, 0);
+	return _snd_pcm_hw_param_test(pcm, params,
+				      SND_PCM_HW_PARAM_CHANNELS, val, 0);
 }
 
 static inline
 int snd_pcm_hw_params_set_channels(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				   unsigned int val)
 {
-	return _snd_pcm_hw_param_set(pcm, params, SND_TRY,
+	return _snd_pcm_hw_param_set(pcm, params,
 				    SND_PCM_HW_PARAM_CHANNELS, val, 0);
 }
 
@@ -999,15 +1007,15 @@ static inline
 int snd_pcm_hw_params_test_rate(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				unsigned int val, int dir)
 {
-	return _snd_pcm_hw_param_set(pcm, params, SND_TEST, SND_PCM_HW_PARAM_RATE,
-				    val, dir);
+	return _snd_pcm_hw_param_test(pcm, params, SND_PCM_HW_PARAM_RATE,
+				      val, dir);
 }
 
 static inline
 int snd_pcm_hw_params_set_rate(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 			       unsigned int val, int dir)
 {
-	return _snd_pcm_hw_param_set(pcm, params, SND_TRY, SND_PCM_HW_PARAM_RATE,
+	return _snd_pcm_hw_param_set(pcm, params, SND_PCM_HW_PARAM_RATE,
 				    val, dir);
 }
 
@@ -1113,15 +1121,15 @@ static inline
 int snd_pcm_hw_params_test_period_time(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				       unsigned int val, int dir)
 {
-	return _snd_pcm_hw_param_set(pcm, params, SND_TEST,
-				    SND_PCM_HW_PARAM_PERIOD_TIME, val, dir);
+	return _snd_pcm_hw_param_test(pcm, params,
+				      SND_PCM_HW_PARAM_PERIOD_TIME, val, dir);
 }
 
 static inline
 int snd_pcm_hw_params_set_period_time(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				      unsigned int val, int dir)
 {
-	return _snd_pcm_hw_param_set(pcm, params, SND_TRY,
+	return _snd_pcm_hw_param_set(pcm, params,
 				    SND_PCM_HW_PARAM_PERIOD_TIME, val, dir);
 }
 
@@ -1210,15 +1218,15 @@ static inline
 int snd_pcm_hw_params_test_period_size(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				       snd_pcm_uframes_t val, int dir)
 {
-	return _snd_pcm_hw_param_set(pcm, params, SND_TEST,
-				    SND_PCM_HW_PARAM_PERIOD_SIZE, val, dir);
+	return _snd_pcm_hw_param_test(pcm, params,
+				      SND_PCM_HW_PARAM_PERIOD_SIZE, val, dir);
 }
 
 static inline
 int snd_pcm_hw_params_set_period_size(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				      snd_pcm_uframes_t val, int dir)
 {
-	return _snd_pcm_hw_param_set(pcm, params, SND_TRY,
+	return _snd_pcm_hw_param_set(pcm, params,
 				    SND_PCM_HW_PARAM_PERIOD_SIZE, val, dir);
 }
 
@@ -1279,7 +1287,7 @@ static inline
 int snd_pcm_hw_params_set_period_size_integer(snd_pcm_t *pcm,
 					      snd_pcm_hw_params_t *params)
 {
-	return _snd_pcm_hw_param_set_integer(pcm, params, SND_TRY,
+	return _snd_pcm_hw_param_set_integer(pcm, params,
 					    SND_PCM_HW_PARAM_PERIOD_SIZE);
 }
 
@@ -1309,15 +1317,15 @@ static inline
 int snd_pcm_hw_params_test_periods(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				   unsigned int val, int dir)
 {
-	return _snd_pcm_hw_param_set(pcm, params, SND_TEST,
-				    SND_PCM_HW_PARAM_PERIODS, val, dir);
+	return _snd_pcm_hw_param_test(pcm, params,
+				      SND_PCM_HW_PARAM_PERIODS, val, dir);
 }
 
 static inline
 int snd_pcm_hw_params_set_periods(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				  unsigned int val, int dir)
 {
-	return _snd_pcm_hw_param_set(pcm, params, SND_TRY,
+	return _snd_pcm_hw_param_set(pcm, params,
 				    SND_PCM_HW_PARAM_PERIODS, val, dir);
 }
 
@@ -1325,7 +1333,7 @@ static inline
 int snd_pcm_hw_params_set_periods_min(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				      unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_set_min(pcm, params, SND_TRY,
+	return _snd_pcm_hw_param_set_min(pcm, params,
 					SND_PCM_HW_PARAM_PERIODS, val, dir);
 }
 
@@ -1333,7 +1341,7 @@ static inline
 int snd_pcm_hw_params_set_periods_max(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				      unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_set_max(pcm, params, SND_TRY,
+	return _snd_pcm_hw_param_set_max(pcm, params,
 					SND_PCM_HW_PARAM_PERIODS, val, dir);
 }
 
@@ -1343,7 +1351,7 @@ int snd_pcm_hw_params_set_periods_minmax(snd_pcm_t *pcm, snd_pcm_hw_params_t *pa
 					 unsigned int *min, int *mindir,
 					 unsigned int *max, int *maxdir)
 {
-	return _snd_pcm_hw_param_set_minmax(pcm, params, SND_TRY,
+	return _snd_pcm_hw_param_set_minmax(pcm, params,
 					   SND_PCM_HW_PARAM_PERIODS,
 					   min, mindir, max, maxdir);
 }
@@ -1375,7 +1383,7 @@ int snd_pcm_hw_params_set_periods_last(snd_pcm_t *pcm, snd_pcm_hw_params_t *para
 static inline
 int snd_pcm_hw_params_set_periods_integer(snd_pcm_t *pcm, snd_pcm_hw_params_t *params)
 {
-	return _snd_pcm_hw_param_set_integer(pcm, params, SND_TRY,
+	return _snd_pcm_hw_param_set_integer(pcm, params,
 					    SND_PCM_HW_PARAM_PERIODS);
 }
 
@@ -1407,15 +1415,15 @@ static inline
 int snd_pcm_hw_params_test_buffer_time(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				       unsigned int val, int dir)
 {
-	return _snd_pcm_hw_param_set(pcm, params, SND_TEST,
-				    SND_PCM_HW_PARAM_BUFFER_TIME, val, dir);
+	return _snd_pcm_hw_param_test(pcm, params,
+				      SND_PCM_HW_PARAM_BUFFER_TIME, val, dir);
 }
 
 static inline
 int snd_pcm_hw_params_set_buffer_time(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				      unsigned int val, int dir)
 {
-	return _snd_pcm_hw_param_set(pcm, params, SND_TRY,
+	return _snd_pcm_hw_param_set(pcm, params,
 				    SND_PCM_HW_PARAM_BUFFER_TIME, val, dir);
 }
 
@@ -1423,7 +1431,7 @@ static inline
 int snd_pcm_hw_params_set_buffer_time_min(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					  unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_set_min(pcm, params, SND_TRY,
+	return _snd_pcm_hw_param_set_min(pcm, params,
 					SND_PCM_HW_PARAM_BUFFER_TIME, val, dir);
 }
 
@@ -1431,7 +1439,7 @@ static inline
 int snd_pcm_hw_params_set_buffer_time_max(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					  unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_set_max(pcm, params, SND_TRY,
+	return _snd_pcm_hw_param_set_max(pcm, params,
 					SND_PCM_HW_PARAM_BUFFER_TIME, val, dir);
 }
 
@@ -1441,7 +1449,7 @@ int snd_pcm_hw_params_set_buffer_time_minmax(snd_pcm_t *pcm,
 					     unsigned int *min, int *mindir,
 					     unsigned int *max, int *maxdir)
 {
-	return _snd_pcm_hw_param_set_minmax(pcm, params, SND_TRY,
+	return _snd_pcm_hw_param_set_minmax(pcm, params,
 					   SND_PCM_HW_PARAM_BUFFER_TIME,
 					   min, mindir, max, maxdir);
 }
@@ -1502,15 +1510,15 @@ static inline
 int snd_pcm_hw_params_test_buffer_size(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				       snd_pcm_uframes_t val)
 {
-	return _snd_pcm_hw_param_set(pcm, params, SND_TEST,
-				    SND_PCM_HW_PARAM_BUFFER_SIZE, val, 0);
+	return _snd_pcm_hw_param_test(pcm, params,
+				      SND_PCM_HW_PARAM_BUFFER_SIZE, val, 0);
 }
 
 static inline
 int snd_pcm_hw_params_set_buffer_size(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				      snd_pcm_uframes_t val)
 {
-	return _snd_pcm_hw_param_set(pcm, params, SND_TRY,
+	return _snd_pcm_hw_param_set(pcm, params,
 				    SND_PCM_HW_PARAM_BUFFER_SIZE, val, 0);
 }
 
@@ -1594,15 +1602,15 @@ static inline
 int snd_pcm_hw_params_test_tick_time(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				     unsigned int val, int dir)
 {
-	return _snd_pcm_hw_param_set(pcm, params, SND_TEST, SND_PCM_HW_PARAM_TICK_TIME,
-				    val, dir);
+	return _snd_pcm_hw_param_test(pcm, params, SND_PCM_HW_PARAM_TICK_TIME,
+				      val, dir);
 }
 
 static inline
 int snd_pcm_hw_params_set_tick_time(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				    unsigned int val, int dir)
 {
-	return _snd_pcm_hw_param_set(pcm, params, SND_TRY, SND_PCM_HW_PARAM_TICK_TIME,
+	return _snd_pcm_hw_param_set(pcm, params, SND_PCM_HW_PARAM_TICK_TIME,
 				    val, dir);
 }
 

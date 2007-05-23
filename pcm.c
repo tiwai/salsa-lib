@@ -158,142 +158,11 @@ int snd_pcm_nonblock(snd_pcm_t *pcm, int nonblock)
 	return 0;
 }
 
-static int snd_pcm_async(snd_pcm_t *pcm, int sig, pid_t pid)
-{
-	if (sig == 0)
-		sig = SIGIO;
-	if (pid == 0)
-		pid = getpid();
-	return pcm->ops->async(pcm->op_arg, sig, pid);
-}
 
-static int snd_pcm_sw_params_default(snd_pcm_t *pcm, snd_pcm_sw_params_t *params)
-{
-	params->tstamp_mode = SND_PCM_TSTAMP_NONE;
-	params->period_step = 1;
-	params->sleep_min = 0;
-	params->avail_min = pcm->period_size;
-	params->xfer_align = pcm->period_size;
-	params->start_threshold = 1;
-	params->stop_threshold = pcm->buffer_size;
-	params->silence_threshold = 0;
-	params->silence_size = 0;
-	params->boundary = pcm->buffer_size;
-	while (params->boundary * 2 <= LONG_MAX - pcm->buffer_size)
-		params->boundary *= 2;
-	return 0;
-}
-
-static int snd_pcm_hw_refine(snd_pcm_t *pcm, snd_pcm_hw_params_t *params)
-{
-	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_HW_REFINE, params) < 0) {
-		err = -errno;
-		return err;
-	}
-	return 0;
-}
 
 /*
+ * READ/WRITE
  */
-static inline int hw_is_mask(snd_pcm_hw_param_t var)
-{
-	return var >= SND_PCM_HW_PARAM_FIRST_MASK &&
-		var <= SND_PCM_HW_PARAM_LAST_MASK;
-}
-
-static inline int hw_is_interval(snd_pcm_hw_param_t var)
-{
-	return var >= SND_PCM_HW_PARAM_FIRST_INTERVAL &&
-		var <= SND_PCM_HW_PARAM_LAST_INTERVAL;
-}
-
-static void _snd_pcm_hw_param_any(snd_pcm_hw_params_t *params, snd_pcm_hw_param_t var)
-{
-	if (hw_is_mask(var)) {
-		snd_mask_any(hw_param_mask(params, var));
-		params->cmask |= 1 << var;
-		params->rmask |= 1 << var;
-	} else {
-		snd_interval_any(hw_param_interval(params, var));
-		params->cmask |= 1 << var;
-		params->rmask |= 1 << var;
-	}
-}
-
-static void _snd_pcm_hw_params_any(snd_pcm_hw_params_t *params)
-{
-	unsigned int k;
-	memset(params, 0, sizeof(*params));
-	for (k = SND_PCM_HW_PARAM_FIRST_MASK; k <= SND_PCM_HW_PARAM_LAST_MASK; k++)
-		_snd_pcm_hw_param_any(params, k);
-	for (k = SND_PCM_HW_PARAM_FIRST_INTERVAL; k <= SND_PCM_HW_PARAM_LAST_INTERVAL; k++)
-		_snd_pcm_hw_param_any(params, k);
-	params->rmask = ~0U;
-	params->cmask = 0;
-	params->info = ~0U;
-}
-
-static int _snd_pcm_hw_params(snd_pcm_t *pcm, snd_pcm_hw_params_t *params)
-{
-	int err;
-	snd_pcm_sw_params_t sw;
-
-	err = snd_pcm_hw_refine(pcm, params);
-	if (err < 0)
-		return err;
-	snd_pcm_hw_params_choose(pcm, params);
-	snd_pcm_hw_free(pcm);
-	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_HW_PARAMS, params) < 0)
-		return -errno;
-
-	pcm->setup = 1;
-	*pcm->hw_params = *params;
-	
-	snd_pcm_hw_params_get_access(params, &pcm->access);
-	snd_pcm_hw_params_get_format(params, &pcm->format);
-	snd_pcm_hw_params_get_subformat(params, &pcm->subformat);
-	snd_pcm_hw_params_get_channels(params, &pcm->channels);
-	snd_pcm_hw_params_get_rate(params, &pcm->rate, 0);
-	snd_pcm_hw_params_get_period_time(params, &pcm->period_time, 0);
-	snd_pcm_hw_params_get_period_size(params, &pcm->period_size, 0);
-	snd_pcm_hw_params_get_buffer_size(params, &pcm->buffer_size);
-	snd_pcm_hw_params_get_tick_time(params, &pcm->tick_time, 0);
-	pcm->sample_bits = snd_pcm_format_physical_width(pcm->format);
-	pcm->frame_bits = pcm->sample_bits * pcm->channels;
-
-	/* Default sw params */
-	memset(&sw, 0, sizeof(sw));
-	snd_pcm_sw_params_default(pcm, &sw);
-	snd_pcm_sw_params(pcm, &sw);
-	return 0;
-}
-
-int snd_pcm_hw_params(snd_pcm_t *pcm, snd_pcm_hw_params_t *params)
-{
-	int err;
-	err = _snd_pcm_hw_params(pcm, params);
-	if (err < 0)
-		return err;
-	err = snd_pcm_prepare(pcm);
-	return err;
-}
-
-int snd_pcm_hw_free(snd_pcm_t *pcm)
-{
-	int err;
-	if (!pcm->setup)
-		return 0;
-	if (pcm->mmap_channels) {
-		err = snd_pcm_munmap(pcm);
-		if (err < 0)
-			return err;
-		pcm->mmap_channels = 0;
-	}
-	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_HW_FREE) < 0)
-		return -errno;
-	pcm->setup = 0;
-	return 0;
-}
 
 static int correct_pcm_error(snd_pcm_t *pcm, int err)
 {
@@ -364,6 +233,10 @@ snd_pcm_sframes_t snd_pcm_readn(snd_pcm_t *pcm, void **bufs,
 	return xfern.result;
 }
 
+
+/*
+ * STRINGS, DUMP
+ */
 #define PCMTYPE(v) [SND_PCM_TYPE_##v] = #v
 #define STATE(v) [SND_PCM_STATE_##v] = #v
 #define STREAM(v) [SND_PCM_STREAM_##v] = #v
@@ -652,399 +525,6 @@ int snd_pcm_dump(snd_pcm_t *pcm, snd_output_t *out)
 	return 0;
 }
 
-#if 0 // ASYNC
-int snd_async_add_pcm_handler(snd_async_handler_t **handler, snd_pcm_t *pcm, 
-			      snd_async_callback_t callback, void *private_data)
-{
-	int err;
-	int was_empty;
-	snd_async_handler_t *h;
-	err = snd_async_add_handler(&h, _snd_pcm_async_descriptor(pcm),
-				    callback, private_data);
-	if (err < 0)
-		return err;
-	h->type = SND_ASYNC_HANDLER_PCM;
-	h->u.pcm = pcm;
-	was_empty = list_empty(&pcm->async_handlers);
-	list_add_tail(&h->hlist, &pcm->async_handlers);
-	if (was_empty) {
-		err = snd_pcm_async(pcm, snd_async_handler_get_signo(h), getpid());
-		if (err < 0) {
-			snd_async_del_handler(h);
-			return err;
-		}
-	}
-	*handler = h;
-	return 0;
-}
-
-snd_pcm_t *snd_async_handler_get_pcm(snd_async_handler_t *handler)
-{
-	if (handler->type != SND_ASYNC_HANDLER_PCM) {
-		SNDMSG("invalid handler type %d", handler->type);
-		return NULL;
-	}
-	return handler->u.pcm;
-}
-#endif // ASYNC
-
-int snd_pcm_wait(snd_pcm_t *pcm, int timeout)
-{
-	struct pollfd pfd;
-	int i, npfds, err, err_poll;
-	
-	if (snd_pcm_mmap_avail(pcm) >= pcm->sw_params.avail_min)
-		return correct_pcm_error(pcm, 1);
-
-	pfd = pcm->pollfd;
-	for (;;) {
-		err = poll(&pfd, 1, timeout);
-		if (err < 0) {
-			if (errno == EINTR)
-				continue;
-			return -errno;
-                }
-		if (!err)
-			return 0;
-		if (pfd.revents & (POLLERR | POLLNVAL))
-			return correct_pcm_error(pcm, -EIO);
-		if (pfd.revents & (POLLIN | POLLOUT))
-			return 1;
-	}
-}
-
-snd_pcm_sframes_t snd_pcm_avail_update(snd_pcm_t *pcm)
-{
-	if (pcm->stream == SND_PCM_STREAM_PLAYBACK) {
-		avail = snd_pcm_mmap_playback_avail(pcm);
-	} else {
-		avail = snd_pcm_mmap_capture_avail(pcm);
-	}
-	switch (FAST_PCM_STATE(hw)) {
-	case SNDRV_PCM_STATE_RUNNING:
-		if (avail >= pcm->stop_threshold) {
-			if (ioctl(hw->fd, SNDRV_PCM_IOCTL_XRUN) < 0)
-				return -errno;
-			/* everything is ok, state == SND_PCM_STATE_XRUN at the moment */
-			return -EPIPE;
-		}
-		break;
-	case SNDRV_PCM_STATE_XRUN:
-		return -EPIPE;
-	default:
-		break;
-	}
-	return avail;
-}
-
-int snd_pcm_area_silence(const snd_pcm_channel_area_t *dst_area,
-			 snd_pcm_uframes_t dst_offset,
-			 unsigned int samples, snd_pcm_format_t format)
-{
-	char *dst;
-	unsigned int dst_step;
-	int width;
-	u_int64_t silence;
-	if (!dst_area->addr)
-		return 0;
-	dst = snd_pcm_channel_area_addr(dst_area, dst_offset);
-	width = snd_pcm_format_physical_width(format);
-	silence = snd_pcm_format_silence_64(format);
-	if (dst_area->step == (unsigned int) width) {
-		unsigned int dwords = samples * width / 64;
-		u_int64_t *dstp = (u_int64_t *)dst;
-		samples -= dwords * 64 / width;
-		while (dwords-- > 0)
-			*dstp++ = silence;
-		if (samples == 0)
-			return 0;
-	}
-	dst_step = dst_area->step / 8;
-	switch (width) {
-	case 4: {
-		u_int8_t s0 = silence & 0xf0;
-		u_int8_t s1 = silence & 0x0f;
-		int dstbit = dst_area->first % 8;
-		int dstbit_step = dst_area->step % 8;
-		while (samples-- > 0) {
-			if (dstbit) {
-				*dst &= 0xf0;
-				*dst |= s1;
-			} else {
-				*dst &= 0x0f;
-				*dst |= s0;
-			}
-			dst += dst_step;
-			dstbit += dstbit_step;
-			if (dstbit == 8) {
-				dst++;
-				dstbit = 0;
-			}
-		}
-		break;
-	}
-	case 8: {
-		u_int8_t sil = silence;
-		while (samples-- > 0) {
-			*dst = sil;
-			dst += dst_step;
-		}
-		break;
-	}
-	case 16: {
-		u_int16_t sil = silence;
-		while (samples-- > 0) {
-			*(u_int16_t*)dst = sil;
-			dst += dst_step;
-		}
-		break;
-	}
-	case 24:
-#ifdef SNDRV_LITTLE_ENDIAN
-		*(dst + 0) = silence >> 0;
-		*(dst + 1) = silence >> 8;
-		*(dst + 2) = silence >> 16;
-#else
-		*(dst + 2) = silence >> 0;
-		*(dst + 1) = silence >> 8;
-		*(dst + 0) = silence >> 16;
-#endif
-		break;
-	case 32: {
-		u_int32_t sil = silence;
-		while (samples-- > 0) {
-			*(u_int32_t*)dst = sil;
-			dst += dst_step;
-		}
-		break;
-	}
-	case 64: {
-		while (samples-- > 0) {
-			*(u_int64_t*)dst = silence;
-			dst += dst_step;
-		}
-		break;
-	}
-	default:
-		SNDMSG("invalid format width %d", width);
-		return -EINVAL;
-	}
-	return 0;
-}
-
-int snd_pcm_areas_silence(const snd_pcm_channel_area_t *dst_areas,
-			  snd_pcm_uframes_t dst_offset,
-			  unsigned int channels, snd_pcm_uframes_t frames,
-			  snd_pcm_format_t format)
-{
-	int width = snd_pcm_format_physical_width(format);
-	while (channels > 0) {
-		void *addr = dst_areas->addr;
-		unsigned int step = dst_areas->step;
-		const snd_pcm_channel_area_t *begin = dst_areas;
-		int channels1 = channels;
-		unsigned int chns = 0;
-		int err;
-		while (1) {
-			channels1--;
-			chns++;
-			dst_areas++;
-			if (channels1 == 0 ||
-			    dst_areas->addr != addr ||
-			    dst_areas->step != step ||
-			    dst_areas->first != dst_areas[-1].first + width)
-				break;
-		}
-		if (chns > 1 && chns * width == step) {
-			/* Collapse the areas */
-			snd_pcm_channel_area_t d;
-			d.addr = begin->addr;
-			d.first = begin->first;
-			d.step = width;
-			err = snd_pcm_area_silence(&d, dst_offset * chns, frames * chns, format);
-			channels -= chns;
-		} else {
-			err = snd_pcm_area_silence(begin, dst_offset, frames, format);
-			dst_areas = begin + 1;
-			channels--;
-		}
-		if (err < 0)
-			return err;
-	}
-	return 0;
-}
-
-
-int snd_pcm_area_copy(const snd_pcm_channel_area_t *dst_area,
-		      snd_pcm_uframes_t dst_offset,
-		      const snd_pcm_channel_area_t *src_area,
-		      snd_pcm_uframes_t src_offset,
-		      unsigned int samples, snd_pcm_format_t format)
-{
-	const char *src;
-	char *dst;
-	int width;
-	int src_step, dst_step;
-	if (dst_area == src_area && dst_offset == src_offset)
-		return 0;
-	if (!src_area->addr)
-		return snd_pcm_area_silence(dst_area, dst_offset, samples, format);
-	src = snd_pcm_channel_area_addr(src_area, src_offset);
-	if (!dst_area->addr)
-		return 0;
-	dst = snd_pcm_channel_area_addr(dst_area, dst_offset);
-	width = snd_pcm_format_physical_width(format);
-	if (src_area->step == (unsigned int) width &&
-	    dst_area->step == (unsigned int) width) {
-		size_t bytes = samples * width / 8;
-		samples -= bytes * 8 / width;
-		memcpy(dst, src, bytes);
-		if (samples == 0)
-			return 0;
-	}
-	src_step = src_area->step / 8;
-	dst_step = dst_area->step / 8;
-	switch (width) {
-	case 4: {
-		int srcbit = src_area->first % 8;
-		int srcbit_step = src_area->step % 8;
-		int dstbit = dst_area->first % 8;
-		int dstbit_step = dst_area->step % 8;
-		while (samples-- > 0) {
-			unsigned char srcval;
-			if (srcbit)
-				srcval = *src & 0x0f;
-			else
-				srcval = *src & 0xf0;
-			if (dstbit)
-				*dst &= 0xf0;
-			else
-				*dst &= 0x0f;
-			*dst |= srcval;
-			src += src_step;
-			srcbit += srcbit_step;
-			if (srcbit == 8) {
-				src++;
-				srcbit = 0;
-			}
-			dst += dst_step;
-			dstbit += dstbit_step;
-			if (dstbit == 8) {
-				dst++;
-				dstbit = 0;
-			}
-		}
-		break;
-	}
-	case 8: {
-		while (samples-- > 0) {
-			*dst = *src;
-			src += src_step;
-			dst += dst_step;
-		}
-		break;
-	}
-	case 16: {
-		while (samples-- > 0) {
-			*(u_int16_t*)dst = *(const u_int16_t*)src;
-			src += src_step;
-			dst += dst_step;
-		}
-		break;
-	}
-	case 24:
-		while (samples-- > 0) {
-			*(dst + 0) = *(src + 0);
-			*(dst + 1) = *(src + 1);
-			*(dst + 2) = *(src + 2);
-			src += src_step;
-			dst += dst_step;
-		}
-		break;
-	case 32: {
-		while (samples-- > 0) {
-			*(u_int32_t*)dst = *(const u_int32_t*)src;
-			src += src_step;
-			dst += dst_step;
-		}
-		break;
-	}
-	case 64: {
-		while (samples-- > 0) {
-			*(u_int64_t*)dst = *(const u_int64_t*)src;
-			src += src_step;
-			dst += dst_step;
-		}
-		break;
-	}
-	default:
-		SNDMSG("invalid format width %d", width);
-		return -EINVAL;
-	}
-	return 0;
-}
-
-int snd_pcm_areas_copy(const snd_pcm_channel_area_t *dst_areas,
-		       snd_pcm_uframes_t dst_offset,
-		       const snd_pcm_channel_area_t *src_areas,
-		       snd_pcm_uframes_t src_offset,
-		       unsigned int channels, snd_pcm_uframes_t frames,
-		       snd_pcm_format_t format)
-{
-	int width = snd_pcm_format_physical_width(format);
-	if (! channels) {
-		SNDMSG("invalid channels %d", channels);
-		return -EINVAL;
-	}
-	if (! frames) {
-		SNDMSG("invalid frames %ld", frames);
-		return -EINVAL;
-	}
-	while (channels > 0) {
-		unsigned int step = src_areas->step;
-		void *src_addr = src_areas->addr;
-		const snd_pcm_channel_area_t *src_start = src_areas;
-		void *dst_addr = dst_areas->addr;
-		const snd_pcm_channel_area_t *dst_start = dst_areas;
-		int channels1 = channels;
-		unsigned int chns = 0;
-		while (dst_areas->step == step) {
-			channels1--;
-			chns++;
-			src_areas++;
-			dst_areas++;
-			if (channels1 == 0 ||
-			    src_areas->step != step ||
-			    src_areas->addr != src_addr ||
-			    dst_areas->addr != dst_addr ||
-			    src_areas->first != src_areas[-1].first + width ||
-			    dst_areas->first != dst_areas[-1].first + width)
-				break;
-		}
-		if (chns > 1 && chns * width == step) {
-			/* Collapse the areas */
-			snd_pcm_channel_area_t s, d;
-			s.addr = src_start->addr;
-			s.first = src_start->first;
-			s.step = width;
-			d.addr = dst_start->addr;
-			d.first = dst_start->first;
-			d.step = width;
-			snd_pcm_area_copy(&d, dst_offset * chns,
-					  &s, src_offset * chns, 
-					  frames * chns, format);
-			channels -= chns;
-		} else {
-			snd_pcm_area_copy(dst_start, dst_offset,
-					  src_start, src_offset,
-					  frames, format);
-			src_areas = src_start + 1;
-			dst_areas = dst_start + 1;
-			channels--;
-		}
-	}
-	return 0;
-}
 
 void snd_pcm_hw_param_dump(const snd_pcm_hw_params_t *params,
 			   snd_pcm_hw_param_t var, snd_output_t *out)
@@ -1106,10 +586,326 @@ int snd_pcm_hw_params_dump(snd_pcm_hw_params_t *params, snd_output_t *out)
 	return 0;
 }
 
-int snd_pcm_hw_params_any(snd_pcm_t *pcm, snd_pcm_hw_params_t *params)
+int snd_pcm_sw_params_dump(snd_pcm_sw_params_t *params, snd_output_t *out)
 {
-	_snd_pcm_hw_params_any(params);
-	return snd_pcm_hw_refine(pcm, params);
+	snd_output_printf(out, "start_mode: %s\n",
+			  snd_pcm_start_mode_name(snd_pcm_sw_params_get_start_mode(params)));
+	snd_output_printf(out, "xrun_mode: %s\n",
+			  snd_pcm_xrun_mode_name(snd_pcm_sw_params_get_xrun_mode(params)));
+	snd_output_printf(out, "tstamp_mode: %s\n",
+			  snd_pcm_tstamp_mode_name(params->tstamp_mode));
+	snd_output_printf(out, "period_step: %u\n",
+			  params->period_step);
+	snd_output_printf(out, "sleep_min: %u\n",
+			  params->sleep_min);
+	snd_output_printf(out, "avail_min: %lu\n",
+			  params->avail_min);
+	snd_output_printf(out, "xfer_align: %lu\n",
+			  params->xfer_align);
+	snd_output_printf(out, "silence_threshold: %lu\n",
+			  params->silence_threshold);
+	snd_output_printf(out, "silence_size: %lu\n",
+			  params->silence_size);
+	snd_output_printf(out, "boundary: %lu\n",
+			  params->boundary);
+	return 0;
+}
+
+
+#if 0 // ASYNC
+/*
+ * ASYNC
+ */
+static int snd_pcm_async(snd_pcm_t *pcm, int sig, pid_t pid)
+{
+	if (sig == 0)
+		sig = SIGIO;
+	if (pid == 0)
+		pid = getpid();
+	return pcm->ops->async(pcm->op_arg, sig, pid);
+}
+
+int snd_async_add_pcm_handler(snd_async_handler_t **handler, snd_pcm_t *pcm, 
+			      snd_async_callback_t callback, void *private_data)
+{
+	int err;
+	int was_empty;
+	snd_async_handler_t *h;
+	err = snd_async_add_handler(&h, _snd_pcm_async_descriptor(pcm),
+				    callback, private_data);
+	if (err < 0)
+		return err;
+	h->type = SND_ASYNC_HANDLER_PCM;
+	h->u.pcm = pcm;
+	was_empty = list_empty(&pcm->async_handlers);
+	list_add_tail(&h->hlist, &pcm->async_handlers);
+	if (was_empty) {
+		err = snd_pcm_async(pcm, snd_async_handler_get_signo(h), getpid());
+		if (err < 0) {
+			snd_async_del_handler(h);
+			return err;
+		}
+	}
+	*handler = h;
+	return 0;
+}
+
+snd_pcm_t *snd_async_handler_get_pcm(snd_async_handler_t *handler)
+{
+	if (handler->type != SND_ASYNC_HANDLER_PCM) {
+		SNDMSG("invalid handler type %d", handler->type);
+		return NULL;
+	}
+	return handler->u.pcm;
+}
+#endif // ASYNC
+
+
+/*
+ * SILENCE AND COPY AREAS
+ */
+static int area_silence_4bit(const snd_pcm_channel_area_t *dst_area,
+			     snd_pcm_uframes_t dst_offset,
+			     unsigned int samples, snd_pcm_format_t format)
+{
+	char *dst = snd_pcm_channel_area_addr(dst_area, dst_offset);
+	int dstbit = dst_area->first % 8;
+	int dstbit_step = dst_area->step % 8;
+	while (samples-- > 0) {
+		if (dstbit)
+			*dst &= 0xf0;
+		else
+			*dst &= 0x0f;
+		dst += dst_step;
+		dstbit += dstbit_step;
+		if (dstbit == 8) {
+			dst++;
+			dstbit = 0;
+		}
+	}
+	return 0;
+}
+
+int snd_pcm_area_silence(const snd_pcm_channel_area_t *dst_area,
+			 snd_pcm_uframes_t dst_offset,
+			 unsigned int samples, snd_pcm_format_t format)
+{
+	char *dst;
+	unsigned int dst_step;
+	int width;
+	u_int64_t silence;
+	if (!dst_area->addr)
+		return 0;
+	width = snd_pcm_format_physical_width(format);
+	if (width < 8)
+		return area_silence_4bit(dst_area, dst_offset, samples, format);
+	dst = snd_pcm_channel_area_addr(dst_area, dst_offset);
+	if (dst_area->step == (unsigned int) width) {
+		snd_pcm_format_set_silence(format, dst, samples);
+		return 0;
+	}
+	dst_step = dst_area->step / 8;
+	while (samples-- > 0) {
+		snd_pcm_format_set_silence(format, dst, 1);
+		dst += dst_step;
+	}
+	return 0;
+}
+
+int snd_pcm_areas_silence(const snd_pcm_channel_area_t *dst_areas,
+			  snd_pcm_uframes_t dst_offset,
+			  unsigned int channels, snd_pcm_uframes_t frames,
+			  snd_pcm_format_t format)
+{
+	int width = snd_pcm_format_physical_width(format);
+	while (channels > 0) {
+		snd_pcm_area_silence(dst_areas, dst_offset, frames, format);
+		dst_areas++;
+		channels--;
+	}
+	return 0;
+}
+
+static int area_copy_4bit(const snd_pcm_channel_area_t *dst_area,
+			  snd_pcm_uframes_t dst_offset,
+			  const snd_pcm_channel_area_t *src_area,
+			  snd_pcm_uframes_t src_offset,
+			  unsigned int samples, snd_pcm_format_t format)
+{
+	int srcbit = src_area->first % 8;
+	int srcbit_step = src_area->step % 8;
+	int dstbit = dst_area->first % 8;
+	int dstbit_step = dst_area->step % 8;
+	while (samples-- > 0) {
+		unsigned char srcval;
+		if (srcbit)
+			srcval = *src & 0x0f;
+		else
+			srcval = *src & 0xf0;
+		if (dstbit)
+			*dst &= 0xf0;
+		else
+			*dst &= 0x0f;
+		*dst |= srcval;
+		src += src_step;
+		srcbit += srcbit_step;
+		if (srcbit == 8) {
+			src++;
+			srcbit = 0;
+		}
+		dst += dst_step;
+		dstbit += dstbit_step;
+		if (dstbit == 8) {
+			dst++;
+			dstbit = 0;
+		}
+	}
+	return 0;
+}
+
+int snd_pcm_area_copy(const snd_pcm_channel_area_t *dst_area,
+		      snd_pcm_uframes_t dst_offset,
+		      const snd_pcm_channel_area_t *src_area,
+		      snd_pcm_uframes_t src_offset,
+		      unsigned int samples, snd_pcm_format_t format)
+{
+	const char *src;
+	char *dst;
+	int width;
+	int src_step, dst_step;
+	if (!dst_area->addr)
+		return 0;
+	if (dst_area == src_area && dst_offset == src_offset)
+		return 0;
+	if (!src_area->addr)
+		return snd_pcm_area_silence(dst_area, dst_offset, samples,
+					    format);
+	if (width < 8)
+		return area_copy_4bit(dst_area, dst_offset,
+				      src_area, src_offset,
+				      samples, format);
+	src = snd_pcm_channel_area_addr(src_area, src_offset);
+	dst = snd_pcm_channel_area_addr(dst_area, dst_offset);
+	width = snd_pcm_format_physical_width(format);
+	if (src_area->step == (unsigned int) width &&
+	    dst_area->step == (unsigned int) width) {
+		memcpy(dst, src, samples * width / 8);
+		return 0;
+	}
+	src_step = src_area->step / 8;
+	dst_step = dst_area->step / 8;
+	width /= 8;
+	while (samples-- > 0) {
+		memcpy(dst, src, width);
+		src += src_step;
+		dst += dst_step;
+	}
+	return 0;
+}
+
+int snd_pcm_areas_copy(const snd_pcm_channel_area_t *dst_areas,
+		       snd_pcm_uframes_t dst_offset,
+		       const snd_pcm_channel_area_t *src_areas,
+		       snd_pcm_uframes_t src_offset,
+		       unsigned int channels, snd_pcm_uframes_t frames,
+		       snd_pcm_format_t format)
+{
+	int width;
+	if (!channels)
+		return -EINVAL;
+	if (!frames)
+		return -EINVAL;
+	width = snd_pcm_format_physical_width(format);
+	while (channels > 0) {
+		snd_pcm_area_copy(dst_start, dst_offset,
+				  src_start, src_offset,
+				  frames, format);
+		src_areas++;
+		dst_areas++;
+		channels--;
+	}
+	return 0;
+}
+
+
+/*
+ * MMAP
+ */
+
+static inline snd_pcm_uframes_t snd_pcm_mmap_playback_avail(snd_pcm_t *pcm)
+{
+	snd_pcm_sframes_t avail;
+	avail = *pcm->hw.ptr + pcm->buffer_size - *pcm->appl.ptr;
+	if (avail < 0)
+		avail += pcm->boundary;
+	else if ((snd_pcm_uframes_t) avail >= pcm->boundary)
+		avail -= pcm->boundary;
+	return avail;
+}
+
+static inline snd_pcm_uframes_t snd_pcm_mmap_capture_avail(snd_pcm_t *pcm)
+{
+	snd_pcm_sframes_t avail;
+	avail = *pcm->hw.ptr - *pcm->appl.ptr;
+	if (avail < 0)
+		avail += pcm->boundary;
+	return avail;
+}
+
+static inline snd_pcm_uframes_t snd_pcm_mmap_avail(snd_pcm_t *pcm)
+{
+	if (pcm->stream == SND_PCM_STREAM_PLAYBACK)
+		return snd_pcm_mmap_playback_avail(pcm);
+	else
+		return snd_pcm_mmap_capture_avail(pcm);
+}
+
+
+int snd_pcm_wait(snd_pcm_t *pcm, int timeout)
+{
+	struct pollfd pfd;
+	int i, npfds, err, err_poll;
+	
+	if (snd_pcm_mmap_avail(pcm) >= pcm->sw_params.avail_min)
+		return correct_pcm_error(pcm, 1);
+
+	pfd = pcm->pollfd;
+	for (;;) {
+		err = poll(&pfd, 1, timeout);
+		if (err < 0) {
+			if (errno == EINTR)
+				continue;
+			return -errno;
+                }
+		if (!err)
+			return 0;
+		if (pfd.revents & (POLLERR | POLLNVAL))
+			return correct_pcm_error(pcm, -EIO);
+		if (pfd.revents & (POLLIN | POLLOUT))
+			return 1;
+	}
+}
+
+snd_pcm_sframes_t snd_pcm_avail_update(snd_pcm_t *pcm)
+{
+	avail = snd_pcm_mmap_avail(pcm);
+	switch (FAST_PCM_STATE(hw)) {
+	case SNDRV_PCM_STATE_RUNNING:
+		if (avail >= pcm->stop_threshold) {
+			if (ioctl(hw->fd, SNDRV_PCM_IOCTL_XRUN) < 0)
+				return -errno;
+			/* everything is ok,
+			 * state == SND_PCM_STATE_XRUN at the moment
+			 */
+			return -EPIPE;
+		}
+		break;
+	case SNDRV_PCM_STATE_XRUN:
+		return -EPIPE;
+	default:
+		break;
+	}
+	return avail;
 }
 
 int snd_pcm_mmap_begin(snd_pcm_t *pcm,
@@ -1172,57 +968,5 @@ int snd_pcm_recover(snd_pcm_t *pcm, int err, int silent)
                 return 0;
         }
         return err;
-}
-
-
-
-int snd_pcm_hw_params_get_min_align(const snd_pcm_hw_params_t *params,
-				    snd_pcm_uframes_t *val)
-{
-	unsigned int format, channels, fb, min_align;
-	int err;
-
-	err = snd_pcm_hw_param_get(params, SND_PCM_HW_PARAM_FORMAT, &format, NULL);
-	if (err < 0)
-		return err;
-	err = snd_pcm_hw_param_get(params, SND_PCM_HW_PARAM_CHANNELS, &channels, NULL);
-	if (err < 0)
-		return err;
-	// compute frame bits
-	fb = snd_pcm_format_physical_width((snd_pcm_format_t)format) * channels;
-        min_align = 1;
-	while (fb % 8) {
-		fb *= 2;
-                min_align *= 2;
-	}
-	if (val)
-		*val = min_align;
-	return 0;
-}
-
-
-int snd_pcm_sw_params_dump(snd_pcm_sw_params_t *params, snd_output_t *out)
-{
-	snd_output_printf(out, "start_mode: %s\n",
-			  snd_pcm_start_mode_name(snd_pcm_sw_params_get_start_mode(params)));
-	snd_output_printf(out, "xrun_mode: %s\n",
-			  snd_pcm_xrun_mode_name(snd_pcm_sw_params_get_xrun_mode(params)));
-	snd_output_printf(out, "tstamp_mode: %s\n",
-			  snd_pcm_tstamp_mode_name(params->tstamp_mode));
-	snd_output_printf(out, "period_step: %u\n",
-			  params->period_step);
-	snd_output_printf(out, "sleep_min: %u\n",
-			  params->sleep_min);
-	snd_output_printf(out, "avail_min: %lu\n",
-			  params->avail_min);
-	snd_output_printf(out, "xfer_align: %lu\n",
-			  params->xfer_align);
-	snd_output_printf(out, "silence_threshold: %lu\n",
-			  params->silence_threshold);
-	snd_output_printf(out, "silence_size: %lu\n",
-			  params->silence_size);
-	snd_output_printf(out, "boundary: %lu\n",
-			  params->boundary);
-	return 0;
 }
 
