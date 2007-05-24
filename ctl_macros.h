@@ -1098,9 +1098,3 @@ void snd_ctl_elem_value_set_iec958(snd_ctl_elem_value_t *obj,
 	memcpy(&obj->value.iec958, ptr, sizeof(obj->value.iec958));
 }
 
-#define snd_ctl_elem_id_alloca(ptr) do { *ptr = (snd_ctl_elem_id_t *) alloca(snd_ctl_elem_id_sizeof()); memset(*ptr, 0, snd_ctl_elem_id_sizeof()); } while (0)
-#define snd_ctl_card_info_alloca(ptr) do { *ptr = (snd_ctl_card_info_t *) alloca(snd_ctl_card_info_sizeof()); memset(*ptr, 0, snd_ctl_card_info_sizeof()); } while (0)
-#define snd_ctl_event_alloca(ptr) do { *ptr = (snd_ctl_event_t *) alloca(snd_ctl_event_sizeof()); memset(*ptr, 0, snd_ctl_event_sizeof()); } while (0)
-#define snd_ctl_elem_list_alloca(ptr) do { *ptr = (snd_ctl_elem_list_t *) alloca(snd_ctl_elem_list_sizeof()); memset(*ptr, 0, snd_ctl_elem_list_sizeof()); } while (0)
-#define snd_ctl_elem_info_alloca(ptr) do { *ptr = (snd_ctl_elem_info_t *) alloca(snd_ctl_elem_info_sizeof()); memset(*ptr, 0, snd_ctl_elem_info_sizeof()); } while (0)
-#define snd_ctl_elem_value_alloca(ptr) do { *ptr = (snd_ctl_elem_value_t *) alloca(snd_ctl_elem_value_sizeof()); memset(*ptr, 0, snd_ctl_elem_value_sizeof()); } while (0)
