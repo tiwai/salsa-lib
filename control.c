@@ -127,8 +127,10 @@ int snd_ctl_elem_add_integer(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
 	memset(&info, 0, sizeof(info));
 	info.id = *id;
 	info.type = SND_CTL_ELEM_TYPE_INTEGER;
-	info.access = SNDRV_CTL_ELEM_ACCESS_READWRITE |
-		SNDRV_CTL_ELEM_ACCESS_TLV_READWRITE;
+	info.access = SNDRV_CTL_ELEM_ACCESS_READWRITE;
+#ifdef HAVE_DB_SUPPORT
+	info.access |= SNDRV_CTL_ELEM_ACCESS_TLV_READWRITE;
+#endif
 	info.count = count;
 	info.value.integer.min = min;
 	info.value.integer.max = max;
@@ -194,6 +196,7 @@ int snd_ctl_elem_add_iec958(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id)
 	return snd_ctl_elem_add(ctl, &info);
 }
 
+#ifdef HAVE_DB_SUPPORT
 static int hw_elem_tlv(snd_ctl_t *handle, int op_flag,
 		       unsigned int numid,
 		       unsigned int *tlv, unsigned int tlv_size)
@@ -285,6 +288,7 @@ int snd_ctl_elem_tlv_command(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
 			      (unsigned int *)tlv,
 			      tlv[1] + 2 * sizeof(unsigned int));
 }
+#endif /* HAVE_DB_SUPPORT */
 
 int snd_ctl_wait(snd_ctl_t *ctl, int timeout)
 {

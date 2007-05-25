@@ -691,19 +691,31 @@ int snd_ctl_elem_info_is_user(const snd_ctl_elem_info_t *obj)
 static inline
 int snd_ctl_elem_info_is_tlv_readable(const snd_ctl_elem_info_t *obj)
 {
+#ifdef HAVE_DB_SUPPORT
 	return !!(obj->access & SNDRV_CTL_ELEM_ACCESS_TLV_READ);
+#else
+	return 0;
+#endif
 }
 
 static inline
 int snd_ctl_elem_info_is_tlv_writable(const snd_ctl_elem_info_t *obj)
 {
+#ifdef HAVE_DB_SUPPORT
 	return !!(obj->access & SNDRV_CTL_ELEM_ACCESS_TLV_WRITE);
+#else
+	return 0;
+#endif
 }
 
 static inline
 int snd_ctl_elem_info_is_tlv_commandable(const snd_ctl_elem_info_t *obj)
 {
+#ifdef HAVE_DB_SUPPORT
 	return !!(obj->access & SNDRV_CTL_ELEM_ACCESS_TLV_COMMAND);
+#else
+	return 0;
+#endif
 }
 
 static inline

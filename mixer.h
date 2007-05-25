@@ -1,12 +1,9 @@
 #ifndef __ALSA_MIXER_H
 #define __ALSA_MIXER_H
 
-/** Mixer handle */
 typedef struct _snd_mixer snd_mixer_t;
-/** Mixer elements class handle */
-typedef struct _snd_mixer_class snd_mixer_class_t;
-/** Mixer element handle */
 typedef struct _snd_mixer_elem snd_mixer_elem_t;
+#define snd_mixer_t	snd_mixer_class_t;
 
 /** 
  * \brief Mixer callback function
@@ -37,18 +34,6 @@ typedef int (*snd_mixer_elem_callback_t)(snd_mixer_elem_t *elem,
 typedef int (*snd_mixer_compare_t)(const snd_mixer_elem_t *e1,
 				   const snd_mixer_elem_t *e2);
 
-/**
- * \brief Event callback for the mixer class
- * \param class_ Mixer class
- * \param mask Event mask (SND_CTL_EVENT_*)
- * \param helem HCTL element which invoked the event
- * \param melem Mixer element associated to HCTL element
- * \return zero if success, otherwise a negative error value
- */
-typedef int (*snd_mixer_event_t)(snd_mixer_class_t *class_, unsigned int mask,
-				 snd_hctl_elem_t *helem, snd_mixer_elem_t *melem);
-
-
 /** Mixer element type */
 typedef enum _snd_mixer_elem_type {
 	/* Simple (legacy) mixer elements */
@@ -77,50 +62,10 @@ void snd_mixer_set_callback(snd_mixer_t *obj, snd_mixer_callback_t val);
 void * snd_mixer_get_callback_private(const snd_mixer_t *obj);
 void snd_mixer_set_callback_private(snd_mixer_t *obj, void * val);
 unsigned int snd_mixer_get_count(const snd_mixer_t *obj);
-int snd_mixer_class_unregister(snd_mixer_class_t *clss);
 
 snd_mixer_elem_t *snd_mixer_elem_next(snd_mixer_elem_t *elem);
 snd_mixer_elem_t *snd_mixer_elem_prev(snd_mixer_elem_t *elem);
-void snd_mixer_elem_set_callback(snd_mixer_elem_t *obj, snd_mixer_elem_callback_t val);
-void * snd_mixer_elem_get_callback_private(const snd_mixer_elem_t *obj);
-void snd_mixer_elem_set_callback_private(snd_mixer_elem_t *obj, void * val);
-snd_mixer_elem_type_t snd_mixer_elem_get_type(const snd_mixer_elem_t *obj);
 
-int snd_mixer_class_register(snd_mixer_class_t *class_, snd_mixer_t *mixer);
-int snd_mixer_add_elem(snd_mixer_t *mixer, snd_mixer_elem_t *elem);
-int snd_mixer_remove_elem(snd_mixer_t *mixer, snd_mixer_elem_t *elem);
-int snd_mixer_elem_new(snd_mixer_elem_t **elem,
-		       snd_mixer_elem_type_t type,
-		       int compare_weight,
-		       void *private_data,
-		       void (*private_free)(snd_mixer_elem_t *elem));
-int snd_mixer_elem_add(snd_mixer_elem_t *elem, snd_mixer_class_t *class_);
-int snd_mixer_elem_remove(snd_mixer_elem_t *elem);
-void snd_mixer_elem_free(snd_mixer_elem_t *elem);
-int snd_mixer_elem_info(snd_mixer_elem_t *elem);
-int snd_mixer_elem_value(snd_mixer_elem_t *elem);
-int snd_mixer_elem_attach(snd_mixer_elem_t *melem, snd_hctl_elem_t *helem);
-int snd_mixer_elem_detach(snd_mixer_elem_t *melem, snd_hctl_elem_t *helem);
-int snd_mixer_elem_empty(snd_mixer_elem_t *melem);
-void *snd_mixer_elem_get_private(const snd_mixer_elem_t *melem);
-
-size_t snd_mixer_class_sizeof(void);
-/** \hideinitializer
- * \brief allocate an invalid #snd_mixer_class_t using standard alloca
- * \param ptr returned pointer
- */
-#define snd_mixer_class_alloca(ptr) do { assert(ptr); *ptr = (snd_mixer_class_t *) alloca(snd_mixer_class_sizeof()); memset(*ptr, 0, snd_mixer_class_sizeof()); } while (0)
-int snd_mixer_class_malloc(snd_mixer_class_t **ptr);
-void snd_mixer_class_free(snd_mixer_class_t *obj);
-void snd_mixer_class_copy(snd_mixer_class_t *dst, const snd_mixer_class_t *src);
-snd_mixer_t *snd_mixer_class_get_mixer(const snd_mixer_class_t *class_);
-snd_mixer_event_t snd_mixer_class_get_event(const snd_mixer_class_t *class_);
-void *snd_mixer_class_get_private(const snd_mixer_class_t *class_);
-snd_mixer_compare_t snd_mixer_class_get_compare(const snd_mixer_class_t *class_);
-int snd_mixer_class_set_event(snd_mixer_class_t *class_, snd_mixer_event_t event);
-int snd_mixer_class_set_private(snd_mixer_class_t *class_, void *private_data);
-int snd_mixer_class_set_private_free(snd_mixer_class_t *class_, void (*private_free)(snd_mixer_class_t *class_));
-int snd_mixer_class_set_compare(snd_mixer_class_t *class_, snd_mixer_compare_t compare);
 
 /**
  *  \defgroup SimpleMixer Simple Mixer Interface
