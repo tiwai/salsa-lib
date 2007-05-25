@@ -253,6 +253,11 @@ static void add_cap(snd_mixer_elem_t *elem, unsigned int caps, int type,
 	type &= 1;
 	if (item->channels > elem->channels[type])
 		elem->channels[type] = item->channels;
+	if (caps & (SND_SM_CAP_GVOLUME | SND_SM_CAP_GSWITCH)) {
+		type += 1;
+		if (item->channels > elem->channels[type])
+			elem->channels[type] = item->channels;
+	}
 }
 
 static snd_mixer_elem_t *new_mixer_elem(const char *name, int index,
@@ -277,12 +282,12 @@ static struct mixer_name_alias {
 	const char *shortname;
 	int dir;
 } name_alias[] = {
-	{"Tone Control - Switch", "Tone", SND_PCM_STREAM_PLAYBACK},
-	{"Tone Control - Bass", "Bass", SND_PCM_STREAM_PLAYBACK},
-	{"Tone Control - Treble", "Treble", SND_PCM_STREAM_PLAYBACK},
-	{"Synth Tone Control - Switch", "Synth Tone", SND_PCM_STREAM_PLAYBACK},
-	{"Synth Tone Control - Bass", "Synth Bass", SND_PCM_STREAM_PLAYBACK},
-	{"Synth Tone Control - Treble", "Synth Treble", SND_PCM_STREAM_PLAYBACK},
+	{"Tone Control - Switch", "Tone", 0},
+	{"Tone Control - Bass", "Bass", 0},
+	{"Tone Control - Treble", "Treble", 0},
+	{"Synth Tone Control - Switch", "Synth Tone", 0},
+	{"Synth Tone Control - Bass", "Synth Bass", 0},
+	{"Synth Tone Control - Treble", "Synth Treble", 0},
 	{},
 };
 
@@ -312,6 +317,9 @@ static int remove_suffix(char *name, const char *sfx)
 	return 1;
 }
 
+
+#define USR_IDX(i)	((i) << 1)
+#define RAW_IDX(i)	(((i) << 1) + 1)
 
 static snd_selem_item_head_t *new_selem_vol_item(snd_ctl_elem_info_t *info,
 						 snd_ctl_elem_value_t *val)
@@ -398,27 +406,27 @@ int add_simple_element(snd_hctl_elem_t *hp, snd_mixer_t *mixer)
 			
 {
 	char name[64];
-	int dir, type;
+	int dir = 0, gflag = 0, type;
 	unsigned int caps, index;
 	snd_ctl_elem_info_t *info;
 
 	snprintf(name, sizeof(name), hp->id.name);
 
-	if (check_alias(name, &dir))
+	if (check_elem_alias(name, &dir))
 		goto found;
 
 	remove_suffix(name, " Volume");
 	remove_suffix(name, " Switch");
 	if (remove_suffix(name, " Playback"))
-		dir = 1;
+		dir = 0;
 	else if (remove_suffix(name, " Capture"))
-		dir = 2;
+		dir = 1;
 	else if (!strncmp(name, "Capture", strlen("Capture")))
-		dir = 2;
+		dir = 1;
 	else if (!strncmp(name, "Input", strlen("Input")))
-		dir = 2;
+		dir = 1;
 	else
-		dir = 4;
+		gflag = 1;
  found:
 	snd_ctl_elem_info_alloca(&info);
 	err = snd_hctl_elem_info(hp, info);
@@ -430,22 +438,24 @@ int add_simple_element(snd_hctl_elem_t *hp, snd_mixer_t *mixer)
 		return -ENOMEM;
 	item->helem = hp;
 
+	if (gflag)
+		caps = 7;
+	else
+		caps = 1 << dir;
 	switch (snd_ctl_elem_info_get_type(info)) {
 	case SND_CTL_ELEM_TYPE_BOOLEAN:
-		caps = dir << SND_SM_CAP_SWITCH_SHIFT;
-		type = (dir == 2 ?
-			SND_SELEM_ITEM_CSWITCH : SND_SELEM_ITEM_PSWITCH)
+		caps <<= SND_SM_CAP_SWITCH_SHIFT;
+		type = (dir ? SND_SELEM_ITEM_CSWITCH : SND_SELEM_ITEM_PSWITCH)
 		break;
 	case SND_CTL_ELEM_TYPE_INTEGER:
-		caps = dir << SND_SM_CAP_VOLUME_SHIFT;
-		type = (dir == 2 ?
-			SND_SELEM_ITEM_CVOLUME : SND_SELEM_ITEM_PVOLUME)
+		caps <<= SND_SM_CAP_VOLUME_SHIFT;
+		type = (dir ? SND_SELEM_ITEM_CVOLUME : SND_SELEM_ITEM_PVOLUME)
 		break;
 	case SND_CTL_ELEM_TYPE_ENUMERATED:
-		if (dir > 2)
-			dir = 1;
-		caps = dir << SND_SM_CAP_ENUM_SHIFT;
+		/* grrr, enum has no global type */
+		caps = 1 << (dir + SND_SM_CAP_ENUM_SHIFT);
 		type = SND_SELEM_ITEM_ENUM;
+		break
 	default:
 		return 0; /* ignore this element */
 	}
@@ -706,22 +716,12 @@ int snd_mixer_selem_set_capture_volume(snd_mixer_elem_t *elem,
 				       snd_mixer_selem_channel_id_t channel,
 				       long value)
 {
-	int type;
-	if (elem->caps & SND_SM_CAP_GVOLUME)
-		type = SND_SELEM_ITEM_PVOLUME;
-	else
-		type = SND_SELEM_ITEM_CVOLUME;
-	return update_volume(elem, type, channel, value);
+	return update_volume(elem, SND_SELEM_ITEM_CVOLUME, channel, value);
 }
 
 int snd_mixer_selem_set_capture_volume_all(snd_mixer_elem_t *elem, long value)
 {
-	int type;
-	if (elem->caps & SND_SM_CAP_GVOLUME)
-		type = SND_SELEM_ITEM_PVOLUME;
-	else
-		type = SND_SELEM_ITEM_CVOLUME;
-	return update_volume_all(elem, type, value);
+	return update_volume_all(elem, SND_SELEM_ITEM_CVOLUME, value);
 }
 
 static int set_volume_range(snd_mixer_elem_t *elem, int type,
@@ -735,7 +735,8 @@ static int set_volume_range(snd_mixer_elem_t *elem, int type,
 	str->min = min;
 	str->max = max;
 	for (i = 0; i < str->channels; i++)
-		str->vol[i * 2] = convert_from_user(str, str->vol[i * 2 + 1]);
+		str->vol[USR_IDX(i)] =
+			convert_to_user(str, str->vol[RAW_IDX(i)]);
 	return 0;
 }
 
