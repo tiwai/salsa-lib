@@ -1,3 +1,6 @@
+/*
+ */
+
 int snd_mixer_open(snd_mixer_t **mixerp, int mode ATTRIBUTE_UNUSED)
 {
 	snd_mixer_t *mixer;
@@ -7,95 +10,6 @@ int snd_mixer_open(snd_mixer_t **mixerp, int mode ATTRIBUTE_UNUSED)
 	*mixerp = mixer;
 	return 0;
 }
-
-static int hctl_elem_event_handler(snd_hctl_elem_t *helem,
-				   unsigned int mask)
-{
-	snd_mixer_elem_t *elem = helem->private_data;
-	snd_mixer_t *mixer = elem->mixer;
-	int err;
-
-	if (!elem)
-		return 0;
-
-	if (mask == SND_CTL_EVENT_MASK_REMOVE) {
-		err = _snd_mixer_elem_throw_event(elem, mask);
-		if (err < 0)
-			return err;
-		remove_simple_element(helem, 1);
-		return 0;
-	}
-	if (mask & SND_CTL_EVENT_MASK_INFO) {
-		remove_simle_element(helem, 0);
-		add_simple_element(helem, mixer);
-		err = snd_mixer_elem_info(elem);
-		if (err < 0)
-			return err;
-		snd_mixer_sort(mixer);
-	}
-	if (mask & SND_CTL_EVENT_MASK_VALUE) {
-		err = update_simple_element(helem, elem);
-		if (err < 0)
-			return err;
-		if (err) {
-			err = snd_mixer_elem_value(elem);
-			if (err < 0)
-				return err;
-		}
-	}
-	return 0;
-}
-
-static int add_mixer_elem(snd_mixer_elem_t *elem, snd_mixer_t *mixer)
-{
-	int dir, idx;
-
-	if (mixer->count == mixer->alloc) {
-		snd_mixer_elem_t **m;
-		int num = mixer->alloc + 32;
-		m = realloc(mixer->pelems, sizeof(*m) * num);
-		if (!m)
-			return -ENOMEM;
-		mixer->pelems = m;
-		mixer->alloc = num;
-	}
-	mixer->pelems[mixer->count] = elem;
-	mixer->count++;
-	snd_mixer_sort(mixer);
-
-	return snd_mixer_throw_event(mixer, SND_CTL_EVENT_MASK_ADD, elem);
-}
-
-static int remove_mixer_elem(snd_mixer_elem_t *elem)
-{
-	snd_mixer_t *mixer = elem->mixer;
-	int err, idx = elem->index;
-
-	memmove(mixer->pelems + idx,
-		mixer->pelems + idx + 1,
-		mixer->count - idx - 1);
-	mixer->count--;
-	for (i = idx; i < mixer->count; i++)
-		mixer->pelems[i]->index = i;
-	if (elem->private_free)
-		elem->private_free(elem);
-	free(elem);
-	return 0;
-}
-
-static int hctl_event_handler(snd_hctl_t *hctl, unsigned int mask,
-			      snd_hctl_elem_t *elem)
-{
-	snd_mixer_t *mixer = snd_hctl_get_callback_private(hctl);
-	if (elem->id.iface != SND_CTL_ELEM_IFACE_MIXER)
-		return 0;
-	if (mask & SND_CTL_EVENT_MASK_ADD) {
-		snd_hctl_elem_set_callback(elem, hctl_elem_event_handler);
-		return add_simple_element(hp, mixer);
-	}
-	return 0;
-}
-
 
 int snd_mixer_attach(snd_mixer_t *mixer, const char *name)
 {
@@ -145,23 +59,6 @@ int snd_mixer_detach_hctl(snd_mixer_t *mixer, snd_hctl_t *hctl)
 	return 0;
 }
 
-static int snd_mixer_throw_event(snd_mixer_t *mixer, unsigned int mask,
-				 snd_mixer_elem_t *elem)
-{
-	mixer->events++;
-	if (mixer->callback)
-		return mixer->callback(mixer, mask, elem);
-	return 0;
-}
-
-int _snd_mixer_elem_throw_event(snd_mixer_elem_t *elem, unsigned int mask)
-{
-	elem->mixer->events++;
-	if (elem->callback)
-		return elem->callback(elem, mask);
-	return 0;
-}
-
 int snd_mixer_load(snd_mixer_t *mixer)
 {
 	if (mixer->hctl)
@@ -184,16 +81,6 @@ int snd_mixer_close(snd_mixer_t *mixer)
 	return 0;
 }
 
-static int snd_mixer_sort(snd_mixer_t *mixer)
-{
-	if (mixer->compare)
-		qsort(mixer->pelems, mixer->count, sizeof(snd_mixer_elem_t *),
-		      mixer->compare);
-	for (i = 0; i < mixer->count; i++)
-		mixer->pelems[i]->index = i;
-	return 0;
-}
-
 int snd_mixer_handle_events(snd_mixer_t *mixer)
 {
 	int err;
@@ -206,6 +93,133 @@ int snd_mixer_handle_events(snd_mixer_t *mixer)
 		return err;
 	return mixer->events;
 }
+
+/*
+ */
+static int snd_mixer_throw_event(snd_mixer_t *mixer, unsigned int mask,
+				 snd_mixer_elem_t *elem)
+{
+	mixer->events++;
+	if (mixer->callback)
+		return mixer->callback(mixer, mask, elem);
+	return 0;
+}
+
+int _snd_mixer_elem_throw_event(snd_mixer_elem_t *elem, unsigned int mask)
+{
+	elem->mixer->events++;
+	if (elem->callback)
+		return elem->callback(elem, mask);
+	return 0;
+}
+
+/*
+ */
+
+static int snd_mixer_sort(snd_mixer_t *mixer)
+{
+	if (mixer->compare)
+		qsort(mixer->pelems, mixer->count, sizeof(snd_mixer_elem_t *),
+		      mixer->compare);
+	for (i = 0; i < mixer->count; i++)
+		mixer->pelems[i]->index = i;
+	return 0;
+}
+
+static int add_mixer_elem(snd_mixer_elem_t *elem, snd_mixer_t *mixer)
+{
+	int dir, idx;
+
+	if (mixer->count == mixer->alloc) {
+		snd_mixer_elem_t **m;
+		int num = mixer->alloc + 32;
+		m = realloc(mixer->pelems, sizeof(*m) * num);
+		if (!m)
+			return -ENOMEM;
+		mixer->pelems = m;
+		mixer->alloc = num;
+	}
+	mixer->pelems[mixer->count] = elem;
+	mixer->count++;
+	snd_mixer_sort(mixer);
+
+	return snd_mixer_throw_event(mixer, SND_CTL_EVENT_MASK_ADD, elem);
+}
+
+static int remove_mixer_elem(snd_mixer_elem_t *elem)
+{
+	snd_mixer_t *mixer = elem->mixer;
+	int err, idx = elem->index;
+
+	memmove(mixer->pelems + idx,
+		mixer->pelems + idx + 1,
+		mixer->count - idx - 1);
+	mixer->count--;
+	for (i = idx; i < mixer->count; i++)
+		mixer->pelems[i]->index = i;
+	if (elem->private_free)
+		elem->private_free(elem);
+	free(elem);
+	return 0;
+}
+
+/*
+ */
+static int add_simple_element(snd_hctl_elem_t *hp, snd_mixer_t *mixer);
+static int remove_simple_element(snd_hctl_elem_t *hp, int remove_mixer);
+static int update_simple_element(snd_hctl_elem_t *hp, snd_mixer_elem_t *elem);
+
+static int hctl_elem_event_handler(snd_hctl_elem_t *helem,
+				   unsigned int mask)
+{
+	snd_mixer_elem_t *elem = helem->private_data;
+	snd_mixer_t *mixer = elem->mixer;
+	int err;
+
+	if (!elem)
+		return 0;
+
+	if (mask == SND_CTL_EVENT_MASK_REMOVE) {
+		err = _snd_mixer_elem_throw_event(elem, mask);
+		if (err < 0)
+			return err;
+		remove_simple_element(helem, 1);
+		return 0;
+	}
+	if (mask & SND_CTL_EVENT_MASK_INFO) {
+		remove_simle_element(helem, 0);
+		add_simple_element(helem, mixer);
+		err = snd_mixer_elem_info(elem);
+		if (err < 0)
+			return err;
+		snd_mixer_sort(mixer);
+	}
+	if (mask & SND_CTL_EVENT_MASK_VALUE) {
+		err = update_simple_element(helem, elem);
+		if (err < 0)
+			return err;
+		if (err) {
+			err = snd_mixer_elem_value(elem);
+			if (err < 0)
+				return err;
+		}
+	}
+	return 0;
+}
+
+static int hctl_event_handler(snd_hctl_t *hctl, unsigned int mask,
+			      snd_hctl_elem_t *elem)
+{
+	snd_mixer_t *mixer = snd_hctl_get_callback_private(hctl);
+	if (elem->id.iface != SND_CTL_ELEM_IFACE_MIXER)
+		return 0;
+	if (mask & SND_CTL_EVENT_MASK_ADD) {
+		snd_hctl_elem_set_callback(elem, hctl_elem_event_handler);
+		return add_simple_element(hp, mixer);
+	}
+	return 0;
+}
+
 
 /*
  */
@@ -254,6 +268,7 @@ static void add_cap(snd_mixer_elem_t *elem, unsigned int caps, int type,
 	if (item->channels > elem->channels[type])
 		elem->channels[type] = item->channels;
 	if (caps & (SND_SM_CAP_GVOLUME | SND_SM_CAP_GSWITCH)) {
+		/* global item needs check of both directions */
 		type += 1;
 		if (item->channels > elem->channels[type])
 			elem->channels[type] = item->channels;
@@ -269,7 +284,7 @@ static snd_mixer_elem_t *new_mixer_elem(const char *name, int index,
 	if (!elem)
 		return NULL;
 	elem->mixer = mixer;
-	strcpy(elem->sid.name, name);
+	strncpy(elem->sid.name, name, sizeof(elem->sid.name) - 1);
 	elem->sid.index = index;
 	return elem;
 }
@@ -277,50 +292,12 @@ static snd_mixer_elem_t *new_mixer_elem(const char *name, int index,
 /*
  */
 
-static struct mixer_name_alias {
-	const char *longname;
-	const char *shortname;
-	int dir;
-} name_alias[] = {
-	{"Tone Control - Switch", "Tone", 0},
-	{"Tone Control - Bass", "Bass", 0},
-	{"Tone Control - Treble", "Treble", 0},
-	{"Synth Tone Control - Switch", "Synth Tone", 0},
-	{"Synth Tone Control - Bass", "Synth Bass", 0},
-	{"Synth Tone Control - Treble", "Synth Treble", 0},
-	{},
-};
-
-static int check_elem_alias(char *name, int *dirp)
-{
-	struct mixer_name_alias *p;
-
-	for (p = name_alias; p->longname; p++) {
-		if (!strcmp(name, p)) {
-			strcpy(name, p->shoftname);
-			*dirp = p->dir;
-			return 1;
-		}
-	}
-	return 0;
-}
-
-static int remove_suffix(char *name, const char *sfx)
-{
-	char *p;
-	p = strstr(name, sfx);
-	if (!p)
-		return 0;
-	if (strcmp(p, sfx))
-		return 0;
-	*p = 0;
-	return 1;
-}
-
-
 #define USR_IDX(i)	((i) << 1)
 #define RAW_IDX(i)	(((i) << 1) + 1)
 
+/*
+ * create a volume item
+ */
 static snd_selem_item_head_t *new_selem_vol_item(snd_ctl_elem_info_t *info,
 						 snd_ctl_elem_value_t *val)
 {
@@ -341,6 +318,9 @@ static snd_selem_item_head_t *new_selem_vol_item(snd_ctl_elem_info_t *info,
 	return &vol->head;
 }
 
+/*
+ * create a switch item
+ */
 static snd_selem_item_head_t *new_selem_sw_item(snd_ctl_elem_info_t *info,
 						snd_ctl_elem_value_t *val)
 {
@@ -358,6 +338,9 @@ static snd_selem_item_head_t *new_selem_sw_item(snd_ctl_elem_info_t *info,
 	return &sw->head;
 }
 
+/*
+ * create an enum item
+ */
 static snd_selem_item_head_t *new_selem_enum_item(snd_ctl_elem_info_t *info,
 						  snd_ctl_elem_value_t *val)
 {
@@ -373,6 +356,9 @@ static snd_selem_item_head_t *new_selem_enum_item(snd_ctl_elem_info_t *info,
 	return &eitem->head;
 }
 
+/*
+ * create a mixer item
+ */
 static snd_selem_item_head_t *new_selem_item(snd_ctl_elem_info_t *info)
 {
 	struct snd_ctl_elem_value_t *val;
@@ -402,7 +388,57 @@ static snd_selem_item_head_t *new_selem_item(snd_ctl_elem_info_t *info)
 }
 
 
-int add_simple_element(snd_hctl_elem_t *hp, snd_mixer_t *mixer)
+/*
+ * check the alias of element names
+ */
+static struct mixer_name_alias {
+	const char *longname;
+	const char *shortname;
+	int dir;
+} name_alias[] = {
+	{"Tone Control - Switch", "Tone", 0},
+	{"Tone Control - Bass", "Bass", 0},
+	{"Tone Control - Treble", "Treble", 0},
+	{"Synth Tone Control - Switch", "Synth Tone", 0},
+	{"Synth Tone Control - Bass", "Synth Bass", 0},
+	{"Synth Tone Control - Treble", "Synth Treble", 0},
+	{},
+};
+
+static int check_elem_alias(char *name, int *dirp)
+{
+	struct mixer_name_alias *p;
+
+	for (p = name_alias; p->longname; p++) {
+		if (!strcmp(name, p)) {
+			strcpy(name, p->shoftname);
+			*dirp = p->dir;
+			return 1;
+		}
+	}
+	return 0;
+}
+
+/*
+ * remove a suffix from the given string
+ */
+static int remove_suffix(char *name, const char *sfx)
+{
+	char *p;
+	p = strstr(name, sfx);
+	if (!p)
+		return 0;
+	if (strcmp(p, sfx))
+		return 0;
+	*p = 0;
+	return 1;
+}
+
+
+/*
+ * add an item to the mixer element
+ */
+static int add_simple_element(snd_hctl_elem_t *hp, snd_mixer_t *mixer)
 			
 {
 	char name[64];
@@ -415,8 +451,10 @@ int add_simple_element(snd_hctl_elem_t *hp, snd_mixer_t *mixer)
 	if (check_elem_alias(name, &dir))
 		goto found;
 
+	/* remove standard suffix */
 	remove_suffix(name, " Volume");
 	remove_suffix(name, " Switch");
+	/* check direction */
 	if (remove_suffix(name, " Playback"))
 		dir = 0;
 	else if (remove_suffix(name, " Capture"))
@@ -426,22 +464,18 @@ int add_simple_element(snd_hctl_elem_t *hp, snd_mixer_t *mixer)
 	else if (!strncmp(name, "Input", strlen("Input")))
 		dir = 1;
 	else
-		gflag = 1;
+		gflag = 1; /* global (common): both playback and capture */
  found:
+	/* acquire the element information */
 	snd_ctl_elem_info_alloca(&info);
 	err = snd_hctl_elem_info(hp, info);
 	if (err < 0)
 		return err;
 
-	item = new_selem_item(info);
-	if (!item)
-		return -ENOMEM;
-	item->helem = hp;
-
 	if (gflag)
-		caps = 7;
+		caps = 7; /* GLOBAL|PLAY|CAPT */
 	else
-		caps = 1 << dir;
+		caps = 1 << dir; /* PLAY or CAPT */
 	switch (snd_ctl_elem_info_get_type(info)) {
 	case SND_CTL_ELEM_TYPE_BOOLEAN:
 		caps <<= SND_SM_CAP_SWITCH_SHIFT;
@@ -459,6 +493,11 @@ int add_simple_element(snd_hctl_elem_t *hp, snd_mixer_t *mixer)
 	default:
 		return 0; /* ignore this element */
 	}
+
+	item = new_selem_item(info);
+	if (!item)
+		return -ENOMEM;
+	item->helem = hp;
 
 	/* check matching element */
 	index = 0;
@@ -478,14 +517,21 @@ int add_simple_element(snd_hctl_elem_t *hp, snd_mixer_t *mixer)
 	}
 	/* no element found, create a new one */
 	elem = new_mixer_elem(name, index, mixer);
-	if (!elem)
+	if (!elem) {
+		free(item);
 		return -ENOMEM;
+	}
 	elem->hctl = hctl;
 	add_cap(elem, caps, type, item);
 	return add_mixer_elem(elem, mixer);
 }
 
-int remove_simple_element(snd_hctl_elem_t *hp, int remove_mixer)
+/*
+ * remote the corresponding item from the mixer element
+ * if remove_mixer is non-zero, removes the mixer element after
+ * all items have been removed.
+ */
+static int remove_simple_element(snd_hctl_elem_t *hp, int remove_mixer)
 {
 	snd_mixer_elem_t *elem = hp->private_data;
 	int i;
@@ -496,7 +542,6 @@ int remove_simple_element(snd_hctl_elem_t *hp, int remove_mixer)
 			continue;
 		if (head->helem != hp)
 			continue;
-		free(head);
 		elem->items[i] = NULL;
 		switch (i) {
 		case SND_SELEM_ITEM_PVOLUME:
@@ -508,6 +553,7 @@ int remove_simple_element(snd_hctl_elem_t *hp, int remove_mixer)
 				elem->items[SND_SELEM_ITEM_CSWITCH] = NULL;
 			break;
 		}
+		free(head);
 
 		if (!remove_mixer)
 			return 0;
@@ -523,6 +569,9 @@ int remove_simple_element(snd_hctl_elem_t *hp, int remove_mixer)
 	return -ENOENT;
 }
 
+/*
+ * update the values of the volume item
+ */
 static int update_selem_vol_item(snd_mixer_elem_t *elem,
 				 snd_selem_vol_item_t *vol,
 				 snd_ctl_elem_value_t *val)
@@ -541,6 +590,9 @@ static int update_selem_vol_item(snd_mixer_elem_t *elem,
 	return changed;
 }
 
+/*
+ * update the values of the switch item
+ */
 static int update_selem_sw_item(snd_mixer_elem_t *elem,
 				snd_selem_sw_item_t *sw,
 				snd_ctl_elem_value_t *val)
@@ -557,6 +609,9 @@ static int update_selem_sw_item(snd_mixer_elem_t *elem,
 	return changed;
 }
 
+/*
+ * update the values of the enum item
+ */
 static int update_selem_enum_item(snd_mixer_elem_t *elem,
 				  snd_selem_enum_item_t *eitem,
 				  snd_ctl_elem_value_t *val)
@@ -572,6 +627,9 @@ static int update_selem_enum_item(snd_mixer_elem_t *elem,
 	return changed;
 }
 
+/*
+ * update the values of the item
+ */
 static int update_slem_item(snd_mixer_elem_t *elem, int type)
 {
 	struct snd_selem_item_head_t *head;
@@ -595,7 +653,10 @@ static int update_slem_item(snd_mixer_elem_t *elem, int type)
 	}
 }
 
-int update_simple_element(snd_hctl_elem_t *hp, snd_mixer_element_t *elem)
+/*
+ * update the given item of the mixer element
+ */
+static int update_simple_element(snd_hctl_elem_t *hp, snd_mixer_elem_t *elem)
 {
 	int i;
 
