@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <byteswap.h>
+#include "pcm.h"
 
 
 /* NOTE: "signed" prefix must be given below since the default char is
@@ -55,11 +56,11 @@ static struct pcm_format_data pcm_formats[SND_PCM_FORMAT_LAST+1] = {
 	},
 	[SND_PCM_FORMAT_U24_LE] = {
 		.width = 24, .phys = 32, .le = 1, .signd = 0,
-		.silence = { 0x00, 0x00, 0x80 },
+		.silence = { 0x00, 0x00, 0x80, 0x00 },
 	},
 	[SND_PCM_FORMAT_U24_BE] = {
 		.width = 24, .phys = 32, .le = 0, .signd = 0,
-		.silence = { 0x80, 0x00, 0x00 },
+		.silence = { 0x00, 0x80, 0x00, 0x00 },
 	},
 	[SND_PCM_FORMAT_S32_LE] = {
 		.width = 32, .phys = 32, .le = 1, .signd = 1,
@@ -261,146 +262,23 @@ ssize_t snd_pcm_format_size(snd_pcm_format_t format, size_t samples)
 
 u_int64_t snd_pcm_format_silence_64(snd_pcm_format_t format)
 {
-	if (format < 0 || format > SND_PCM_FORMAT_LAST)
-		return 0;
-	if (!pcm_formats[format].phys)
-		return 0;
-	return pcm_formats[format].silence;
+	struct pcm_format_data *fmt;
+	int i, p, w;
+	u_int64_t silence;
 
-	switch (format) {
-	case SND_PCM_FORMAT_S8:
-	case SND_PCM_FORMAT_S16_LE:
-	case SND_PCM_FORMAT_S16_BE:
-	case SND_PCM_FORMAT_S24_LE:
-	case SND_PCM_FORMAT_S24_BE:
-	case SND_PCM_FORMAT_S32_LE:
-	case SND_PCM_FORMAT_S32_BE:
-	case SND_PCM_FORMAT_S24_3LE:
-	case SND_PCM_FORMAT_S24_3BE:
-	case SND_PCM_FORMAT_S20_3LE:
-	case SND_PCM_FORMAT_S20_3BE:
-	case SND_PCM_FORMAT_S18_3LE:
-	case SND_PCM_FORMAT_S18_3BE:
+	if (format < 0 || format > SNDRV_PCM_FORMAT_LAST)
 		return 0;
-	case SND_PCM_FORMAT_U8:
-		return 0x8080808080808080ULL;
-#ifdef SND_LITTLE_ENDIAN
-	case SND_PCM_FORMAT_U16_LE:
-		return 0x8000800080008000ULL;
-	case SND_PCM_FORMAT_U24_LE:
-		return 0x0080000000800000ULL;
-	case SND_PCM_FORMAT_U32_LE:
-		return 0x8000000080000000ULL;
-	case SND_PCM_FORMAT_U16_BE:
-		return 0x0080008000800080ULL;
-	case SND_PCM_FORMAT_U24_BE:
-		return 0x0000800000008000ULL;
-	case SND_PCM_FORMAT_U32_BE:
-		return 0x0000008000000080ULL;
-	case SND_PCM_FORMAT_U24_3LE:
-		return 0x0000800000800000ULL;
-	case SND_PCM_FORMAT_U24_3BE:
-		return 0x0080000080000080ULL;
-	case SND_PCM_FORMAT_U20_3LE:
-		return 0x0000080000080000ULL;
-	case SND_PCM_FORMAT_U20_3BE:
-		return 0x0008000008000008ULL;
-	case SND_PCM_FORMAT_U18_3LE:
-		return 0x0000020000020000ULL;
-	case SND_PCM_FORMAT_U18_3BE:
-		return 0x0002000002000002ULL;
-#else
-	case SND_PCM_FORMAT_U16_LE:
-		return 0x0080008000800080ULL;
-	case SND_PCM_FORMAT_U24_LE:
-		return 0x0000800000008000ULL;
-	case SND_PCM_FORMAT_U32_LE:
-		return 0x0000008000000080ULL;
-	case SND_PCM_FORMAT_U16_BE:
-		return 0x8000800080008000ULL;
-	case SND_PCM_FORMAT_U24_BE:
-		return 0x0080000000800000ULL;
-	case SND_PCM_FORMAT_U32_BE:
-		return 0x8000000080000000ULL;
-	case SND_PCM_FORMAT_U24_3LE:
-		return 0x0080000080000080ULL;
-	case SND_PCM_FORMAT_U24_3BE:
-		return 0x0000800000800000ULL;
-	case SND_PCM_FORMAT_U20_3LE:
-		return 0x0008000008000008ULL;
-	case SND_PCM_FORMAT_U20_3BE:
-		return 0x0000080000080000ULL;
-	case SND_PCM_FORMAT_U18_3LE:
-		return 0x0002000002000002ULL;
-	case SND_PCM_FORMAT_U18_3BE:
-		return 0x0000020000020000ULL;
-#endif
-	case SND_PCM_FORMAT_FLOAT_LE:
-	{
-		union {
-			float f[2];
-			u_int64_t i;
-		} u;
-		u.f[0] = u.f[1] = 0.0;
-#ifdef SND_LITTLE_ENDIAN
-		return u.i;
-#else
-		return bswap_64(u.i);
-#endif
-	}
-	case SND_PCM_FORMAT_FLOAT64_LE:
-	{
-		union {
-			double f;
-			u_int64_t i;
-		} u;
-		u.f = 0.0;
-#ifdef SND_LITTLE_ENDIAN
-		return u.i;
-#else
-		return bswap_64(u.i);
-#endif
-	}
-	case SND_PCM_FORMAT_FLOAT_BE:		
-	{
-		union {
-			float f[2];
-			u_int64_t i;
-		} u;
-		u.f[0] = u.f[1] = 0.0;
-#ifdef SND_LITTLE_ENDIAN
-		return bswap_64(u.i);
-#else
-		return u.i;
-#endif
-	}
-	case SND_PCM_FORMAT_FLOAT64_BE:
-	{
-		union {
-			double f;
-			u_int64_t i;
-		} u;
-		u.f = 0.0;
-#ifdef SND_LITTLE_ENDIAN
-		return bswap_64(u.i);
-#else
-		return u.i;
-#endif
-	}
-	case SND_PCM_FORMAT_IEC958_SUBFRAME_LE:
-	case SND_PCM_FORMAT_IEC958_SUBFRAME_BE:
-		return 0;	
-	case SND_PCM_FORMAT_MU_LAW:
-		return 0x7f7f7f7f7f7f7f7fULL;
-	case SND_PCM_FORMAT_A_LAW:
-		return 0x5555555555555555ULL;
-	case SND_PCM_FORMAT_IMA_ADPCM:	/* special case */
-	case SND_PCM_FORMAT_MPEG:
-	case SND_PCM_FORMAT_GSM:
-	case SND_PCM_FORMAT_SPECIAL:
+	fmt = &pcm_formats[format];
+	if (!fmt->phys)
 		return 0;
+	w = fmt->width / 8;
+	p = 0;
+	silence = 0;
+	while (p < w) {
+		for (i = 0; i < w; i++, p++)
+			silence = (silence << 8) | fmt->silence[i];
 	}
-	return 0;
+	return silence;
 }
 
 u_int32_t snd_pcm_format_silence_32(snd_pcm_format_t format)

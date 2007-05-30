@@ -62,8 +62,6 @@ struct _snd_pcm {
 	snd_interval_t buffer_time;
 	unsigned int sample_bits;
 	unsigned int frame_bits;
-	/*snd_pcm_rbptr_t appl;
-	  snd_pcm_rbptr_t hw;*/
 	snd_pcm_uframes_t min_align;
 };
 
@@ -399,7 +397,7 @@ int snd_pcm_hw_params_get_fifo_size(const snd_pcm_hw_params_t *params)
 extern int _snd_pcm_hw_param_get(const snd_pcm_hw_params_t *params, int type,
 				 unsigned int *val, int *dir);
 extern int _snd_pcm_hw_param_set(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
-				 int type, unsigned int val, int *dir);
+				 int type, unsigned int val, int dir);
 extern int _snd_pcm_hw_param_test(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				  int type, unsigned int val, int *dir);
 extern snd_mask_t * _snd_pcm_hw_param_get_mask(snd_pcm_hw_params_t *params, int type);
@@ -1084,7 +1082,7 @@ int snd_pcm_hw_params_set_rate(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 			       unsigned int val, int dir)
 {
 	return _snd_pcm_hw_param_set(pcm, params, SNDRV_PCM_HW_PARAM_RATE,
-				    val, &dir);
+				    val, dir);
 }
 
 static inline
@@ -1198,7 +1196,7 @@ int snd_pcm_hw_params_set_period_time(snd_pcm_t *pcm, snd_pcm_hw_params_t *param
 				      unsigned int val, int dir)
 {
 	return _snd_pcm_hw_param_set(pcm, params,
-				    SNDRV_PCM_HW_PARAM_PERIOD_TIME, val, &dir);
+				    SNDRV_PCM_HW_PARAM_PERIOD_TIME, val, dir);
 }
 
 
@@ -1295,7 +1293,7 @@ int snd_pcm_hw_params_set_period_size(snd_pcm_t *pcm, snd_pcm_hw_params_t *param
 				      snd_pcm_uframes_t val, int dir)
 {
 	return _snd_pcm_hw_param_set(pcm, params,
-				    SNDRV_PCM_HW_PARAM_PERIOD_SIZE, val, &dir);
+				    SNDRV_PCM_HW_PARAM_PERIOD_SIZE, val, dir);
 }
 
 static inline
@@ -1394,7 +1392,7 @@ int snd_pcm_hw_params_set_periods(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				  unsigned int val, int dir)
 {
 	return _snd_pcm_hw_param_set(pcm, params,
-				    SNDRV_PCM_HW_PARAM_PERIODS, val, &dir);
+				    SNDRV_PCM_HW_PARAM_PERIODS, val, dir);
 }
 
 static inline
@@ -1492,7 +1490,7 @@ int snd_pcm_hw_params_set_buffer_time(snd_pcm_t *pcm, snd_pcm_hw_params_t *param
 				      unsigned int val, int dir)
 {
 	return _snd_pcm_hw_param_set(pcm, params,
-				    SNDRV_PCM_HW_PARAM_BUFFER_TIME, val, &dir);
+				    SNDRV_PCM_HW_PARAM_BUFFER_TIME, val, dir);
 }
 
 static inline
@@ -1679,7 +1677,7 @@ int snd_pcm_hw_params_set_tick_time(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				    unsigned int val, int dir)
 {
 	return _snd_pcm_hw_param_set(pcm, params, SNDRV_PCM_HW_PARAM_TICK_TIME,
-				    val, &dir);
+				    val, dir);
 }
 
 static inline
