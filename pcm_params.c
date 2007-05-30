@@ -953,6 +953,9 @@ static int snd_pcm_hw_params_choose(snd_pcm_t *pcm, snd_pcm_hw_params_t *params)
 	return 0;
 }
 
+extern int _snd_pcm_mmap(snd_pcm_t *pcm);
+extern int _snd_pcm_munmap(snd_pcm_t *pcm);
+
 static int _snd_pcm_hw_params(snd_pcm_t *pcm, snd_pcm_hw_params_t *params)
 {
 	int err;
@@ -985,6 +988,16 @@ static int _snd_pcm_hw_params(snd_pcm_t *pcm, snd_pcm_hw_params_t *params)
 	memset(&sw, 0, sizeof(sw));
 	snd_pcm_sw_params_default(pcm, &sw);
 	snd_pcm_sw_params(pcm, &sw);
+
+	if (pcm->access == SND_PCM_ACCESS_MMAP_INTERLEAVED ||
+	    pcm->access == SND_PCM_ACCESS_MMAP_NONINTERLEAVED ||
+	    pcm->access == SND_PCM_ACCESS_MMAP_COMPLEX) {
+		err = _snd_pcm_mmap(pcm);
+		if (err < 0)
+			return err;
+	}
+
+	_snd_pcm_sync_ptr(pcm, 0);
 	return 0;
 }
 
@@ -1026,17 +1039,9 @@ int snd_pcm_hw_params(snd_pcm_t *pcm, snd_pcm_hw_params_t *params)
 
 int snd_pcm_hw_free(snd_pcm_t *pcm)
 {
-	int err;
 	if (!pcm->setup)
 		return 0;
-#if 0 // xxx
-	if (pcm->mmap_channels) {
-		err = snd_pcm_munmap(pcm);
-		if (err < 0)
-			return err;
-		pcm->mmap_channels = 0;
-	}
-#endif
+	_snd_pcm_munmap(pcm);
 	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_HW_FREE) < 0)
 		return -errno;
 	pcm->setup = 0;
@@ -1156,3 +1161,4 @@ int snd_pcm_sw_params_dump(snd_pcm_sw_params_t *params, snd_output_t *out)
 			  params->boundary);
 	return 0;
 }
+

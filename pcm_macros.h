@@ -12,7 +12,10 @@
 #include <sys/poll.h>
 
 typedef struct sndrv_interval snd_interval_t;
-typedef struct sndrv_pcm_channel_info snd_pcm_channel_info_t;
+typedef struct {
+	struct sndrv_pcm_channel_info info;
+	void *addr;
+} snd_pcm_channel_info_t;
 
 struct _snd_pcm {
 	char *name;
@@ -63,6 +66,13 @@ struct _snd_pcm {
 	unsigned int sample_bits;
 	unsigned int frame_bits;
 	snd_pcm_uframes_t min_align;
+
+	struct sndrv_pcm_mmap_status *mmap_status;
+	struct sndrv_pcm_mmap_control *mmap_control;
+	struct sndrv_pcm_sync_ptr *sync_ptr;
+
+	snd_pcm_channel_info_t *mmap_channels;
+	snd_pcm_channel_area_t *running_areas;
 };
 
 /*
@@ -143,21 +153,31 @@ int snd_pcm_status(snd_pcm_t *pcm, snd_pcm_status_t *status)
 	return 0;
 }
 
-#if 0
+static inline
+int _snd_pcm_sync_ptr(snd_pcm_t *pcm, int flags)
+{
+	if (pcm->sync_ptr) {
+		pcm->sync_ptr->flags = flags;
+		if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_SYNC_PTR, pcm->sync_ptr) < 0)
+			return -errno;
+	}
+	return 0;
+}
+
+
 static inline
 snd_pcm_state_t snd_pcm_state(snd_pcm_t *pcm)
 {
-	return pcm->mmap_status ?
-		pcm->mmap_status->state : _snd_pcm_state(pcm);
+	_snd_pcm_sync_ptr(pcm, SNDRV_PCM_SYNC_PTR_APPL);
+	return pcm->mmap_status->state;
 }
-#else
-extern snd_pcm_state_t snd_pcm_state(snd_pcm_t *pcm);
-#endif
 
 static inline
 int snd_pcm_hwsync(snd_pcm_t *pcm)
 {
-	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_HWSYNC) < 0)
+	if (pcm->sync_ptr)
+		return _snd_pcm_sync_ptr(pcm, SNDRV_PCM_SYNC_PTR_HWSYNC);
+	else if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_HWSYNC) < 0)
 		return -errno;
 	return 0;
 }
@@ -183,7 +203,7 @@ int snd_pcm_prepare(snd_pcm_t *pcm)
 {
 	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_PREPARE) < 0)
 		return -errno;
-	return 0;
+	return _snd_pcm_sync_ptr(pcm, SNDRV_PCM_SYNC_PTR_APPL);
 }
 
 static inline
@@ -191,12 +211,13 @@ int snd_pcm_reset(snd_pcm_t *pcm)
 {
 	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_RESET) < 0)
 		return -errno;
-	return 0;
+	return _snd_pcm_sync_ptr(pcm, SNDRV_PCM_SYNC_PTR_APPL);
 }
 
 static inline
 int snd_pcm_start(snd_pcm_t *pcm)
 {
+	_snd_pcm_sync_ptr(pcm, 0);
 	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_START) < 0)
 		return -errno;
 	return 0;
@@ -233,6 +254,7 @@ snd_pcm_sframes_t snd_pcm_rewind(snd_pcm_t *pcm, snd_pcm_uframes_t frames)
 		return 0;
 	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_REWIND, &frames) < 0)
 		return -errno;
+	_snd_pcm_sync_ptr(pcm, SNDRV_PCM_SYNC_PTR_APPL);
 	return frames;
 }
 
@@ -243,6 +265,7 @@ snd_pcm_sframes_t snd_pcm_forward(snd_pcm_t *pcm, snd_pcm_uframes_t frames)
 		return 0;
 	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_FORWARD, &frames) < 0)
 		return -errno;
+	_snd_pcm_sync_ptr(pcm, SNDRV_PCM_SYNC_PTR_APPL);
 	return frames;
 }
 
@@ -260,6 +283,30 @@ int snd_pcm_unlink(snd_pcm_t *pcm)
 	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_UNLINK) < 0)
 		return -errno;
 	return 0;
+}
+
+static inline
+snd_pcm_sframes_t snd_pcm_mmap_writei(snd_pcm_t *pcm, const void *buffer, snd_pcm_uframes_t size)
+{
+	return -ENXIO;
+}
+
+static inline
+snd_pcm_sframes_t snd_pcm_mmap_writen(snd_pcm_t *pcm, void **bufs, snd_pcm_uframes_t size)
+{
+	return -ENXIO;
+}
+
+static inline
+snd_pcm_sframes_t snd_pcm_mmap_readi(snd_pcm_t *pcm, void *buffer, snd_pcm_uframes_t size)
+{
+	return -ENXIO;
+}
+
+static inline
+snd_pcm_sframes_t snd_pcm_mmap_readn(snd_pcm_t *pcm, void **bufs, snd_pcm_uframes_t size)
+{
+	return -ENXIO;
 }
 
 extern const char *_snd_pcm_stream_names[];

@@ -80,7 +80,7 @@ int snd_ctl_open(snd_ctl_t **ctlp, const char *name, int mode)
 		close(fd);
 		return err;
 	}
-#if 0
+#if 0 // VCHECK
 	if (SNDRV_PROTOCOL_INCOMPATIBLE(ver, SNDRV_CTL_VERSION_MAX)) {
 		close(fd);
 		return -SND_ERROR_INCOMPATIBLE_VERSION;
@@ -105,7 +105,7 @@ int snd_ctl_open(snd_ctl_t **ctlp, const char *name, int mode)
 int snd_ctl_close(snd_ctl_t *ctl)
 {
 	int err;
-#if 0
+#if 0 // ASYNC
 	while (!list_empty(&ctl->async_handlers)) {
 		snd_async_handler_t *h = list_entry(&ctl->async_handlers.next, snd_async_handler_t, hlist);
 		snd_async_del_handler(h);
@@ -128,7 +128,7 @@ int snd_ctl_nonblock(snd_ctl_t *ctl, int nonblock)
 	return 0;
 }
 
-#if 0
+#if 0 // ASYNC
 int snd_ctl_async(snd_ctl_t *ctl, int sig, pid_t pid)
 {
 	if (sig == 0)
@@ -332,7 +332,7 @@ int snd_ctl_wait(snd_ctl_t *ctl, int timeout)
 	}
 }
 
-#if 0
+#if 0 // ASYNC
 int snd_async_add_ctl_handler(snd_async_handler_t **handler, snd_ctl_t *ctl, 
 			      snd_async_callback_t callback, void *private_data)
 {

@@ -25,11 +25,19 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/mman.h>
 #include <fcntl.h>
 #include "pcm.h"
 #include "control.h"
 #include "local.h"
 
+/*
+ */
+static int snd_pcm_hw_mmap_status(snd_pcm_t *pcm);
+static void snd_pcm_hw_munmap_status(snd_pcm_t *pcm);
+
+/*
+ */
 static int open_with_subdev(const char *filename, int fmode,
 			    int card, int subdev)
 {
@@ -100,7 +108,7 @@ int snd_pcm_open(snd_pcm_t **pcmp, const char *name,
 		err = -errno;
 		goto error;
 	}
-#if 0
+#if 0 // VCHECK
 	if (SNDRV_PROTOCOL_INCOMPATIBLE(ver, SNDRV_PCM_VERSION_MAX)) {
 		err = -SND_ERROR_INCOMPATIBLE_VERSION;
 		goto error;
@@ -132,6 +140,10 @@ int snd_pcm_open(snd_pcm_t **pcmp, const char *name,
 		(stream == SND_PCM_STREAM_PLAYBACK ? POLLOUT : POLLIN)
 		| POLLERR | POLLNVAL;
 
+	err = snd_pcm_hw_mmap_status(pcm);
+	if (err < 0)
+		goto error;
+
 	return 0;
 
  error:
@@ -140,15 +152,17 @@ int snd_pcm_open(snd_pcm_t **pcmp, const char *name,
 	return err;
 }
 
+int _snd_pcm_munmap(snd_pcm_t *pcm);
+
 int snd_pcm_close(snd_pcm_t *pcm)
 {
 	if (pcm->setup) {
 		snd_pcm_drop(pcm);
 		snd_pcm_hw_free(pcm);
 	}
+	_snd_pcm_munmap(pcm);
+	snd_pcm_hw_munmap_status(pcm);
 #if 0 // ASYNC
-	if (pcm->mmap_channels)
-		snd_pcm_munmap(pcm);
 	while (!list_empty(&pcm->async_handlers)) {
 		snd_async_handler_t *h = list_entry(pcm->async_handlers.next, snd_async_handler_t, hlist);
 		snd_async_del_handler(h);
@@ -207,6 +221,7 @@ snd_pcm_sframes_t snd_pcm_writei(snd_pcm_t *pcm, const void *buffer,
 	xferi.frames = size;
 	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_WRITEI_FRAMES, &xferi) < 0)
 		return snd_pcm_check_error(pcm, -errno);
+	_snd_pcm_sync_ptr(pcm, SNDRV_PCM_SYNC_PTR_APPL);
 	return xferi.result;
 }
 
@@ -219,6 +234,7 @@ snd_pcm_sframes_t snd_pcm_writen(snd_pcm_t *pcm, void **bufs,
 	xfern.frames = size;
 	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_WRITEN_FRAMES, &xfern) < 0)
 		return snd_pcm_check_error(pcm, -errno);
+	_snd_pcm_sync_ptr(pcm, SNDRV_PCM_SYNC_PTR_APPL);
 	return xfern.result;
 }
 
@@ -231,6 +247,7 @@ snd_pcm_sframes_t snd_pcm_readi(snd_pcm_t *pcm, void *buffer,
 	xferi.frames = size;
 	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_READI_FRAMES, &xferi) < 0)
 		return snd_pcm_check_error(pcm, -errno);
+	_snd_pcm_sync_ptr(pcm, SNDRV_PCM_SYNC_PTR_APPL);
 	return xferi.result;
 }
 
@@ -243,6 +260,7 @@ snd_pcm_sframes_t snd_pcm_readn(snd_pcm_t *pcm, void **bufs,
 	xfern.frames = size;
 	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_READN_FRAMES, &xfern) < 0)
 		return snd_pcm_check_error(pcm, -errno);
+	_snd_pcm_sync_ptr(pcm, SNDRV_PCM_SYNC_PTR_APPL);
 	return xfern.result;
 }
 
@@ -771,35 +789,189 @@ int snd_pcm_areas_copy(const snd_pcm_channel_area_t *dst_areas,
  * MMAP
  */
 
-static inline snd_pcm_uframes_t snd_pcm_mmap_playback_avail(snd_pcm_t *pcm)
+static size_t page_align(size_t size)
 {
-#if 0
+	size_t r;
+	long psz = sysconf(_SC_PAGE_SIZE);
+	r = size % psz;
+	if (r)
+		return size + psz - r;
+	return size;
+}
+
+int _snd_pcm_mmap(snd_pcm_t *pcm)
+{
+	unsigned int c;
+
+	pcm->mmap_channels = calloc(pcm->channels, sizeof(*pcm->mmap_channels));
+	if (!pcm->mmap_channels)
+		return -ENOMEM;
+	pcm->running_areas = calloc(pcm->channels, sizeof(*pcm->running_areas));
+	if (!pcm->running_areas) {
+		free(pcm->mmap_channels);
+		pcm->mmap_channels = NULL;
+		return -ENOMEM;
+	}
+	for (c = 0; c < pcm->channels; ++c) {
+		snd_pcm_channel_info_t *i = &pcm->mmap_channels[c];
+		i->info.channel = c;
+		if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_CHANNEL_INFO, &i) < 0)
+			return -errno;
+	}
+	for (c = 0; c < pcm->channels; ++c) {
+		snd_pcm_channel_info_t *i = &pcm->mmap_channels[c];
+		snd_pcm_channel_area_t *a = &pcm->running_areas[c];
+		char *ptr;
+		size_t size;
+		unsigned int c1;
+		if (i->addr)
+			goto copy;
+                size = i->info.first + i->info.step * (pcm->buffer_size - 1) +
+			pcm->sample_bits;
+		for (c1 = c + 1; c1 < pcm->channels; ++c1) {
+			snd_pcm_channel_info_t *i1 = &pcm->mmap_channels[c1];
+			size_t s;
+			if (i1->info.offset != i->info.offset)
+				continue;
+			s = i1->info.first + i1->info.step *
+				(pcm->buffer_size - 1) + pcm->sample_bits;
+			if (s > size)
+				size = s;
+		}
+		size = (size + 7) / 8;
+		size = page_align(size);
+		ptr = mmap(NULL, size, PROT_READ|PROT_WRITE,
+			   MAP_FILE|MAP_SHARED, pcm->fd, i->info.offset);
+		if (ptr == MAP_FAILED)
+			return -errno;
+		i->addr = ptr;
+		for (c1 = c + 1; c1 < pcm->channels; ++c1) {
+			snd_pcm_channel_info_t *i1 = &pcm->mmap_channels[c1];
+			if (i1->info.offset != i->info.offset)
+				continue;
+			i1->addr = i->addr;
+		}
+	copy:
+		a->addr = i->addr;
+		a->first = i->info.first;
+		a->step = i->info.step;
+	}
+	return 0;
+}
+
+int _snd_pcm_munmap(snd_pcm_t *pcm)
+{
+	int err;
+	unsigned int c;
+
+	if (!pcm->mmap_channels)
+		return 0;
+
+	for (c = 0; c < pcm->channels; ++c) {
+		snd_pcm_channel_info_t *i = &pcm->mmap_channels[c];
+		unsigned int c1;
+		size_t size;
+		if (!i->addr)
+			continue;
+		size = i->info.first + i->info.step *
+			(pcm->buffer_size - 1) + pcm->sample_bits;
+		for (c1 = c + 1; c1 < pcm->channels; ++c1) {
+			snd_pcm_channel_info_t *i1 = &pcm->mmap_channels[c1];
+			size_t s;
+			if (i1->addr != i->addr)
+				continue;
+			i1->addr = NULL;
+			s = i1->info.first + i1->info.step *
+				(pcm->buffer_size - 1) + pcm->sample_bits;
+			if (s > size)
+				size = s;
+		}
+		size = (size + 7) / 8;
+		size = page_align(size);
+		err = munmap(i->addr, size);
+		if (err < 0)
+			return -errno;
+		i->addr = NULL;
+	}
+	free(pcm->mmap_channels);
+	free(pcm->running_areas);
+	pcm->mmap_channels = NULL;
+	pcm->running_areas = NULL;
+	return 0;
+}
+
+static int snd_pcm_hw_mmap_status(snd_pcm_t *pcm)
+{
+	if (pcm->sync_ptr)
+		return 0;
+
+	pcm->mmap_status =
+		mmap(NULL, page_align(sizeof(struct sndrv_pcm_mmap_status)),
+		     PROT_READ, MAP_FILE|MAP_SHARED, 
+		     pcm->fd, SNDRV_PCM_MMAP_OFFSET_STATUS);
+	if (pcm->mmap_status == MAP_FAILED)
+		pcm->mmap_status = NULL;
+	if (!pcm->mmap_status)
+		goto no_mmap;
+	pcm->mmap_control =
+		mmap(NULL, page_align(sizeof(struct sndrv_pcm_mmap_control)),
+		     PROT_READ|PROT_WRITE, MAP_FILE|MAP_SHARED, 
+		     pcm->fd, SNDRV_PCM_MMAP_OFFSET_CONTROL);
+	if (pcm->mmap_control == MAP_FAILED)
+		pcm->mmap_control = NULL;
+	if (!pcm->mmap_control) {
+		munmap(pcm->mmap_status, page_align(sizeof(struct sndrv_pcm_mmap_status)));
+		pcm->mmap_status = NULL;
+		goto no_mmap;
+	}
+	return 0;
+
+ no_mmap:
+	pcm->sync_ptr = calloc(1, sizeof(*pcm->sync_ptr));
+	if (!pcm->sync_ptr)
+		return -ENOMEM;
+	pcm->mmap_status = &pcm->sync_ptr->s.status;
+	pcm->mmap_control = &pcm->sync_ptr->c.control;
+	return 0;
+}
+
+static void snd_pcm_hw_munmap_status(snd_pcm_t *pcm)
+{
+	if (pcm->sync_ptr) {
+		free(pcm->sync_ptr);
+		pcm->sync_ptr = NULL;
+	} else {
+		munmap(pcm->mmap_status, page_align(sizeof(struct sndrv_pcm_mmap_status)));
+		munmap(pcm->mmap_control, page_align(sizeof(struct sndrv_pcm_mmap_control)));
+	}
+	pcm->mmap_status = NULL;
+	pcm->mmap_control = NULL;
+}
+
+#define get_hw_ptr(pcm)		((pcm)->mmap_status->hw_ptr)
+#define get_appl_ptr(pcm)	((pcm)->mmap_control->appl_ptr)
+
+static snd_pcm_uframes_t snd_pcm_mmap_playback_avail(snd_pcm_t *pcm)
+{
 	snd_pcm_sframes_t avail;
-	avail = *pcm->hw.ptr + pcm->buffer_size - *pcm->appl.ptr;
+	avail = get_hw_ptr(pcm) + pcm->buffer_size - get_appl_ptr(pcm);
 	if (avail < 0)
 		avail += pcm->boundary;
 	else if ((snd_pcm_uframes_t) avail >= pcm->boundary)
 		avail -= pcm->boundary;
 	return avail;
-#else
-	return 0;
-#endif
 }
 
-static inline snd_pcm_uframes_t snd_pcm_mmap_capture_avail(snd_pcm_t *pcm)
+static snd_pcm_uframes_t snd_pcm_mmap_capture_avail(snd_pcm_t *pcm)
 {
-#if 0
 	snd_pcm_sframes_t avail;
-	avail = *pcm->hw.ptr - *pcm->appl.ptr;
+	avail = get_hw_ptr(pcm) - get_appl_ptr(pcm);
 	if (avail < 0)
 		avail += pcm->boundary;
 	return avail;
-#else
-	return 0;
-#endif
 }
 
-static inline snd_pcm_uframes_t snd_pcm_mmap_avail(snd_pcm_t *pcm)
+static snd_pcm_uframes_t snd_pcm_mmap_avail(snd_pcm_t *pcm)
 {
 	if (pcm->stream == SND_PCM_STREAM_PLAYBACK)
 		return snd_pcm_mmap_playback_avail(pcm);
@@ -807,35 +979,12 @@ static inline snd_pcm_uframes_t snd_pcm_mmap_avail(snd_pcm_t *pcm)
 		return snd_pcm_mmap_capture_avail(pcm);
 }
 
-
-int snd_pcm_wait(snd_pcm_t *pcm, int timeout)
-{
-	struct pollfd pfd;
-	int err;
-	
-	if (snd_pcm_mmap_avail(pcm) >= pcm->sw_params.avail_min)
-		return correct_pcm_error(pcm, 1);
-
-	pfd = pcm->pollfd;
-	for (;;) {
-		err = poll(&pfd, 1, timeout);
-		if (err < 0) {
-			if (errno == EINTR)
-				continue;
-			return -errno;
-                }
-		if (!err)
-			return 0;
-		if (pfd.revents & (POLLERR | POLLNVAL))
-			return correct_pcm_error(pcm, -EIO);
-		if (pfd.revents & (POLLIN | POLLOUT))
-			return 1;
-	}
-}
-
 snd_pcm_sframes_t snd_pcm_avail_update(snd_pcm_t *pcm)
 {
-	snd_pcm_uframes_t avail = snd_pcm_mmap_avail(pcm);
+	snd_pcm_uframes_t avail;
+
+	_snd_pcm_sync_ptr(pcm, 0);
+	avail = snd_pcm_mmap_avail(pcm);
 	switch (snd_pcm_state(pcm)) {
 	case SNDRV_PCM_STATE_RUNNING:
 		if (avail >= pcm->stop_threshold) {
@@ -860,17 +1009,12 @@ int snd_pcm_mmap_begin(snd_pcm_t *pcm,
 		       snd_pcm_uframes_t *offset,
 		       snd_pcm_uframes_t *frames)
 {
-#if 0
 	snd_pcm_uframes_t cont;
 	snd_pcm_uframes_t f;
 	snd_pcm_uframes_t avail;
-	const snd_pcm_channel_area_t *xareas;
 
-	xareas = snd_pcm_mmap_areas(pcm);
-	if (xareas == NULL)
-		return -EBADFD;
-	*areas = xareas;
-	*offset = *pcm->appl.ptr % pcm->buffer_size;
+	*areas = pcm->running_areas;
+	*offset = pcm->mmap_control->appl_ptr % pcm->buffer_size;
 	avail = snd_pcm_mmap_avail(pcm);
 	if (avail > pcm->buffer_size)
 		avail = pcm->buffer_size;
@@ -881,7 +1025,6 @@ int snd_pcm_mmap_begin(snd_pcm_t *pcm,
 	if (f > cont)
 		f = cont;
 	*frames = f;
-#endif
 	return 0;
 }
 
@@ -889,12 +1032,46 @@ snd_pcm_sframes_t snd_pcm_mmap_commit(snd_pcm_t *pcm,
 				      snd_pcm_uframes_t offset,
 				      snd_pcm_uframes_t frames)
 {
-	return 0; /* XXX */
+	snd_pcm_uframes_t appl_ptr = pcm->mmap_control->appl_ptr;
+	appl_ptr += frames;
+	if (appl_ptr >= pcm->boundary)
+		appl_ptr -= pcm->boundary;
+	pcm->mmap_control->appl_ptr = appl_ptr;
+	_snd_pcm_sync_ptr(pcm, 0);
+	return frames;
 }
 
 
 /*
  */
+
+int snd_pcm_wait(snd_pcm_t *pcm, int timeout)
+{
+	struct pollfd pfd;
+	int err;
+	
+#if 0 // NEEDED?
+	_snd_pcm_sync_ptr(pcm, SNDRV_PCM_SYNC_PTR_APPL);
+	if (snd_pcm_mmap_avail(pcm) >= pcm->sw_params.avail_min)
+		return correct_pcm_error(pcm, 1);
+#endif
+
+	pfd = pcm->pollfd;
+	for (;;) {
+		err = poll(&pfd, 1, timeout);
+		if (err < 0) {
+			if (errno == EINTR)
+				continue;
+			return -errno;
+                }
+		if (!err)
+			return 0;
+		if (pfd.revents & (POLLERR | POLLNVAL))
+			return correct_pcm_error(pcm, -EIO);
+		if (pfd.revents & (POLLIN | POLLOUT))
+			return 1;
+	}
+}
 
 int snd_pcm_recover(snd_pcm_t *pcm, int err, int silent)
 {

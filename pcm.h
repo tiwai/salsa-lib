@@ -12,7 +12,7 @@ int snd_pcm_open(snd_pcm_t **pcm, const char *name,
 		 snd_pcm_stream_t stream, int mode);
 int snd_pcm_close(snd_pcm_t *pcm);
 int snd_pcm_nonblock(snd_pcm_t *pcm, int nonblock);
-#if 0
+#if 0 // ASYNC
 int snd_async_add_pcm_handler(snd_async_handler_t **handler, snd_pcm_t *pcm, 
 			      snd_async_callback_t callback,
 			      void *private_data);
@@ -51,6 +51,7 @@ int snd_pcm_mmap_begin(snd_pcm_t *pcm,
 snd_pcm_sframes_t snd_pcm_mmap_commit(snd_pcm_t *pcm,
 				      snd_pcm_uframes_t offset,
 				      snd_pcm_uframes_t frames);
+#if 0 // NYI
 snd_pcm_sframes_t snd_pcm_mmap_writei(snd_pcm_t *pcm, const void *buffer,
 				      snd_pcm_uframes_t size);
 snd_pcm_sframes_t snd_pcm_mmap_readi(snd_pcm_t *pcm, void *buffer,
@@ -58,7 +59,8 @@ snd_pcm_sframes_t snd_pcm_mmap_readi(snd_pcm_t *pcm, void *buffer,
 snd_pcm_sframes_t snd_pcm_mmap_writen(snd_pcm_t *pcm, void **bufs,
 				      snd_pcm_uframes_t size);
 snd_pcm_sframes_t snd_pcm_mmap_readn(snd_pcm_t *pcm, void **bufs,
-				     snd_pcm_uframes_t size);                                                                
+				     snd_pcm_uframes_t size);
+#endif
 
 int snd_pcm_format_signed(snd_pcm_format_t format);
 int snd_pcm_format_unsigned(snd_pcm_format_t format);
