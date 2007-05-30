@@ -1,17 +1,20 @@
-/** PCM generic info container */
-typedef struct _snd_pcm_info snd_pcm_info_t;
+#include <unistd.h>
+#include <stdint.h>
+
 /** PCM hardware configuration space container */
-typedef struct _snd_pcm_hw_params snd_pcm_hw_params_t;
+typedef struct sndrv_pcm_hw_params snd_pcm_hw_params_t;
 /** PCM software configuration container */
-typedef struct _snd_pcm_sw_params snd_pcm_sw_params_t;
+typedef struct sndrv_pcm_sw_params snd_pcm_sw_params_t;
 /** PCM status container */
- typedef struct _snd_pcm_status snd_pcm_status_t;
+ typedef struct sndrv_pcm_status snd_pcm_status_t;
 /** PCM access types mask */
-typedef struct _snd_pcm_access_mask snd_pcm_access_mask_t;
+typedef struct sndrv_mask snd_mask_t;
+/** PCM access types mask */
+typedef struct sndrv_mask snd_pcm_access_mask_t;
 /** PCM formats mask */
-typedef struct _snd_pcm_format_mask snd_pcm_format_mask_t;
+typedef struct sndrv_mask snd_pcm_format_mask_t;
 /** PCM subformats mask */
-typedef struct _snd_pcm_subformat_mask snd_pcm_subformat_mask_t;
+typedef struct sndrv_mask snd_pcm_subformat_mask_t;
 
 /** PCM class */
 typedef enum _snd_pcm_class {

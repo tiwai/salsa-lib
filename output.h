@@ -2,6 +2,7 @@
 #define __ALSA_OUTPUT_H
 
 #include <stdio.h>
+#include <errno.h>
 
 typedef FILE snd_output_t;
 
@@ -23,10 +24,11 @@ static inline
 int snd_output_stdio_attach(snd_output_t **outputp, FILE *fp, int _close)
 {
 	*outputp = fp;
+	return 0;
 }
 
 #define snd_output_close(out)			fclose(out)
-#define snd_output_printf(out, format...)	vfprintf(out, format)
+#define snd_output_printf			fprintf
 #define snd_output_puts(out, str)		fputs(str, out)
 #define snd_output_putc(out, c)			putc(c, out)
 #define snd_output_flush(out)			fflush(out)

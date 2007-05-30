@@ -4,11 +4,13 @@ struct _snd_hctl {
 	void *callback_private;
 	snd_hctl_elem_t *first_elem;
 	snd_hctl_elem_t *last_elem;
+	unsigned int count;
 };
 
 struct _snd_hctl_elem {
 	snd_ctl_elem_id_t id;
 	snd_hctl_t *hctl;
+	void *private_data;
 	snd_hctl_elem_callback_t callback;
 	void *callback_private;
 	snd_hctl_elem_t *prev;
@@ -36,6 +38,12 @@ static inline
 int snd_hctl_nonblock(snd_hctl_t *hctl, int nonblock)
 {
 	return snd_ctl_nonblock(hctl->ctl, nonblock);
+}
+
+static inline
+int snd_hctl_set_compare(snd_hctl_t *hctl, snd_hctl_compare_t compare)
+{
+	return 0;
 }
 
 static inline
@@ -135,7 +143,7 @@ void snd_hctl_elem_get_id(const snd_hctl_elem_t *obj, snd_ctl_elem_id_t *ptr)
 	*ptr = obj->id;
 }
 
-static iline
+static inline
 unsigned int snd_hctl_elem_get_numid(const snd_hctl_elem_t *obj)
 {
 	return obj->id.numid;
@@ -162,7 +170,6 @@ unsigned int snd_hctl_elem_get_subdevice(const snd_hctl_elem_t *obj)
 static inline
 const char *snd_hctl_elem_get_name(const snd_hctl_elem_t *obj)
 {
-	assert(obj);
 	return (const char *)obj->id.name;
 }
 
@@ -220,10 +227,3 @@ int snd_hctl_async(snd_hctl_t *hctl, int sig, pid_t pid)
 	return snd_ctl_async(hctl->ctl, sig, pid);
 }
 #endif
-
-static inline
-int snd_hctl_set_compare(snd_hctl_t *hctl, snd_hctl_compare_t compare)
-{
-	return 0;
-}
-

@@ -1,7 +1,39 @@
 /*
+ *  Control Interface
+ *
+ *  Copyright (c) 2007 by Takashi Iwai <tiwai@suse.de>
+ *
+ *   This library is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU Lesser General Public License as
+ *   published by the Free Software Foundation; either version 2.1 of
+ *   the License, or (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU Lesser General Public License for more details.
+ *
+ *   You should have received a copy of the GNU Lesser General Public
+ *   License along with this library; if not, write to the Free Software
+ *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+ *
  */
 
-int snd_mixer_open(snd_mixer_t **mixerp, int mode ATTRIBUTE_UNUSED)
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <unistd.h>
+#include <string.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <sys/poll.h>
+#include "mixer.h"
+#include "local.h"
+
+static int hctl_event_handler(snd_hctl_t *hctl, unsigned int mask,
+			      snd_hctl_elem_t *elem);
+
+int snd_mixer_open(snd_mixer_t **mixerp, int mode)
 {
 	snd_mixer_t *mixer;
 	mixer = calloc(1, sizeof(*mixer));
@@ -36,7 +68,6 @@ int snd_mixer_attach_hctl(snd_mixer_t *mixer, snd_hctl_t *hctl)
 	err = snd_hctl_nonblock(hctl, 1);
 	if (err < 0) {
 		snd_hctl_close(hctl);
-		free(slave);
 		return err;
 	}
 	snd_hctl_set_callback(hctl, hctl_event_handler);
@@ -47,7 +78,7 @@ int snd_mixer_attach_hctl(snd_mixer_t *mixer, snd_hctl_t *hctl)
 
 int snd_mixer_detach(snd_mixer_t *mixer, const char *name)
 {
-	return snd_mixer_detach(mixer, mixer->hctl);
+	return snd_mixer_detach_hctl(mixer, mixer->hctl);
 }
 
 int snd_mixer_detach_hctl(snd_mixer_t *mixer, snd_hctl_t *hctl)
@@ -62,7 +93,7 @@ int snd_mixer_detach_hctl(snd_mixer_t *mixer, snd_hctl_t *hctl)
 int snd_mixer_load(snd_mixer_t *mixer)
 {
 	if (mixer->hctl)
-		return snd_hctl_load(s->hctl);
+		return snd_hctl_load(mixer->hctl);
 	return 0;
 }
 
@@ -118,9 +149,10 @@ int _snd_mixer_elem_throw_event(snd_mixer_elem_t *elem, unsigned int mask)
 
 static int snd_mixer_sort(snd_mixer_t *mixer)
 {
+	int i;
 	if (mixer->compare)
 		qsort(mixer->pelems, mixer->count, sizeof(snd_mixer_elem_t *),
-		      mixer->compare);
+		      (int (*)(const void*, const void *))mixer->compare);
 	for (i = 0; i < mixer->count; i++)
 		mixer->pelems[i]->index = i;
 	return 0;
@@ -128,8 +160,6 @@ static int snd_mixer_sort(snd_mixer_t *mixer)
 
 static int add_mixer_elem(snd_mixer_elem_t *elem, snd_mixer_t *mixer)
 {
-	int dir, idx;
-
 	if (mixer->count == mixer->alloc) {
 		snd_mixer_elem_t **m;
 		int num = mixer->alloc + 32;
@@ -149,7 +179,7 @@ static int add_mixer_elem(snd_mixer_elem_t *elem, snd_mixer_t *mixer)
 static int remove_mixer_elem(snd_mixer_elem_t *elem)
 {
 	snd_mixer_t *mixer = elem->mixer;
-	int err, idx = elem->index;
+	int i, idx = elem->index;
 
 	memmove(mixer->pelems + idx,
 		mixer->pelems + idx + 1,
@@ -157,8 +187,6 @@ static int remove_mixer_elem(snd_mixer_elem_t *elem)
 	mixer->count--;
 	for (i = idx; i < mixer->count; i++)
 		mixer->pelems[i]->index = i;
-	if (elem->private_free)
-		elem->private_free(elem);
 	free(elem);
 	return 0;
 }
@@ -187,7 +215,7 @@ static int hctl_elem_event_handler(snd_hctl_elem_t *helem,
 		return 0;
 	}
 	if (mask & SND_CTL_EVENT_MASK_INFO) {
-		remove_simle_element(helem, 0);
+		remove_simple_element(helem, 0);
 		add_simple_element(helem, mixer);
 		err = snd_mixer_elem_info(elem);
 		if (err < 0)
@@ -215,7 +243,7 @@ static int hctl_event_handler(snd_hctl_t *hctl, unsigned int mask,
 		return 0;
 	if (mask & SND_CTL_EVENT_MASK_ADD) {
 		snd_hctl_elem_set_callback(elem, hctl_elem_event_handler);
-		return add_simple_element(hp, mixer);
+		return add_simple_element(elem, mixer);
 	}
 	return 0;
 }
@@ -359,13 +387,15 @@ static snd_selem_item_head_t *new_selem_enum_item(snd_ctl_elem_info_t *info,
 /*
  * create a mixer item
  */
-static snd_selem_item_head_t *new_selem_item(snd_ctl_elem_info_t *info)
+static snd_selem_item_head_t *new_selem_item(snd_hctl_elem_t *hp,
+					     snd_ctl_elem_info_t *info)
 {
-	struct snd_ctl_elem_value_t *val;
+	snd_ctl_elem_value_t *val;
+	snd_selem_item_head_t *item;
 
 	snd_ctl_elem_value_alloca(&val);
 	val->id = info->id;
-	if (snd_hctl_elem_read(hctl, val) < 0)
+	if (snd_hctl_elem_read(hp, val) < 0)
 		return NULL;
 
 	switch (snd_ctl_elem_info_get_type(info)) {
@@ -378,6 +408,8 @@ static snd_selem_item_head_t *new_selem_item(snd_ctl_elem_info_t *info)
 	case SND_CTL_ELEM_TYPE_ENUMERATED:
 		item = new_selem_enum_item(info, val);
 		break;
+	default:
+		return NULL;
 	}
 
 	if (!item)
@@ -410,8 +442,8 @@ static int check_elem_alias(char *name, int *dirp)
 	struct mixer_name_alias *p;
 
 	for (p = name_alias; p->longname; p++) {
-		if (!strcmp(name, p)) {
-			strcpy(name, p->shoftname);
+		if (!strcmp(name, p->longname)) {
+			strcpy(name, p->shortname);
 			*dirp = p->dir;
 			return 1;
 		}
@@ -442,11 +474,14 @@ static int add_simple_element(snd_hctl_elem_t *hp, snd_mixer_t *mixer)
 			
 {
 	char name[64];
-	int dir = 0, gflag = 0, type;
+	int dir = 0, gflag = 0, type, i, err;
 	unsigned int caps, index;
 	snd_ctl_elem_info_t *info;
+	snd_selem_item_head_t *item;
+	snd_mixer_elem_t *elem;
 
-	snprintf(name, sizeof(name), hp->id.name);
+	strncpy(name, (char *)hp->id.name, sizeof(name) - 1);
+	name[sizeof(name)-1] = 0;
 
 	if (check_elem_alias(name, &dir))
 		goto found;
@@ -479,22 +514,22 @@ static int add_simple_element(snd_hctl_elem_t *hp, snd_mixer_t *mixer)
 	switch (snd_ctl_elem_info_get_type(info)) {
 	case SND_CTL_ELEM_TYPE_BOOLEAN:
 		caps <<= SND_SM_CAP_SWITCH_SHIFT;
-		type = (dir ? SND_SELEM_ITEM_CSWITCH : SND_SELEM_ITEM_PSWITCH)
+		type = (dir ? SND_SELEM_ITEM_CSWITCH : SND_SELEM_ITEM_PSWITCH);
 		break;
 	case SND_CTL_ELEM_TYPE_INTEGER:
 		caps <<= SND_SM_CAP_VOLUME_SHIFT;
-		type = (dir ? SND_SELEM_ITEM_CVOLUME : SND_SELEM_ITEM_PVOLUME)
+		type = (dir ? SND_SELEM_ITEM_CVOLUME : SND_SELEM_ITEM_PVOLUME);
 		break;
 	case SND_CTL_ELEM_TYPE_ENUMERATED:
 		/* grrr, enum has no global type */
 		caps = 1 << (dir + SND_SM_CAP_ENUM_SHIFT);
 		type = SND_SELEM_ITEM_ENUM;
-		break
+		break;
 	default:
 		return 0; /* ignore this element */
 	}
 
-	item = new_selem_item(info);
+	item = new_selem_item(hp, info);
 	if (!item)
 		return -ENOMEM;
 	item->helem = hp;
@@ -521,7 +556,6 @@ static int add_simple_element(snd_hctl_elem_t *hp, snd_mixer_t *mixer)
 		free(item);
 		return -ENOMEM;
 	}
-	elem->hctl = hctl;
 	add_cap(elem, caps, type, item);
 	return add_mixer_elem(elem, mixer);
 }
@@ -574,17 +608,17 @@ static int remove_simple_element(snd_hctl_elem_t *hp, int remove_mixer)
  */
 static int update_selem_vol_item(snd_mixer_elem_t *elem,
 				 snd_selem_vol_item_t *vol,
-				 snd_ctl_elem_value_t *val)
+				 snd_ctl_elem_value_t *obj)
 {
 	int i, changed = 0;
 	
 	for (i = 0; i < vol->head.channels; i++) {
 		long val;
-		val = snd_ctl_elem_value_get_integer(val, i);
-		change |= (vol->vol[RAW_IDX(i)] != val);
+		val = snd_ctl_elem_value_get_integer(obj, i);
+		changed |= (vol->vol[RAW_IDX(i)] != val);
 		vol->vol[RAW_IDX(i)] = val;
 		val = convert_to_user(vol, val);
-		change |= (vol->vol[USR_IDX(i)] != val);
+		changed |= (vol->vol[USR_IDX(i)] != val);
 		vol->vol[USR_IDX(i)] = val;
 	}
 	return changed;
@@ -598,14 +632,14 @@ static int update_selem_sw_item(snd_mixer_elem_t *elem,
 				snd_ctl_elem_value_t *val)
 {
 	int i, changed;
-	unsigned int sw = 0;
+	unsigned int swbits = 0;
 	
 	for (i = 0; i < sw->head.channels; i++) {
 		if (snd_ctl_elem_value_get_boolean(val, i))
-			sw |= (1 << i);
+			swbits |= (1 << i);
 	}
-	changed = (sw->sw != sw);
-	sw->sw = sw;
+	changed = (sw->sw != swbits);
+	sw->sw = swbits;
 	return changed;
 }
 
@@ -621,7 +655,7 @@ static int update_selem_enum_item(snd_mixer_elem_t *elem,
 	for (i = 0; i < eitem->head.channels; i++) {
 		unsigned int item = 
 			snd_ctl_elem_value_get_enumerated(val, i);
-		change |= eitem->item[i] != item;
+		changed |= eitem->item[i] != item;
 		eitem->item[i] = item;
 	}
 	return changed;
@@ -630,15 +664,15 @@ static int update_selem_enum_item(snd_mixer_elem_t *elem,
 /*
  * update the values of the item
  */
-static int update_slem_item(snd_mixer_elem_t *elem, int type)
+static int update_selem_item(snd_mixer_elem_t *elem, int type)
 {
-	struct snd_selem_item_head_t *head;
-	struct snd_ctl_elem_value_t *val;
+	snd_selem_item_head_t *head;
+	snd_ctl_elem_value_t *val;
 
 	snd_ctl_elem_value_alloca(&val);
 	head = elem->items[type];
-	val->id.num_id = head->numid;
-	if (snd_hctl_elem_read(elem->mixer->hctl, val) < 0)
+	val->id.numid = head->numid;
+	if (snd_hctl_elem_read(head->helem, val) < 0)
 		return 0;
 
 	switch (type) {
@@ -647,7 +681,7 @@ static int update_slem_item(snd_mixer_elem_t *elem, int type)
 		return update_selem_vol_item(elem, elem->items[type], val);
 	case SND_SELEM_ITEM_PSWITCH:
 	case SND_SELEM_ITEM_CSWITCH:
-		return update_selem_sel_item(elem, elem->items[type], val);
+		return update_selem_sw_item(elem, elem->items[type], val);
 	default:
 		return update_selem_enum_item(elem, elem->items[type], val);
 	}
@@ -739,11 +773,11 @@ static int update_volume(snd_mixer_elem_t *elem,
 	str->vol[RAW_IDX(channel)] = value;
 	snd_ctl_elem_value_alloca(&ctl);
 	snd_ctl_elem_value_set_numid(ctl, str->head.numid);
-	err = snd_hctl_elem_read(elem->mixer->hctl, ctl);
+	err = snd_hctl_elem_read(str->head.helem, ctl);
 	if (err < 0)
 		return err;
 	snd_ctl_elem_value_set_integer(ctl, channel, value);
-	return snd_hctl_elem_write(elem->mixer->hctl, ctl);
+	return snd_hctl_elem_write(str->head.helem, ctl);
 }
 
 int snd_mixer_selem_set_playback_volume(snd_mixer_elem_t *elem,
@@ -760,7 +794,7 @@ static int update_volume_all(snd_mixer_elem_t *elem, int type, long value)
 
 	if (!str)
 		return -EINVAL;
-	for (i = 0; i < str->channels; i++) {
+	for (i = 0; i < str->head.channels; i++) {
 		err = update_volume(elem, type, i, value);
 		if (err < 0)
 			return err;
@@ -795,7 +829,7 @@ static int set_volume_range(snd_mixer_elem_t *elem, int type,
 		return -EINVAL;
 	str->min = min;
 	str->max = max;
-	for (i = 0; i < str->channels; i++)
+	for (i = 0; i < str->head.channels; i++)
 		str->vol[USR_IDX(i)] =
 			convert_to_user(str, str->vol[RAW_IDX(i)]);
 	return 0;
@@ -825,6 +859,7 @@ static int update_switch(snd_mixer_elem_t *elem, int type, int channel,
 {
 	snd_selem_sw_item_t *str = elem->items[type];
 	snd_ctl_elem_value_t *ctl;
+	unsigned int sw;
 	int err;
 
 	if (!str)
@@ -839,11 +874,11 @@ static int update_switch(snd_mixer_elem_t *elem, int type, int channel,
 	str->sw = sw;
 	snd_ctl_elem_value_alloca(&ctl);
 	snd_ctl_elem_value_set_numid(ctl, str->head.numid);
-	err = snd_hctl_elem_read(elem->mixer->hctl, ctl);
+	err = snd_hctl_elem_read(str->head.helem, ctl);
 	if (err < 0)
 		return err;
 	snd_ctl_elem_value_set_integer(ctl, channel, !!value);
-	return snd_hctl_elem_write(elem->mixer->hctl, ctl);
+	return snd_hctl_elem_write(str->head.helem, ctl);
 }
 
 int snd_mixer_selem_set_playback_switch(snd_mixer_elem_t *elem,
@@ -860,7 +895,7 @@ static int update_switch_all(snd_mixer_elem_t *elem, int type, int value)
 
 	if (!str)
 		return -EINVAL;
-	for (i = 0; i < str->channels; i++) {
+	for (i = 0; i < str->head.channels; i++) {
 		err = update_switch(elem, type, i, value);
 		if (err < 0)
 			return err;
@@ -909,10 +944,10 @@ int snd_mixer_selem_get_enum_item_name(snd_mixer_elem_t *elem,
 	if (!eitem)
 		return -EINVAL;
 
-	snd_ctl_elem_info_alloca(info);
+	snd_ctl_elem_info_alloca(&info);
 	snd_ctl_elem_info_set_numid(info, eitem->head.numid);
 	snd_ctl_elem_info_set_item(info, item);
-	err = snd_hctl_elem_info(elem->mixer->hctl, info);
+	err = snd_hctl_elem_info(eitem->head.helem, info);
 	if (err < 0)
 		return err;
 	strncpy(buf, snd_ctl_elem_info_get_item_name(info),
@@ -938,9 +973,9 @@ int snd_mixer_selem_set_enum_item(snd_mixer_elem_t *elem,
 	eitem->item[channel] = item;
 	snd_ctl_elem_value_alloca(&ctl);
 	snd_ctl_elem_value_set_numid(ctl, eitem->head.numid);
-	err = snd_hctl_elem_read(elem->mixer->hctl, ctl);
+	err = snd_hctl_elem_read(eitem->head.helem, ctl);
 	if (err < 0)
 		return err;
 	snd_ctl_elem_value_set_enumerated(ctl, channel, item);
-	return snd_hctl_elem_write(elem->mixer->hctl, ctl);
+	return snd_hctl_elem_write(eitem->head.helem, ctl);
 }

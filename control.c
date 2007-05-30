@@ -1,3 +1,24 @@
+/*
+ *  Control Interface
+ *
+ *  Copyright (c) 2007 by Takashi Iwai <tiwai@suse.de>
+ *
+ *   This library is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU Lesser General Public License as
+ *   published by the Free Software Foundation; either version 2.1 of
+ *   the License, or (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU Lesser General Public License for more details.
+ *
+ *   You should have received a copy of the GNU Lesser General Public
+ *   License along with this library; if not, write to the Free Software
+ *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+ *
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -6,7 +27,8 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <sys/poll.h>
-#include "control_local.h"
+#include "control.h"
+#include "local.h"
 
 int _snd_dev_get_device(const char *name, int *cardp, int *devp, int *subdevp)
 {
@@ -58,10 +80,12 @@ int snd_ctl_open(snd_ctl_t **ctlp, const char *name, int mode)
 		close(fd);
 		return err;
 	}
+#if 0
 	if (SNDRV_PROTOCOL_INCOMPATIBLE(ver, SNDRV_CTL_VERSION_MAX)) {
 		close(fd);
 		return -SND_ERROR_INCOMPATIBLE_VERSION;
 	}
+#endif
 
 	ctl = calloc(1, sizeof(*ctl));
 	if (!ctl) {
@@ -87,27 +111,26 @@ int snd_ctl_close(snd_ctl_t *ctl)
 		snd_async_del_handler(h);
 	}
 #endif
-	err = close(hw->fd) < 0 ? -errno : 0;
+	err = close(ctl->fd) < 0 ? -errno : 0;
 	free(ctl);
 	return err;
 }
 
 int snd_ctl_nonblock(snd_ctl_t *ctl, int nonblock)
 {
-	int flags = fcntl(pcm->fd, F_GETFD);
+	int flags = fcntl(ctl->fd, F_GETFD);
 
 	if (nonblock)
 		flags |= O_NONBLOCK;
 	else
 		flags &= ~O_NONBLOCK;
-	fcntl(fd, F_SETFD, flags);
+	fcntl(ctl->fd, F_SETFD, flags);
 	return 0;
 }
 
-#ifndef DOC_HIDDEN
+#if 0
 int snd_ctl_async(snd_ctl_t *ctl, int sig, pid_t pid)
 {
-	assert(ctl);
 	if (sig == 0)
 		sig = SIGIO;
 	if (pid == 0)
@@ -120,7 +143,7 @@ int snd_ctl_elem_add_integer(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
 			     unsigned int count, long min, long max, long step)
 {
 	snd_ctl_elem_info_t info;
-	snd_ctl_elem_value_t *val;
+	snd_ctl_elem_value_t val;
 	unsigned int i;
 	int err;
 
@@ -138,7 +161,7 @@ int snd_ctl_elem_add_integer(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
 	err = snd_ctl_elem_add(ctl, &info);
 	if (err < 0)
 		return err;
-	memset(&val, 0, sizeof(*val));
+	memset(&val, 0, sizeof(val));
 	val.id = *id;
 	for (i = 0; i < count; i++)
 		val.value.integer.value[i] = min;

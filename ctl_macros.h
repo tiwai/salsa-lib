@@ -1,3 +1,22 @@
+#ifndef __ALSA_CTL_MACROS_H
+#define __ALSA_CTL_MACROS_H
+
+#include <errno.h>
+#include <sys/ioctl.h>
+#include <sys/poll.h>
+#include "asound.h"
+
+struct _snd_ctl {
+	char *name;
+	snd_ctl_type_t type;
+	int nonblock;
+	int fd;
+	int card;
+	int protocol;
+	struct pollfd pollfd;
+};
+
+
 static inline
 int snd_ctl_open_lconf(snd_ctl_t **ctlp, const char *name,
 		       int mode, snd_config_t *lconf)
@@ -27,7 +46,7 @@ static inline
 int snd_ctl_poll_descriptors(snd_ctl_t *ctl, struct pollfd *pfds,
 			     unsigned int space)
 {
-	pfds->fd = ctl->pollfd;
+	*pfds = ctl->pollfd;
 	return 0;
 }
 
@@ -72,7 +91,7 @@ int snd_ctl_elem_info(snd_ctl_t *ctl, snd_ctl_elem_info_t *info)
 }
 
 static inline
-static int snd_ctl_elem_add(snd_ctl_t *handle, snd_ctl_elem_info_t *info)
+int snd_ctl_elem_add(snd_ctl_t *ctl, snd_ctl_elem_info_t *info)
 {
 	if (ioctl(ctl->fd, SNDRV_CTL_IOCTL_ELEM_ADD, info) < 0)
 		return -errno;
@@ -138,7 +157,7 @@ int snd_ctl_hwdep_info(snd_ctl_t *ctl, snd_hwdep_info_t * info)
 static inline
 int snd_ctl_pcm_next_device(snd_ctl_t *ctl, int * device)
 {
-	if (ioctl(hw->fd, SNDRV_CTL_IOCTL_PCM_INFO, info) < 0)
+	if (ioctl(ctl->fd, SNDRV_CTL_IOCTL_PCM_NEXT_DEVICE, device) < 0)
 		return -errno;
 	return 0;
 }
@@ -1110,3 +1129,4 @@ void snd_ctl_elem_value_set_iec958(snd_ctl_elem_value_t *obj,
 	memcpy(&obj->value.iec958, ptr, sizeof(obj->value.iec958));
 }
 
+#endif /* __ALSA_CTL_MACROS_H */

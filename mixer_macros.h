@@ -2,7 +2,7 @@ struct _snd_mixer {
 	snd_hctl_t *hctl;
 	int count;
 	int alloc;
-	snd_mixer_elem_t *pelems;
+	snd_mixer_elem_t **pelems;
 	snd_mixer_compare_t compare;
 	unsigned int events;
 	snd_mixer_callback_t callback;
@@ -41,7 +41,7 @@ enum {
 	SND_SELEM_ITEM_CSWITCH,
 	SND_SELEM_ITEM_ENUM,
 	SND_SELEM_ITEMS,
-}
+};
 
 /* CAPS bits */
 #define SND_SM_CAP_VOLUME_SHIFT		0
@@ -92,7 +92,7 @@ int snd_mixer_poll_descriptors_revents(snd_mixer_t *mixer, struct pollfd *pfds,
 				       unsigned int nfds,
 				       unsigned short *revents)
 {
-	return snd_hctl_poll_descriptor_revents(mixer->hctl, pfds, nfds, revents);
+	return snd_hctl_poll_descriptors_revents(mixer->hctl, pfds, nfds, revents);
 }
 
 static inline
@@ -175,7 +175,8 @@ snd_mixer_elem_type_t snd_mixer_elem_get_type(const snd_mixer_elem_t *mixer)
 static inline
 int snd_mixer_set_compare(snd_mixer_t *mixer, snd_mixer_compare_t compare)
 {
-	return mixer->compare = compare;
+	mixer->compare = compare;
+	return 0;
 }
 
 static inline
@@ -242,6 +243,8 @@ int snd_mixer_selem_has_common_switch(snd_mixer_elem_t *elem)
 {
 	return !!(elem->caps & SND_SM_CAP_GSWITCH);
 }
+
+extern const char *_snd_mixer_selem_channels[];
 
 static inline
 const char *snd_mixer_selem_channel_name(snd_mixer_selem_channel_id_t channel)
@@ -312,7 +315,7 @@ int snd_mixer_selem_has_playback_volume_joined(snd_mixer_elem_t *elem)
 static inline
 int snd_mixer_selem_has_playback_switch(snd_mixer_elem_t *elem)
 {
-	return 	return elem->items[SND_SELEM_ITEM_PSWITCH] != NULL;
+	return elem->items[SND_SELEM_ITEM_PSWITCH] != NULL;
 }
 
 static inline
@@ -340,7 +343,7 @@ int snd_mixer_selem_get_capture_volume_range(snd_mixer_elem_t *elem,
 					     long *min, long *max)
 {
 	return _snd_mixer_selem_get_volume_range(elem, SND_SELEM_ITEM_CVOLUME,
-						 min, str);
+						 min, max);
 }
 
 static inline
@@ -352,8 +355,8 @@ int snd_mixer_selem_has_capture_volume(snd_mixer_elem_t *elem)
 static inline
 int snd_mixer_selem_has_capture_volume_joined(snd_mixer_elem_t *elem)
 {
-	return snd_mixer_selem_has_joined(elem, SND_SELEM_ITEM_CVOLUME,
-					  SND_PCM_STREAM_CAPTURE);
+	return _snd_mixer_selem_has_joined(elem, SND_SELEM_ITEM_CVOLUME,
+					   SND_PCM_STREAM_CAPTURE);
 }
 
 static inline
@@ -365,8 +368,8 @@ int snd_mixer_selem_has_capture_switch(snd_mixer_elem_t *elem)
 static inline
 int snd_mixer_selem_has_capture_switch_joined(snd_mixer_elem_t *elem)
 {
-	return snd_mixer_selem_has_joined(elem, SND_SELEM_ITEM_CSWITCH,
-					  SND_PCM_STREAM_CAPTURE);
+	return _snd_mixer_selem_has_joined(elem, SND_SELEM_ITEM_CSWITCH,
+					   SND_PCM_STREAM_CAPTURE);
 }
 
 static inline
@@ -409,7 +412,7 @@ int _snd_mixer_selem_get_switch(snd_mixer_elem_t *elem, int type,
 				int *value)
 {
 	snd_selem_sw_item_t *sw;
-	vol = elem->items[type];
+	sw = elem->items[type];
 	if (!sw)
 		return -EINVAL;
 	*value = !!(sw->sw & (1 << channel));

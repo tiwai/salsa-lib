@@ -22,9 +22,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <malloc.h>
-#include <stdarg.h>
 #include <signal.h>
-#include <sys/poll.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include "pcm.h"
+#include "control.h"
 #include "local.h"
 
 static int open_with_subdev(const char *filename, int fmode,
@@ -32,14 +35,15 @@ static int open_with_subdev(const char *filename, int fmode,
 {
 	snd_pcm_info_t info;
 	char ctlfile[8];
-	int err;
+	snd_ctl_t *ctl;
+	int err, counts, fd;
 
 	sprintf(ctlfile, "hw:%d", card);
 	err = snd_ctl_open(&ctl, ctlfile, 0);
 	if (err < 0)
 		return err;
 
-	err = snd_ctl_pcm_prefer_subdevice(ctl, subdevice);
+	err = snd_ctl_pcm_prefer_subdevice(ctl, subdev);
 	if (err < 0)
 		return err;
 
@@ -65,8 +69,8 @@ int snd_pcm_open(snd_pcm_t **pcmp, const char *name,
 {
 	char filename[32];
 	int card, dev, subdev;
-	snd_ctl_t *ctl = NULL;
-	int fd = -1, err, counts = 0, fmode;
+	int fd = -1, err, fmode, ver;
+	snd_pcm_t *pcm;
 
 	err = _snd_dev_get_device(name, &card, &dev, &subdev);
 	if (err < 0)
@@ -96,10 +100,12 @@ int snd_pcm_open(snd_pcm_t **pcmp, const char *name,
 		err = -errno;
 		goto error;
 	}
+#if 0
 	if (SNDRV_PROTOCOL_INCOMPATIBLE(ver, SNDRV_PCM_VERSION_MAX)) {
 		err = -SND_ERROR_INCOMPATIBLE_VERSION;
 		goto error;
 	}
+#endif
 	if (subdev < 0) {
 		snd_pcm_info_t info;
 		memset(&info, 0, sizeof(info));
@@ -117,8 +123,8 @@ int snd_pcm_open(snd_pcm_t **pcmp, const char *name,
 	}
 
 	pcm->card = card;
-	pcm->device = device;
-	pcm->subdevice = subdevice;
+	pcm->device = dev;
+	pcm->subdevice = subdev;
 	pcm->protocol = ver;
 	pcm->fd = fd;
 	pcm->pollfd.fd = fd;
@@ -140,9 +146,9 @@ int snd_pcm_close(snd_pcm_t *pcm)
 		snd_pcm_drop(pcm);
 		snd_pcm_hw_free(pcm);
 	}
+#if 0 // ASYNC
 	if (pcm->mmap_channels)
 		snd_pcm_munmap(pcm);
-#if 0 // ASYNC
 	while (!list_empty(&pcm->async_handlers)) {
 		snd_async_handler_t *h = list_entry(pcm->async_handlers.next, snd_async_handler_t, hlist);
 		snd_async_del_handler(h);
@@ -161,7 +167,7 @@ int snd_pcm_nonblock(snd_pcm_t *pcm, int nonblock)
 		flags |= O_NONBLOCK;
 	else
 		flags &= ~O_NONBLOCK;
-	fcntl(fd, F_SETFD, flags);
+	fcntl(pcm->fd, F_SETFD, flags);
 	return 0;
 }
 
@@ -430,18 +436,18 @@ snd_pcm_format_t snd_pcm_format_value(const char* name)
 {
 	snd_pcm_format_t format;
 	for (format = 0; format <= SND_PCM_FORMAT_LAST; format++) {
-		if (snd_pcm_format_names[format] &&
-		    strcasecmp(name, snd_pcm_format_names[format]) == 0) {
+		if (_snd_pcm_format_names[format] &&
+		    strcasecmp(name, _snd_pcm_format_names[format]) == 0) {
 			return format;
 		}
-		if (snd_pcm_format_aliases[format] &&
-		    strcasecmp(name, snd_pcm_format_aliases[format]) == 0) {
+		if (_snd_pcm_format_aliases[format] &&
+		    strcasecmp(name, _snd_pcm_format_aliases[format]) == 0) {
 			return format;
 		}
 	}
 	for (format = 0; format <= SND_PCM_FORMAT_LAST; format++) {
-		if (snd_pcm_format_descriptions[format] &&
-		    strcasecmp(name, snd_pcm_format_descriptions[format]) == 0) {
+		if (_snd_pcm_format_descriptions[format] &&
+		    strcasecmp(name, _snd_pcm_format_descriptions[format]) == 0) {
 			return format;
 		}
 	}
@@ -582,6 +588,12 @@ snd_pcm_t *snd_async_handler_get_pcm(snd_async_handler_t *handler)
 #endif // ASYNC
 
 
+static inline void *snd_pcm_channel_area_addr(const snd_pcm_channel_area_t *area, snd_pcm_uframes_t offset)
+{
+	unsigned int bitofs = area->first + area->step * offset;
+	return (char *) area->addr + bitofs / 8;
+}
+
 /*
  * SILENCE AND COPY AREAS
  */
@@ -590,6 +602,7 @@ static int area_silence_4bit(const snd_pcm_channel_area_t *dst_area,
 			     unsigned int samples, snd_pcm_format_t format)
 {
 	char *dst = snd_pcm_channel_area_addr(dst_area, dst_offset);
+	int dst_step = dst_area->step / 8;
 	int dstbit = dst_area->first % 8;
 	int dstbit_step = dst_area->step % 8;
 	while (samples-- > 0) {
@@ -614,7 +627,7 @@ int snd_pcm_area_silence(const snd_pcm_channel_area_t *dst_area,
 	char *dst;
 	unsigned int dst_step;
 	int width;
-	u_int64_t silence;
+
 	if (!dst_area->addr)
 		return 0;
 	width = snd_pcm_format_physical_width(format);
@@ -638,7 +651,6 @@ int snd_pcm_areas_silence(const snd_pcm_channel_area_t *dst_areas,
 			  unsigned int channels, snd_pcm_uframes_t frames,
 			  snd_pcm_format_t format)
 {
-	int width = snd_pcm_format_physical_width(format);
 	while (channels > 0) {
 		snd_pcm_area_silence(dst_areas, dst_offset, frames, format);
 		dst_areas++;
@@ -657,6 +669,11 @@ static int area_copy_4bit(const snd_pcm_channel_area_t *dst_area,
 	int srcbit_step = src_area->step % 8;
 	int dstbit = dst_area->first % 8;
 	int dstbit_step = dst_area->step % 8;
+	const unsigned char *src = snd_pcm_channel_area_addr(src_area, src_offset);
+	unsigned char *dst = snd_pcm_channel_area_addr(dst_area, dst_offset);
+	int src_step = src_area->step / 8;
+	int dst_step = dst_area->step / 8;
+	
 	while (samples-- > 0) {
 		unsigned char srcval;
 		if (srcbit)
@@ -694,6 +711,7 @@ int snd_pcm_area_copy(const snd_pcm_channel_area_t *dst_area,
 	char *dst;
 	int width;
 	int src_step, dst_step;
+
 	if (!dst_area->addr)
 		return 0;
 	if (dst_area == src_area && dst_offset == src_offset)
@@ -701,13 +719,13 @@ int snd_pcm_area_copy(const snd_pcm_channel_area_t *dst_area,
 	if (!src_area->addr)
 		return snd_pcm_area_silence(dst_area, dst_offset, samples,
 					    format);
+	width = snd_pcm_format_physical_width(format);
 	if (width < 8)
 		return area_copy_4bit(dst_area, dst_offset,
 				      src_area, src_offset,
 				      samples, format);
 	src = snd_pcm_channel_area_addr(src_area, src_offset);
 	dst = snd_pcm_channel_area_addr(dst_area, dst_offset);
-	width = snd_pcm_format_physical_width(format);
 	if (src_area->step == (unsigned int) width &&
 	    dst_area->step == (unsigned int) width) {
 		memcpy(dst, src, samples * width / 8);
@@ -738,8 +756,8 @@ int snd_pcm_areas_copy(const snd_pcm_channel_area_t *dst_areas,
 		return -EINVAL;
 	width = snd_pcm_format_physical_width(format);
 	while (channels > 0) {
-		snd_pcm_area_copy(dst_start, dst_offset,
-				  src_start, src_offset,
+		snd_pcm_area_copy(dst_areas, dst_offset,
+				  src_areas, src_offset,
 				  frames, format);
 		src_areas++;
 		dst_areas++;
@@ -755,6 +773,7 @@ int snd_pcm_areas_copy(const snd_pcm_channel_area_t *dst_areas,
 
 static inline snd_pcm_uframes_t snd_pcm_mmap_playback_avail(snd_pcm_t *pcm)
 {
+#if 0
 	snd_pcm_sframes_t avail;
 	avail = *pcm->hw.ptr + pcm->buffer_size - *pcm->appl.ptr;
 	if (avail < 0)
@@ -762,15 +781,22 @@ static inline snd_pcm_uframes_t snd_pcm_mmap_playback_avail(snd_pcm_t *pcm)
 	else if ((snd_pcm_uframes_t) avail >= pcm->boundary)
 		avail -= pcm->boundary;
 	return avail;
+#else
+	return 0;
+#endif
 }
 
 static inline snd_pcm_uframes_t snd_pcm_mmap_capture_avail(snd_pcm_t *pcm)
 {
+#if 0
 	snd_pcm_sframes_t avail;
 	avail = *pcm->hw.ptr - *pcm->appl.ptr;
 	if (avail < 0)
 		avail += pcm->boundary;
 	return avail;
+#else
+	return 0;
+#endif
 }
 
 static inline snd_pcm_uframes_t snd_pcm_mmap_avail(snd_pcm_t *pcm)
@@ -809,11 +835,11 @@ int snd_pcm_wait(snd_pcm_t *pcm, int timeout)
 
 snd_pcm_sframes_t snd_pcm_avail_update(snd_pcm_t *pcm)
 {
-	avail = snd_pcm_mmap_avail(pcm);
-	switch (FAST_PCM_STATE(hw)) {
+	snd_pcm_uframes_t avail = snd_pcm_mmap_avail(pcm);
+	switch (snd_pcm_state(pcm)) {
 	case SNDRV_PCM_STATE_RUNNING:
 		if (avail >= pcm->stop_threshold) {
-			if (ioctl(hw->fd, SNDRV_PCM_IOCTL_XRUN) < 0)
+			if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_XRUN) < 0)
 				return -errno;
 			/* everything is ok,
 			 * state == SND_PCM_STATE_XRUN at the moment
@@ -834,11 +860,12 @@ int snd_pcm_mmap_begin(snd_pcm_t *pcm,
 		       snd_pcm_uframes_t *offset,
 		       snd_pcm_uframes_t *frames)
 {
+#if 0
 	snd_pcm_uframes_t cont;
 	snd_pcm_uframes_t f;
 	snd_pcm_uframes_t avail;
 	const snd_pcm_channel_area_t *xareas;
-	assert(pcm && areas && offset && frames);
+
 	xareas = snd_pcm_mmap_areas(pcm);
 	if (xareas == NULL)
 		return -EBADFD;
@@ -854,6 +881,7 @@ int snd_pcm_mmap_begin(snd_pcm_t *pcm,
 	if (f > cont)
 		f = cont;
 	*frames = f;
+#endif
 	return 0;
 }
 
@@ -861,7 +889,7 @@ snd_pcm_sframes_t snd_pcm_mmap_commit(snd_pcm_t *pcm,
 				      snd_pcm_uframes_t offset,
 				      snd_pcm_uframes_t frames)
 {
-	return pcm->fast_ops->mmap_commit(pcm->fast_op_arg, offset, frames);
+	return 0; /* XXX */
 }
 
 

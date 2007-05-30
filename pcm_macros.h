@@ -1,10 +1,80 @@
 /*
+ * PCM privates and macros
+ */
+
+#ifndef __ALSA_PCM_MACROS_H
+#define __ALSA_PCM_MACROS_H
+
+#include "asound.h"
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <sys/poll.h>
+
+typedef struct sndrv_interval snd_interval_t;
+typedef struct sndrv_pcm_channel_info snd_pcm_channel_info_t;
+
+struct _snd_pcm {
+	char *name;
+	snd_pcm_type_t type;
+	snd_pcm_stream_t stream;
+	int mode;
+	int setup;
+
+	int card;
+	int device;
+	int subdevice;
+	int protocol;
+
+	int fd;
+	struct pollfd pollfd;
+
+	snd_pcm_hw_params_t hw_params;
+	snd_pcm_sw_params_t sw_params;
+
+	snd_pcm_access_t access;	/* access mode */
+	snd_pcm_format_t format;	/* SND_PCM_FORMAT_* */
+	snd_pcm_subformat_t subformat;	/* subformat */
+	unsigned int channels;		/* channels */
+	unsigned int rate;		/* rate in Hz */
+	snd_pcm_uframes_t period_size;
+	unsigned int period_time;	/* period duration */
+	snd_interval_t periods;
+	unsigned int tick_time;
+	snd_pcm_tstamp_t tstamp_mode;	/* timestamp mode */
+	unsigned int period_step;
+	unsigned int sleep_min;
+	snd_pcm_uframes_t avail_min;	/* min avail frames for wakeup */
+	snd_pcm_uframes_t start_threshold;	
+	snd_pcm_uframes_t stop_threshold;	
+	snd_pcm_uframes_t silence_threshold;	/* Silence filling happens when
+					   noise is nearest than this */
+	snd_pcm_uframes_t silence_size;	/* Silence filling size */
+	snd_pcm_uframes_t xfer_align;	/* xfer size need to be a multiple */
+	snd_pcm_uframes_t boundary;	/* pointers wrap point */
+	unsigned int info;		/* Info for returned setup */
+	unsigned int msbits;		/* used most significant bits */
+	unsigned int rate_num;		/* rate numerator */
+	unsigned int rate_den;		/* rate denominator */
+	unsigned int hw_flags;		/* actual hardware flags */
+	snd_pcm_uframes_t fifo_size;	/* chip FIFO size in frames */
+	snd_pcm_uframes_t buffer_size;
+	snd_interval_t buffer_time;
+	unsigned int sample_bits;
+	unsigned int frame_bits;
+	/*snd_pcm_rbptr_t appl;
+	  snd_pcm_rbptr_t hw;*/
+	snd_pcm_uframes_t min_align;
+};
+
+/*
  * Macros
  */
 
-static inline int snd_pcm_open_lconf(snd_pcm_t **pcm, const char *name, 
-				     snd_pcm_stream_t stream, int mode,
-				     snd_config_t *lconf)
+static inline
+int snd_pcm_open_lconf(snd_pcm_t **pcm, const char *name, 
+		       snd_pcm_stream_t stream, int mode,
+		       snd_config_t *lconf)
 {
 	return -ENXIO;
 }
@@ -75,12 +145,16 @@ int snd_pcm_status(snd_pcm_t *pcm, snd_pcm_status_t *status)
 	return 0;
 }
 
+#if 0
 static inline
 snd_pcm_state_t snd_pcm_state(snd_pcm_t *pcm)
 {
 	return pcm->mmap_status ?
 		pcm->mmap_status->state : _snd_pcm_state(pcm);
 }
+#else
+extern snd_pcm_state_t snd_pcm_state(snd_pcm_t *pcm);
+#endif
 
 static inline
 int snd_pcm_hwsync(snd_pcm_t *pcm)
@@ -141,7 +215,7 @@ int snd_pcm_drop(snd_pcm_t *pcm)
 static inline
 int snd_pcm_drain(snd_pcm_t *pcm)
 {
-	if (ioctl(hw->fd, SNDRV_PCM_IOCTL_DROP) < 0)
+	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_DROP) < 0)
 		return -errno;
 	return 0;
 }
@@ -159,7 +233,7 @@ snd_pcm_sframes_t snd_pcm_rewind(snd_pcm_t *pcm, snd_pcm_uframes_t frames)
 {
 	if (frames == 0)
 		return 0;
-	if (ioctl(hw->fd, SNDRV_PCM_IOCTL_REWIND, &frames) < 0)
+	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_REWIND, &frames) < 0)
 		return -errno;
 	return frames;
 }
@@ -169,7 +243,7 @@ snd_pcm_sframes_t snd_pcm_forward(snd_pcm_t *pcm, snd_pcm_uframes_t frames)
 {
 	if (frames == 0)
 		return 0;
-	if (ioctl(hw->fd, SNDRV_PCM_IOCTL_FORWARD, &frames) < 0)
+	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_FORWARD, &frames) < 0)
 		return -errno;
 	return frames;
 }
@@ -236,13 +310,13 @@ ssize_t snd_pcm_samples_to_bytes(snd_pcm_t *pcm, long samples)
 }
 
 static inline
-int snd_pcm_hw_params_can_mmap_sample_resolution(const snd_pcm_hw_params_t *params);
+int snd_pcm_hw_params_can_mmap_sample_resolution(const snd_pcm_hw_params_t *params)
 {
 	return !!(params->info & SNDRV_PCM_INFO_MMAP_VALID);
 }
 
 static inline
-int snd_pcm_hw_params_is_double(const snd_pcm_hw_params_t *params);
+int snd_pcm_hw_params_is_double(const snd_pcm_hw_params_t *params)
 {
 	return !!(params->info & SNDRV_PCM_INFO_DOUBLE);
 }
@@ -260,7 +334,7 @@ int snd_pcm_hw_params_is_block_transfer(const snd_pcm_hw_params_t *params)
 }
 
 static inline
-int snd_pcm_hw_params_can_overrange(const snd_pcm_hw_params_t *params);
+int snd_pcm_hw_params_can_overrange(const snd_pcm_hw_params_t *params)
 {
 	return !!(params->info & SNDRV_PCM_INFO_OVERRANGE);
 }
@@ -278,7 +352,7 @@ int snd_pcm_hw_params_can_resume(const snd_pcm_hw_params_t *params)
 }
 
 static inline
-int snd_pcm_hw_params_is_half_duplex(const snd_pcm_hw_params_t *params);
+int snd_pcm_hw_params_is_half_duplex(const snd_pcm_hw_params_t *params)
 {
 	return !!(params->info & SNDRV_PCM_INFO_HALF_DUPLEX);
 }
@@ -328,6 +402,9 @@ extern int _snd_pcm_hw_param_set(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				 int type, unsigned int val, int *dir);
 extern int _snd_pcm_hw_param_test(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				  int type, unsigned int val, int *dir);
+extern snd_mask_t * _snd_pcm_hw_param_get_mask(snd_pcm_hw_params_t *params, int type);
+extern int _snd_pcm_hw_param_set_mask(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
+				      int type, snd_mask_t *mask);
 extern int _snd_pcm_hw_param_set_integer(snd_pcm_t *pcm,
 					 snd_pcm_hw_params_t *params, int type);
 extern int _snd_pcm_hw_param_get_min(const snd_pcm_hw_params_t *params,
@@ -339,8 +416,8 @@ extern int _snd_pcm_hw_param_get_max(const snd_pcm_hw_params_t *params,
 extern int _snd_pcm_hw_param_set_max(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				     int type, unsigned int *val, int *dir);
 extern int _snd_pcm_hw_param_set_minmax(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
-					int type, unsigned int *minval, int *mindir,;
-					unsigned int *minval, int *mindir);
+					int type, unsigned int *minval, int *mindir,
+					unsigned int *maxval, int *maxdir);
 extern int _snd_pcm_hw_param_set_near(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				      int type, unsigned int *val, int *dir);
 extern int _snd_pcm_hw_param_set_first(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
@@ -380,6 +457,8 @@ int _snd_mask_test(const snd_mask_t *mask, unsigned int val)
 {
 	return mask->bits[MASK_OFS(val)] & MASK_BIT(val);
 }
+
+#define SND_MASK_MAX	SNDRV_MASK_MAX
 
 static inline
 int _snd_mask_empty(const snd_mask_t *mask)
@@ -474,20 +553,20 @@ int __snd_pcm_hw_param_set_minmax64(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 	_snd_pcm_hw_param_get_min(params, type, (unsigned int *)(ptr), dir)
 #define _snd_pcm_hw_param_get_max64(params, type, ptr, dir) \
 	_snd_pcm_hw_param_get_max(params, type, (unsigned int *)(ptr), dir)
-#define _snd_pcm_hw_param_set_min64(params, type, ptr, dir)		\
-	_snd_pcm_hw_param_set_min(params, type, (unsigned int *)(ptr), dir)
-#define _snd_pcm_hw_param_set_max64(params, type, ptr, dir) \
-	_snd_pcm_hw_param_set_max(params, type, (unsigned int *)(ptr), dir)
-#define _snd_pcm_hw_param_set_minmax64(params, type, minptr, mindir, maxptr, maxdir) \
-	_snd_pcm_hw_param_set_minmax(params, type,\
+#define _snd_pcm_hw_param_set_min64(pcm, params, type, ptr, dir)	\
+	_snd_pcm_hw_param_set_min(pcm, params, type, (unsigned int *)(ptr), dir)
+#define _snd_pcm_hw_param_set_max64(pcm, params, type, ptr, dir)	\
+	_snd_pcm_hw_param_set_max(pcm, params, type, (unsigned int *)(ptr), dir)
+#define _snd_pcm_hw_param_set_minmax64(pcm, params, type, minptr, mindir, maxptr, maxdir) \
+	_snd_pcm_hw_param_set_minmax(pcm, params, type,			\
 				    (unsigned int *)(minptr), mindir,\
 				    (unsigned int *)maxptr, maxdir)
-#define _snd_pcm_hw_param_set_near64(params, type, ptr, dir)		\
-	_snd_pcm_hw_param_set_near(params, type, (unsigned int *)(ptr), dir)
-#define _snd_pcm_hw_param_set_first64(params, type, ptr, dir)		\
-	_snd_pcm_hw_param_set_first(params, type, (unsigned int *)(ptr), dir)
-#define _snd_pcm_hw_param_set_last64(params, type, ptr, dir)		\
-	_snd_pcm_hw_param_set_last(params, type, (unsigned int *)(ptr), dir)
+#define _snd_pcm_hw_param_set_near64(pcm, params, type, ptr, dir)	\
+	_snd_pcm_hw_param_set_near(pcm, params, type, (unsigned int *)(ptr), dir)
+#define _snd_pcm_hw_param_set_first64(pcm, params, type, ptr, dir)	\
+	_snd_pcm_hw_param_set_first(pcm, params, type, (unsigned int *)(ptr), dir)
+#define _snd_pcm_hw_param_set_last64(pcm, params, type, ptr, dir)	\
+	_snd_pcm_hw_param_set_last(pcm, params, type, (unsigned int *)(ptr), dir)
 #endif
 
 static inline
@@ -497,7 +576,7 @@ size_t snd_pcm_access_mask_sizeof(void)
 }
 
 static inline
-static int snd_pcm_access_mask_malloc(snd_pcm_access_mask_t **ptr)
+int snd_pcm_access_mask_malloc(snd_pcm_access_mask_t **ptr)
 {
 	*ptr = calloc(1, sizeof(snd_pcm_access_mask_t));
 	if (!*ptr)
@@ -717,7 +796,7 @@ static inline
 int snd_pcm_hw_params_get_access(const snd_pcm_hw_params_t *params,
 				 snd_pcm_access_t *access)
 {
-	return _snd_pcm_hw_param_get(params, SND_PCM_HW_PARAM_ACCESS,
+	return _snd_pcm_hw_param_get(params, SNDRV_PCM_HW_PARAM_ACCESS,
 				    (unsigned int *)access, NULL);
 }
 
@@ -725,15 +804,15 @@ static inline
 int snd_pcm_hw_params_test_access(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				  snd_pcm_access_t access)
 {
-	return _snd_pcm_hw_param_test(pcm, params, SND_PCM_HW_PARAM_ACCESS,
-				      access, 0);
+	return _snd_pcm_hw_param_test(pcm, params, SNDRV_PCM_HW_PARAM_ACCESS,
+				      access, NULL);
 }
 
 static inline
 int snd_pcm_hw_params_set_access(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				 snd_pcm_access_t access)
 {
-	return _snd_pcm_hw_param_set(pcm, params, SND_PCM_HW_PARAM_ACCESS,
+	return _snd_pcm_hw_param_set(pcm, params, SNDRV_PCM_HW_PARAM_ACCESS,
 				    access, 0);
 }
 
@@ -741,7 +820,7 @@ static inline
 int snd_pcm_hw_params_set_access_first(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				       snd_pcm_access_t *access)
 {
-	return _snd_pcm_hw_param_set_first(pcm, params, SND_PCM_HW_PARAM_ACCESS,
+	return _snd_pcm_hw_param_set_first(pcm, params, SNDRV_PCM_HW_PARAM_ACCESS,
 					  access, NULL);
 }
 
@@ -749,7 +828,7 @@ static inline
 int snd_pcm_hw_params_set_access_last(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				      snd_pcm_access_t *access)
 {
-	return _snd_pcm_hw_param_set_last(pcm, params, SND_PCM_HW_PARAM_ACCESS,
+	return _snd_pcm_hw_param_set_last(pcm, params, SNDRV_PCM_HW_PARAM_ACCESS,
 					 access, NULL);
 }
 
@@ -757,7 +836,7 @@ static inline
 int snd_pcm_hw_params_set_access_mask(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				      snd_pcm_access_mask_t *mask)
 {
-	return _snd_pcm_hw_param_set_mask(pcm, params, SND_PCM_HW_PARAM_ACCESS,
+	return _snd_pcm_hw_param_set_mask(pcm, params, SNDRV_PCM_HW_PARAM_ACCESS,
 					 (snd_mask_t *) mask);
 }
 
@@ -767,7 +846,7 @@ int snd_pcm_hw_params_get_access_mask(snd_pcm_hw_params_t *params,
 {
 	if (params == NULL || mask == NULL)
 		return -EINVAL;
-	snd_pcm_access_mask_copy(mask, _snd_pcm_hw_param_get_mask(params, SND_PCM_HW_PARAM_ACCESS));
+	snd_pcm_access_mask_copy(mask, _snd_pcm_hw_param_get_mask(params, SNDRV_PCM_HW_PARAM_ACCESS));
 	return 0;
 }
 
@@ -776,7 +855,7 @@ static inline
 int snd_pcm_hw_params_get_format(const snd_pcm_hw_params_t *params,
 				 snd_pcm_format_t *format)
 {
-	return _snd_pcm_hw_param_get(params, SND_PCM_HW_PARAM_FORMAT,
+	return _snd_pcm_hw_param_get(params, SNDRV_PCM_HW_PARAM_FORMAT,
 				    (unsigned int *)format, NULL);
 }
 
@@ -784,15 +863,15 @@ static inline
 int snd_pcm_hw_params_test_format(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				  snd_pcm_format_t format)
 {
-	return _snd_pcm_hw_param_test(pcm, params, SND_PCM_HW_PARAM_FORMAT,
-				      format, 0);
+	return _snd_pcm_hw_param_test(pcm, params, SNDRV_PCM_HW_PARAM_FORMAT,
+				      format, NULL);
 }
 
 static inline
 int snd_pcm_hw_params_set_format(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				 snd_pcm_format_t format)
 {
-	return _snd_pcm_hw_param_set(pcm, params, SND_PCM_HW_PARAM_FORMAT,
+	return _snd_pcm_hw_param_set(pcm, params, SNDRV_PCM_HW_PARAM_FORMAT,
 				    format, 0);
 }
 
@@ -800,7 +879,7 @@ static inline
 int snd_pcm_hw_params_set_format_first(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				       snd_pcm_format_t *format)
 {
-	return _snd_pcm_hw_param_set_first(pcm, params, SND_PCM_HW_PARAM_FORMAT,
+	return _snd_pcm_hw_param_set_first(pcm, params, SNDRV_PCM_HW_PARAM_FORMAT,
 					  (unsigned int *)format, NULL);
 }
 
@@ -808,7 +887,7 @@ static inline
 int snd_pcm_hw_params_set_format_last(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				      snd_pcm_format_t *format)
 {
-	return _snd_pcm_hw_param_set_last(pcm, params, SND_PCM_HW_PARAM_FORMAT,
+	return _snd_pcm_hw_param_set_last(pcm, params, SNDRV_PCM_HW_PARAM_FORMAT,
 					 (unsigned int *)format, NULL);
 }
 
@@ -816,7 +895,7 @@ static inline
 int snd_pcm_hw_params_set_format_mask(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				      snd_pcm_format_mask_t *mask)
 {
-	return _snd_pcm_hw_param_set_mask(pcm, params, SND_PCM_HW_PARAM_FORMAT,
+	return _snd_pcm_hw_param_set_mask(pcm, params, SNDRV_PCM_HW_PARAM_FORMAT,
 					 (snd_mask_t *) mask);
 }
 
@@ -824,7 +903,7 @@ static inline
 void snd_pcm_hw_params_get_format_mask(snd_pcm_hw_params_t *params,
 				       snd_pcm_format_mask_t *mask)
 {
-	snd_pcm_format_mask_copy(mask, _snd_pcm_hw_param_get_mask(params, SND_PCM_HW_PARAM_FORMAT));
+	snd_pcm_format_mask_copy(mask, _snd_pcm_hw_param_get_mask(params, SNDRV_PCM_HW_PARAM_FORMAT));
 }
 
 
@@ -832,7 +911,7 @@ static inline
 int snd_pcm_hw_params_get_subformat(const snd_pcm_hw_params_t *params,
 				    snd_pcm_subformat_t *subformat)
 {
-	return _snd_pcm_hw_param_get(params, SND_PCM_HW_PARAM_SUBFORMAT,
+	return _snd_pcm_hw_param_get(params, SNDRV_PCM_HW_PARAM_SUBFORMAT,
 				    subformat, NULL);
 }
 
@@ -840,15 +919,15 @@ static inline
 int snd_pcm_hw_params_test_subformat(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				     snd_pcm_subformat_t subformat)
 {
-	return _snd_pcm_hw_param_test(pcm, params, SND_PCM_HW_PARAM_SUBFORMAT,
-				      subformat, 0);
+	return _snd_pcm_hw_param_test(pcm, params, SNDRV_PCM_HW_PARAM_SUBFORMAT,
+				      subformat, NULL);
 }
 
 static inline
 int snd_pcm_hw_params_set_subformat(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				    snd_pcm_subformat_t subformat)
 {
-	return _snd_pcm_hw_param_set(pcm, params, SND_PCM_HW_PARAM_SUBFORMAT,
+	return _snd_pcm_hw_param_set(pcm, params, SNDRV_PCM_HW_PARAM_SUBFORMAT,
 				    subformat, 0);
 }
 
@@ -856,7 +935,7 @@ static inline
 int snd_pcm_hw_params_set_subformat_first(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					  snd_pcm_subformat_t *subformat)
 {
-	return _snd_pcm_hw_param_set_first(pcm, params, SND_PCM_HW_PARAM_SUBFORMAT,
+	return _snd_pcm_hw_param_set_first(pcm, params, SNDRV_PCM_HW_PARAM_SUBFORMAT,
 					  subformat, NULL);
 }
 
@@ -864,7 +943,7 @@ static inline
 int snd_pcm_hw_params_set_subformat_last(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					 snd_pcm_subformat_t *subformat)
 {
-	return _snd_pcm_hw_param_set_last(pcm, params, SND_PCM_HW_PARAM_SUBFORMAT,
+	return _snd_pcm_hw_param_set_last(pcm, params, SNDRV_PCM_HW_PARAM_SUBFORMAT,
 					 subformat, NULL);
 }
 
@@ -873,7 +952,7 @@ int snd_pcm_hw_params_set_subformat_mask(snd_pcm_t *pcm, snd_pcm_hw_params_t *pa
 					 snd_pcm_subformat_mask_t *mask)
 {
 	return _snd_pcm_hw_param_set_mask(pcm, params,
-					 SND_PCM_HW_PARAM_SUBFORMAT,
+					 SNDRV_PCM_HW_PARAM_SUBFORMAT,
 					 (snd_mask_t *) mask);
 }
 
@@ -881,7 +960,7 @@ static inline
 void snd_pcm_hw_params_get_subformat_mask(snd_pcm_hw_params_t *params,
 					  snd_pcm_subformat_mask_t *mask)
 {
-	snd_pcm_subformat_mask_copy(mask, _snd_pcm_hw_param_get_mask(params, SND_PCM_HW_PARAM_SUBFORMAT));
+	snd_pcm_subformat_mask_copy(mask, _snd_pcm_hw_param_get_mask(params, SNDRV_PCM_HW_PARAM_SUBFORMAT));
 }
 
 
@@ -889,21 +968,21 @@ static inline
 int snd_pcm_hw_params_get_channels(const snd_pcm_hw_params_t *params,
 				   unsigned int *val)
 {
-	return _snd_pcm_hw_param_get(params, SND_PCM_HW_PARAM_CHANNELS, val, NULL);
+	return _snd_pcm_hw_param_get(params, SNDRV_PCM_HW_PARAM_CHANNELS, val, NULL);
 }
 
 static inline
 int snd_pcm_hw_params_get_channels_min(const snd_pcm_hw_params_t *params,
 				       unsigned int *val)
 {
-	return _snd_pcm_hw_param_get_min(params, SND_PCM_HW_PARAM_CHANNELS, val, NULL);
+	return _snd_pcm_hw_param_get_min(params, SNDRV_PCM_HW_PARAM_CHANNELS, val, NULL);
 }
 
 static inline
 int snd_pcm_hw_params_get_channels_max(const snd_pcm_hw_params_t *params,
 				       unsigned int *val)
 {
-	return _snd_pcm_hw_param_get_max(params, SND_PCM_HW_PARAM_CHANNELS, val, NULL);
+	return _snd_pcm_hw_param_get_max(params, SNDRV_PCM_HW_PARAM_CHANNELS, val, NULL);
 }
 
 static inline
@@ -911,7 +990,7 @@ int snd_pcm_hw_params_test_channels(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				    unsigned int val)
 {
 	return _snd_pcm_hw_param_test(pcm, params,
-				      SND_PCM_HW_PARAM_CHANNELS, val, 0);
+				      SNDRV_PCM_HW_PARAM_CHANNELS, val, NULL);
 }
 
 static inline
@@ -919,14 +998,14 @@ int snd_pcm_hw_params_set_channels(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				   unsigned int val)
 {
 	return _snd_pcm_hw_param_set(pcm, params,
-				    SND_PCM_HW_PARAM_CHANNELS, val, 0);
+				    SNDRV_PCM_HW_PARAM_CHANNELS, val, 0);
 }
 
 static inline
 int snd_pcm_hw_params_set_channels_min(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				       unsigned int *val)
 {
-	return _snd_pcm_hw_param_set_min(pcm, params, SND_PCM_HW_PARAM_CHANNELS,
+	return _snd_pcm_hw_param_set_min(pcm, params, SNDRV_PCM_HW_PARAM_CHANNELS,
 					val, NULL);
 }
 
@@ -934,7 +1013,7 @@ static inline
 int snd_pcm_hw_params_set_channels_max(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				       unsigned int *val)
 {
-	return _snd_pcm_hw_param_set_max(pcm, params, SND_PCM_HW_PARAM_CHANNELS,
+	return _snd_pcm_hw_param_set_max(pcm, params, SNDRV_PCM_HW_PARAM_CHANNELS,
 					val, NULL);
 }
 
@@ -942,7 +1021,7 @@ static inline
 int snd_pcm_hw_params_set_channels_minmax(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					  unsigned int *min, unsigned int *max)
 {
-	return _snd_pcm_hw_param_set_minmax(pcm, params, SND_PCM_HW_PARAM_CHANNELS,
+	return _snd_pcm_hw_param_set_minmax(pcm, params, SNDRV_PCM_HW_PARAM_CHANNELS,
 					   min, NULL, max, NULL);
 }
 
@@ -950,7 +1029,7 @@ static inline
 int snd_pcm_hw_params_set_channels_near(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					unsigned int *val)
 {
-	return _snd_pcm_hw_param_set_near(pcm, params, SND_PCM_HW_PARAM_CHANNELS,
+	return _snd_pcm_hw_param_set_near(pcm, params, SNDRV_PCM_HW_PARAM_CHANNELS,
 					 val, NULL);
 }
 
@@ -958,7 +1037,7 @@ static inline
 int snd_pcm_hw_params_set_channels_first(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					 unsigned int *val)
 {
-	return _snd_pcm_hw_param_set_first(pcm, params, SND_PCM_HW_PARAM_CHANNELS,
+	return _snd_pcm_hw_param_set_first(pcm, params, SNDRV_PCM_HW_PARAM_CHANNELS,
 					  val, NULL);
 }
 
@@ -966,7 +1045,7 @@ static inline
 int snd_pcm_hw_params_set_channels_last(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					unsigned int *val)
 {
-	return _snd_pcm_hw_param_set_last(pcm, params, SND_PCM_HW_PARAM_CHANNELS,
+	return _snd_pcm_hw_param_set_last(pcm, params, SNDRV_PCM_HW_PARAM_CHANNELS,
 					 val, NULL);
 }
 
@@ -975,44 +1054,44 @@ static inline
 int snd_pcm_hw_params_get_rate(const snd_pcm_hw_params_t *params, unsigned int *val,
 			       int *dir)
 {
-	return _snd_pcm_hw_param_get(params, SND_PCM_HW_PARAM_RATE, val, dir);
+	return _snd_pcm_hw_param_get(params, SNDRV_PCM_HW_PARAM_RATE, val, dir);
 }
 
 static inline
 int snd_pcm_hw_params_get_rate_min(const snd_pcm_hw_params_t *params,
 				   unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_get_min(params, SND_PCM_HW_PARAM_RATE, val, dir);
+	return _snd_pcm_hw_param_get_min(params, SNDRV_PCM_HW_PARAM_RATE, val, dir);
 }
 
 static inline
 int snd_pcm_hw_params_get_rate_max(const snd_pcm_hw_params_t *params,
 				   unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_get_max(params, SND_PCM_HW_PARAM_RATE, val, dir);
+	return _snd_pcm_hw_param_get_max(params, SNDRV_PCM_HW_PARAM_RATE, val, dir);
 }
 
 static inline
 int snd_pcm_hw_params_test_rate(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				unsigned int val, int dir)
 {
-	return _snd_pcm_hw_param_test(pcm, params, SND_PCM_HW_PARAM_RATE,
-				      val, dir);
+	return _snd_pcm_hw_param_test(pcm, params, SNDRV_PCM_HW_PARAM_RATE,
+				      val, &dir);
 }
 
 static inline
 int snd_pcm_hw_params_set_rate(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 			       unsigned int val, int dir)
 {
-	return _snd_pcm_hw_param_set(pcm, params, SND_PCM_HW_PARAM_RATE,
-				    val, dir);
+	return _snd_pcm_hw_param_set(pcm, params, SNDRV_PCM_HW_PARAM_RATE,
+				    val, &dir);
 }
 
 static inline
 int snd_pcm_hw_params_set_rate_min(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				   unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_set_min(pcm, params, SND_PCM_HW_PARAM_RATE,
+	return _snd_pcm_hw_param_set_min(pcm, params, SNDRV_PCM_HW_PARAM_RATE,
 					val, dir);
 }
 
@@ -1020,7 +1099,7 @@ static inline
 int snd_pcm_hw_params_set_rate_max(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				   unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_set_max(pcm, params, SND_PCM_HW_PARAM_RATE,
+	return _snd_pcm_hw_param_set_max(pcm, params, SNDRV_PCM_HW_PARAM_RATE,
 					val, dir);
 }
 
@@ -1029,7 +1108,7 @@ int snd_pcm_hw_params_set_rate_minmax(snd_pcm_t *pcm, snd_pcm_hw_params_t *param
 				      unsigned int *min, int *mindir,
 				      unsigned int *max, int *maxdir)
 {
-	return _snd_pcm_hw_param_set_minmax(pcm, params, SND_PCM_HW_PARAM_RATE,
+	return _snd_pcm_hw_param_set_minmax(pcm, params, SNDRV_PCM_HW_PARAM_RATE,
 					   min, mindir, max, maxdir);
 }
 
@@ -1037,14 +1116,14 @@ static inline
 int snd_pcm_hw_params_set_rate_near(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				    unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_set_near(pcm, params, SND_PCM_HW_PARAM_RATE, val, dir);
+	return _snd_pcm_hw_param_set_near(pcm, params, SNDRV_PCM_HW_PARAM_RATE, val, dir);
 }
 
 static inline
 int snd_pcm_hw_params_set_rate_first(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				     unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_set_first(pcm, params, SND_PCM_HW_PARAM_RATE,
+	return _snd_pcm_hw_param_set_first(pcm, params, SNDRV_PCM_HW_PARAM_RATE,
 					  val, dir);
 }
 
@@ -1052,7 +1131,7 @@ static inline
 int snd_pcm_hw_params_set_rate_last(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				    unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_set_last(pcm, params, SND_PCM_HW_PARAM_RATE, val, dir);
+	return _snd_pcm_hw_param_set_last(pcm, params, SNDRV_PCM_HW_PARAM_RATE, val, dir);
 }
 
 static inline
@@ -1087,14 +1166,14 @@ static inline
 int snd_pcm_hw_params_get_period_time(const snd_pcm_hw_params_t *params,
 				      unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_get(params, SND_PCM_HW_PARAM_PERIOD_TIME, val, dir);
+	return _snd_pcm_hw_param_get(params, SNDRV_PCM_HW_PARAM_PERIOD_TIME, val, dir);
 }
 
 static inline
 int snd_pcm_hw_params_get_period_time_min(const snd_pcm_hw_params_t *params,
 					  unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_get_min(params, SND_PCM_HW_PARAM_PERIOD_TIME,
+	return _snd_pcm_hw_param_get_min(params, SNDRV_PCM_HW_PARAM_PERIOD_TIME,
 					val, dir);
 }
 
@@ -1102,7 +1181,7 @@ static inline
 int snd_pcm_hw_params_get_period_time_max(const snd_pcm_hw_params_t *params,
 					  unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_get_max(params, SND_PCM_HW_PARAM_PERIOD_TIME,
+	return _snd_pcm_hw_param_get_max(params, SNDRV_PCM_HW_PARAM_PERIOD_TIME,
 					val, dir);
 }
 
@@ -1111,7 +1190,7 @@ int snd_pcm_hw_params_test_period_time(snd_pcm_t *pcm, snd_pcm_hw_params_t *para
 				       unsigned int val, int dir)
 {
 	return _snd_pcm_hw_param_test(pcm, params,
-				      SND_PCM_HW_PARAM_PERIOD_TIME, val, dir);
+				      SNDRV_PCM_HW_PARAM_PERIOD_TIME, val, &dir);
 }
 
 static inline
@@ -1119,7 +1198,7 @@ int snd_pcm_hw_params_set_period_time(snd_pcm_t *pcm, snd_pcm_hw_params_t *param
 				      unsigned int val, int dir)
 {
 	return _snd_pcm_hw_param_set(pcm, params,
-				    SND_PCM_HW_PARAM_PERIOD_TIME, val, dir);
+				    SNDRV_PCM_HW_PARAM_PERIOD_TIME, val, &dir);
 }
 
 
@@ -1128,7 +1207,7 @@ int snd_pcm_hw_params_set_period_time_min(snd_pcm_t *pcm,
 					  snd_pcm_hw_params_t *params,
 					  unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_set_min(pcm, params, SND_PCM_HW_PARAM_PERIOD_TIME,
+	return _snd_pcm_hw_param_set_min(pcm, params, SNDRV_PCM_HW_PARAM_PERIOD_TIME,
 					val, dir);
 }
 
@@ -1137,7 +1216,7 @@ int snd_pcm_hw_params_set_period_time_max(snd_pcm_t *pcm,
 					  snd_pcm_hw_params_t *params,
 					  unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_set_max(pcm, params, SND_PCM_HW_PARAM_PERIOD_TIME,
+	return _snd_pcm_hw_param_set_max(pcm, params, SNDRV_PCM_HW_PARAM_PERIOD_TIME,
 					val, dir);
 }
 
@@ -1147,7 +1226,7 @@ int snd_pcm_hw_params_set_period_time_minmax(snd_pcm_t *pcm,
 					     unsigned int *min, int *mindir,
 					     unsigned int *max, int *maxdir)
 {
-	return _snd_pcm_hw_param_set_minmax(pcm, params, SND_PCM_HW_PARAM_PERIOD_TIME,
+	return _snd_pcm_hw_param_set_minmax(pcm, params, SNDRV_PCM_HW_PARAM_PERIOD_TIME,
 					   min, mindir, max, maxdir);
 }
 
@@ -1156,7 +1235,7 @@ int snd_pcm_hw_params_set_period_time_near(snd_pcm_t *pcm,
 					   snd_pcm_hw_params_t *params,
 					   unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_set_near(pcm, params, SND_PCM_HW_PARAM_PERIOD_TIME,
+	return _snd_pcm_hw_param_set_near(pcm, params, SNDRV_PCM_HW_PARAM_PERIOD_TIME,
 					 val, dir);
 }
 
@@ -1165,7 +1244,7 @@ int snd_pcm_hw_params_set_period_time_first(snd_pcm_t *pcm,
 					    snd_pcm_hw_params_t *params,
 					    unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_set_first(pcm, params, SND_PCM_HW_PARAM_PERIOD_TIME,
+	return _snd_pcm_hw_param_set_first(pcm, params, SNDRV_PCM_HW_PARAM_PERIOD_TIME,
 					  val, dir);
 }
 
@@ -1174,7 +1253,7 @@ int snd_pcm_hw_params_set_period_time_last(snd_pcm_t *pcm,
 					   snd_pcm_hw_params_t *params,
 					   unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_set_last(pcm, params, SND_PCM_HW_PARAM_PERIOD_TIME,
+	return _snd_pcm_hw_param_set_last(pcm, params, SNDRV_PCM_HW_PARAM_PERIOD_TIME,
 					 val, dir);
 }
 
@@ -1183,7 +1262,7 @@ static inline
 int snd_pcm_hw_params_get_period_size(const snd_pcm_hw_params_t *params,
 				      snd_pcm_uframes_t *val, int *dir)
 {
-	return _snd_pcm_hw_param_get64(params, SND_PCM_HW_PARAM_PERIOD_SIZE,
+	return _snd_pcm_hw_param_get64(params, SNDRV_PCM_HW_PARAM_PERIOD_SIZE,
 				      val, dir);
 }
 
@@ -1191,7 +1270,7 @@ static inline
 int snd_pcm_hw_params_get_period_size_min(const snd_pcm_hw_params_t *params,
 					  snd_pcm_uframes_t *val, int *dir)
 {
-	return _snd_pcm_hw_param_get_min64(params, SND_PCM_HW_PARAM_PERIOD_SIZE,
+	return _snd_pcm_hw_param_get_min64(params, SNDRV_PCM_HW_PARAM_PERIOD_SIZE,
 					  val, dir);
 }
 
@@ -1199,7 +1278,7 @@ static inline
 int snd_pcm_hw_params_get_period_size_max(const snd_pcm_hw_params_t *params,
 					  snd_pcm_uframes_t *val, int *dir)
 {
-	return _snd_pcm_hw_param_get_max64(params, SND_PCM_HW_PARAM_PERIOD_SIZE,
+	return _snd_pcm_hw_param_get_max64(params, SNDRV_PCM_HW_PARAM_PERIOD_SIZE,
 					   val, dir);
 }
 
@@ -1208,7 +1287,7 @@ int snd_pcm_hw_params_test_period_size(snd_pcm_t *pcm, snd_pcm_hw_params_t *para
 				       snd_pcm_uframes_t val, int dir)
 {
 	return _snd_pcm_hw_param_test(pcm, params,
-				      SND_PCM_HW_PARAM_PERIOD_SIZE, val, dir);
+				      SNDRV_PCM_HW_PARAM_PERIOD_SIZE, val, &dir);
 }
 
 static inline
@@ -1216,14 +1295,14 @@ int snd_pcm_hw_params_set_period_size(snd_pcm_t *pcm, snd_pcm_hw_params_t *param
 				      snd_pcm_uframes_t val, int dir)
 {
 	return _snd_pcm_hw_param_set(pcm, params,
-				    SND_PCM_HW_PARAM_PERIOD_SIZE, val, dir);
+				    SNDRV_PCM_HW_PARAM_PERIOD_SIZE, val, &dir);
 }
 
 static inline
 int snd_pcm_hw_params_set_period_size_min(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					  snd_pcm_uframes_t *val, int *dir)
 {
-	return _snd_pcm_hw_param_set_min64(pcm, params, SND_PCM_HW_PARAM_PERIOD_SIZE,
+	return _snd_pcm_hw_param_set_min64(pcm, params, SNDRV_PCM_HW_PARAM_PERIOD_SIZE,
 					  val, dir);
 }
 
@@ -1231,17 +1310,17 @@ static inline
 int snd_pcm_hw_params_set_period_size_max(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					  snd_pcm_uframes_t *val, int *dir)
 {
-	return _snd_pcm_hw_param_set_max64(pcm, params, SND_PCM_HW_PARAM_PERIOD_SIZE,
+	return _snd_pcm_hw_param_set_max64(pcm, params, SNDRV_PCM_HW_PARAM_PERIOD_SIZE,
 					val, dir);
 }
 
-static inline void
+static inline
 int snd_pcm_hw_params_set_period_size_minmax(snd_pcm_t *pcm,
 					     snd_pcm_hw_params_t *params,
 					     snd_pcm_uframes_t *min, int *mindir,
 					     snd_pcm_uframes_t *max, int *maxdir)
 {
-	return _snd_pcm_hw_param_set_minmax64(pcm, params, SND_PCM_HW_PARAM_PERIOD_SIZE,
+	return _snd_pcm_hw_param_set_minmax64(pcm, params, SNDRV_PCM_HW_PARAM_PERIOD_SIZE,
 					     min, mindir, max, maxdir);
 }
 
@@ -1250,7 +1329,7 @@ int snd_pcm_hw_params_set_period_size_near(snd_pcm_t *pcm,
 					   snd_pcm_hw_params_t *params,
 					   snd_pcm_uframes_t *val, int *dir)
 {
-	return _snd_pcm_hw_param_set_near64(pcm, params, SND_PCM_HW_PARAM_PERIOD_SIZE,
+	return _snd_pcm_hw_param_set_near64(pcm, params, SNDRV_PCM_HW_PARAM_PERIOD_SIZE,
 					   val, dir);
 }
 
@@ -1259,7 +1338,7 @@ int snd_pcm_hw_params_set_period_size_first(snd_pcm_t *pcm,
 					    snd_pcm_hw_params_t *params,
 					    snd_pcm_uframes_t *val, int *dir)
 {
-	return _snd_pcm_hw_param_set_first64(pcm, params, SND_PCM_HW_PARAM_PERIOD_SIZE,
+	return _snd_pcm_hw_param_set_first64(pcm, params, SNDRV_PCM_HW_PARAM_PERIOD_SIZE,
 					    val, dir);
 }
 
@@ -1268,7 +1347,7 @@ int snd_pcm_hw_params_set_period_size_last(snd_pcm_t *pcm,
 					   snd_pcm_hw_params_t *params,
 					   snd_pcm_uframes_t *val, int *dir)
 {
-	return _snd_pcm_hw_param_set_last64(pcm, params, SND_PCM_HW_PARAM_PERIOD_SIZE,
+	return _snd_pcm_hw_param_set_last64(pcm, params, SNDRV_PCM_HW_PARAM_PERIOD_SIZE,
 					   val, dir);
 }
 
@@ -1277,7 +1356,7 @@ int snd_pcm_hw_params_set_period_size_integer(snd_pcm_t *pcm,
 					      snd_pcm_hw_params_t *params)
 {
 	return _snd_pcm_hw_param_set_integer(pcm, params,
-					    SND_PCM_HW_PARAM_PERIOD_SIZE);
+					    SNDRV_PCM_HW_PARAM_PERIOD_SIZE);
 }
 
 
@@ -1285,21 +1364,21 @@ static inline
 int snd_pcm_hw_params_get_periods(const snd_pcm_hw_params_t *params,
 				  unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_get(params, SND_PCM_HW_PARAM_PERIODS, val, dir);
+	return _snd_pcm_hw_param_get(params, SNDRV_PCM_HW_PARAM_PERIODS, val, dir);
 }
 
 static inline
 int snd_pcm_hw_params_get_periods_min(const snd_pcm_hw_params_t *params,
 				      unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_get_min(params, SND_PCM_HW_PARAM_PERIODS, val, dir);
+	return _snd_pcm_hw_param_get_min(params, SNDRV_PCM_HW_PARAM_PERIODS, val, dir);
 }
 
 static inline
 int snd_pcm_hw_params_get_periods_max(const snd_pcm_hw_params_t *params,
 				      unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_get_max(params, SND_PCM_HW_PARAM_PERIODS, val, dir);
+	return _snd_pcm_hw_param_get_max(params, SNDRV_PCM_HW_PARAM_PERIODS, val, dir);
 }
 
 static inline
@@ -1307,7 +1386,7 @@ int snd_pcm_hw_params_test_periods(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				   unsigned int val, int dir)
 {
 	return _snd_pcm_hw_param_test(pcm, params,
-				      SND_PCM_HW_PARAM_PERIODS, val, dir);
+				      SNDRV_PCM_HW_PARAM_PERIODS, val, &dir);
 }
 
 static inline
@@ -1315,7 +1394,7 @@ int snd_pcm_hw_params_set_periods(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				  unsigned int val, int dir)
 {
 	return _snd_pcm_hw_param_set(pcm, params,
-				    SND_PCM_HW_PARAM_PERIODS, val, dir);
+				    SNDRV_PCM_HW_PARAM_PERIODS, val, &dir);
 }
 
 static inline
@@ -1323,7 +1402,7 @@ int snd_pcm_hw_params_set_periods_min(snd_pcm_t *pcm, snd_pcm_hw_params_t *param
 				      unsigned int *val, int *dir)
 {
 	return _snd_pcm_hw_param_set_min(pcm, params,
-					SND_PCM_HW_PARAM_PERIODS, val, dir);
+					SNDRV_PCM_HW_PARAM_PERIODS, val, dir);
 }
 
 static inline
@@ -1331,7 +1410,7 @@ int snd_pcm_hw_params_set_periods_max(snd_pcm_t *pcm, snd_pcm_hw_params_t *param
 				      unsigned int *val, int *dir)
 {
 	return _snd_pcm_hw_param_set_max(pcm, params,
-					SND_PCM_HW_PARAM_PERIODS, val, dir);
+					SNDRV_PCM_HW_PARAM_PERIODS, val, dir);
 }
 
 
@@ -1341,7 +1420,7 @@ int snd_pcm_hw_params_set_periods_minmax(snd_pcm_t *pcm, snd_pcm_hw_params_t *pa
 					 unsigned int *max, int *maxdir)
 {
 	return _snd_pcm_hw_param_set_minmax(pcm, params,
-					   SND_PCM_HW_PARAM_PERIODS,
+					   SNDRV_PCM_HW_PARAM_PERIODS,
 					   min, mindir, max, maxdir);
 }
 
@@ -1349,7 +1428,7 @@ static inline
 int snd_pcm_hw_params_set_periods_near(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				       unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_set_near(pcm, params, SND_PCM_HW_PARAM_PERIODS,
+	return _snd_pcm_hw_param_set_near(pcm, params, SNDRV_PCM_HW_PARAM_PERIODS,
 					 val, dir);
 }
 
@@ -1357,7 +1436,7 @@ static inline
 int snd_pcm_hw_params_set_periods_first(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_set_first(pcm, params, SND_PCM_HW_PARAM_PERIODS,
+	return _snd_pcm_hw_param_set_first(pcm, params, SNDRV_PCM_HW_PARAM_PERIODS,
 					  val, dir);
 }
 
@@ -1365,7 +1444,7 @@ static inline
 int snd_pcm_hw_params_set_periods_last(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				       unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_set_last(pcm, params, SND_PCM_HW_PARAM_PERIODS,
+	return _snd_pcm_hw_param_set_last(pcm, params, SNDRV_PCM_HW_PARAM_PERIODS,
 					 val, dir);
 }
 
@@ -1373,7 +1452,7 @@ static inline
 int snd_pcm_hw_params_set_periods_integer(snd_pcm_t *pcm, snd_pcm_hw_params_t *params)
 {
 	return _snd_pcm_hw_param_set_integer(pcm, params,
-					    SND_PCM_HW_PARAM_PERIODS);
+					    SNDRV_PCM_HW_PARAM_PERIODS);
 }
 
 
@@ -1381,14 +1460,14 @@ static inline
 int snd_pcm_hw_params_get_buffer_time(const snd_pcm_hw_params_t *params,
 				      unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_get(params, SND_PCM_HW_PARAM_BUFFER_TIME, val, dir);
+	return _snd_pcm_hw_param_get(params, SNDRV_PCM_HW_PARAM_BUFFER_TIME, val, dir);
 }
 
 static inline
 int snd_pcm_hw_params_get_buffer_time_min(const snd_pcm_hw_params_t *params,
 					  unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_get_min(params, SND_PCM_HW_PARAM_BUFFER_TIME,
+	return _snd_pcm_hw_param_get_min(params, SNDRV_PCM_HW_PARAM_BUFFER_TIME,
 					val, dir);
 }
 
@@ -1396,7 +1475,7 @@ static inline
 int snd_pcm_hw_params_get_buffer_time_max(const snd_pcm_hw_params_t *params,
 					  unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_get_max(params, SND_PCM_HW_PARAM_BUFFER_TIME,
+	return _snd_pcm_hw_param_get_max(params, SNDRV_PCM_HW_PARAM_BUFFER_TIME,
 					val, dir);
 }
 
@@ -1405,7 +1484,7 @@ int snd_pcm_hw_params_test_buffer_time(snd_pcm_t *pcm, snd_pcm_hw_params_t *para
 				       unsigned int val, int dir)
 {
 	return _snd_pcm_hw_param_test(pcm, params,
-				      SND_PCM_HW_PARAM_BUFFER_TIME, val, dir);
+				      SNDRV_PCM_HW_PARAM_BUFFER_TIME, val, &dir);
 }
 
 static inline
@@ -1413,7 +1492,7 @@ int snd_pcm_hw_params_set_buffer_time(snd_pcm_t *pcm, snd_pcm_hw_params_t *param
 				      unsigned int val, int dir)
 {
 	return _snd_pcm_hw_param_set(pcm, params,
-				    SND_PCM_HW_PARAM_BUFFER_TIME, val, dir);
+				    SNDRV_PCM_HW_PARAM_BUFFER_TIME, val, &dir);
 }
 
 static inline
@@ -1421,7 +1500,7 @@ int snd_pcm_hw_params_set_buffer_time_min(snd_pcm_t *pcm, snd_pcm_hw_params_t *p
 					  unsigned int *val, int *dir)
 {
 	return _snd_pcm_hw_param_set_min(pcm, params,
-					SND_PCM_HW_PARAM_BUFFER_TIME, val, dir);
+					SNDRV_PCM_HW_PARAM_BUFFER_TIME, val, dir);
 }
 
 static inline
@@ -1429,7 +1508,7 @@ int snd_pcm_hw_params_set_buffer_time_max(snd_pcm_t *pcm, snd_pcm_hw_params_t *p
 					  unsigned int *val, int *dir)
 {
 	return _snd_pcm_hw_param_set_max(pcm, params,
-					SND_PCM_HW_PARAM_BUFFER_TIME, val, dir);
+					SNDRV_PCM_HW_PARAM_BUFFER_TIME, val, dir);
 }
 
 static inline
@@ -1439,7 +1518,7 @@ int snd_pcm_hw_params_set_buffer_time_minmax(snd_pcm_t *pcm,
 					     unsigned int *max, int *maxdir)
 {
 	return _snd_pcm_hw_param_set_minmax(pcm, params,
-					   SND_PCM_HW_PARAM_BUFFER_TIME,
+					   SNDRV_PCM_HW_PARAM_BUFFER_TIME,
 					   min, mindir, max, maxdir);
 }
 
@@ -1448,7 +1527,7 @@ int snd_pcm_hw_params_set_buffer_time_near(snd_pcm_t *pcm,
 					   snd_pcm_hw_params_t *params,
 					   unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_set_near(pcm, params, SND_PCM_HW_PARAM_BUFFER_TIME,
+	return _snd_pcm_hw_param_set_near(pcm, params, SNDRV_PCM_HW_PARAM_BUFFER_TIME,
 					 val, dir);
 }
 
@@ -1457,7 +1536,7 @@ int snd_pcm_hw_params_set_buffer_time_first(snd_pcm_t *pcm,
 					    snd_pcm_hw_params_t *params,
 					    unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_set_first(pcm, params, SND_PCM_HW_PARAM_BUFFER_TIME,
+	return _snd_pcm_hw_param_set_first(pcm, params, SNDRV_PCM_HW_PARAM_BUFFER_TIME,
 					  val, dir);
 }
 
@@ -1466,7 +1545,7 @@ int snd_pcm_hw_params_set_buffer_time_last(snd_pcm_t *pcm,
 					   snd_pcm_hw_params_t *params,
 					   unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_set_last(pcm, params, SND_PCM_HW_PARAM_BUFFER_TIME,
+	return _snd_pcm_hw_param_set_last(pcm, params, SNDRV_PCM_HW_PARAM_BUFFER_TIME,
 					 val, dir);
 }
 
@@ -1475,7 +1554,7 @@ static inline
 int snd_pcm_hw_params_get_buffer_size(const snd_pcm_hw_params_t *params,
 				      snd_pcm_uframes_t *val)
 {
-	return _snd_pcm_hw_param_get64(params, SND_PCM_HW_PARAM_BUFFER_SIZE,
+	return _snd_pcm_hw_param_get64(params, SNDRV_PCM_HW_PARAM_BUFFER_SIZE,
 				      val, NULL);
 }
 
@@ -1483,7 +1562,7 @@ static inline
 int snd_pcm_hw_params_get_buffer_size_min(const snd_pcm_hw_params_t *params,
 					  snd_pcm_uframes_t *val)
 {
-	return _snd_pcm_hw_param_get_min64(params, SND_PCM_HW_PARAM_BUFFER_SIZE,
+	return _snd_pcm_hw_param_get_min64(params, SNDRV_PCM_HW_PARAM_BUFFER_SIZE,
 					  val, NULL);
 }
 
@@ -1491,7 +1570,7 @@ static inline
 int snd_pcm_hw_params_get_buffer_size_max(const snd_pcm_hw_params_t *params,
 					  snd_pcm_uframes_t *val)
 {
-	return _snd_pcm_hw_param_get_max64(params, SND_PCM_HW_PARAM_BUFFER_SIZE,
+	return _snd_pcm_hw_param_get_max64(params, SNDRV_PCM_HW_PARAM_BUFFER_SIZE,
 					  val, NULL);
 }
 
@@ -1500,7 +1579,7 @@ int snd_pcm_hw_params_test_buffer_size(snd_pcm_t *pcm, snd_pcm_hw_params_t *para
 				       snd_pcm_uframes_t val)
 {
 	return _snd_pcm_hw_param_test(pcm, params,
-				      SND_PCM_HW_PARAM_BUFFER_SIZE, val, 0);
+				      SNDRV_PCM_HW_PARAM_BUFFER_SIZE, val, 0);
 }
 
 static inline
@@ -1508,14 +1587,14 @@ int snd_pcm_hw_params_set_buffer_size(snd_pcm_t *pcm, snd_pcm_hw_params_t *param
 				      snd_pcm_uframes_t val)
 {
 	return _snd_pcm_hw_param_set(pcm, params,
-				    SND_PCM_HW_PARAM_BUFFER_SIZE, val, 0);
+				    SNDRV_PCM_HW_PARAM_BUFFER_SIZE, val, 0);
 }
 
 static inline
 int snd_pcm_hw_params_set_buffer_size_min(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					  snd_pcm_uframes_t *val)
 {
-	return _snd_pcm_hw_param_set_min64(pcm, params, SND_PCM_HW_PARAM_BUFFER_SIZE,
+	return _snd_pcm_hw_param_set_min64(pcm, params, SNDRV_PCM_HW_PARAM_BUFFER_SIZE,
 					  val, NULL);
 }
 
@@ -1523,7 +1602,7 @@ static inline
 int snd_pcm_hw_params_set_buffer_size_max(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					  snd_pcm_uframes_t *val)
 {
-	return _snd_pcm_hw_param_set_max64(pcm, params, SND_PCM_HW_PARAM_BUFFER_SIZE,
+	return _snd_pcm_hw_param_set_max64(pcm, params, SNDRV_PCM_HW_PARAM_BUFFER_SIZE,
 					  val, NULL);
 }
 
@@ -1534,7 +1613,7 @@ int snd_pcm_hw_params_set_buffer_size_minmax64(snd_pcm_t *pcm,
 					       snd_pcm_uframes_t *max)
 {
 	return _snd_pcm_hw_param_set_minmax64(pcm, params,
-					     SND_PCM_HW_PARAM_BUFFER_SIZE,
+					     SNDRV_PCM_HW_PARAM_BUFFER_SIZE,
 					     min, NULL, max, NULL);
 }
 
@@ -1543,7 +1622,7 @@ int snd_pcm_hw_params_set_buffer_size_near(snd_pcm_t *pcm,
 					   snd_pcm_hw_params_t *params,
 					   snd_pcm_uframes_t *val)
 {
-	return _snd_pcm_hw_param_set_near64(pcm, params, SND_PCM_HW_PARAM_BUFFER_SIZE,
+	return _snd_pcm_hw_param_set_near64(pcm, params, SNDRV_PCM_HW_PARAM_BUFFER_SIZE,
 					   val, NULL);
 }
 
@@ -1552,7 +1631,7 @@ int snd_pcm_hw_params_set_buffer_size_first(snd_pcm_t *pcm,
 					    snd_pcm_hw_params_t *params,
 					    snd_pcm_uframes_t *val)
 {
-	return _snd_pcm_hw_param_set_first64(pcm, params, SND_PCM_HW_PARAM_BUFFER_SIZE,
+	return _snd_pcm_hw_param_set_first64(pcm, params, SNDRV_PCM_HW_PARAM_BUFFER_SIZE,
 					    val, NULL);
 }
 
@@ -1561,8 +1640,8 @@ int snd_pcm_hw_params_set_buffer_size_last(snd_pcm_t *pcm,
 					   snd_pcm_hw_params_t *params,
 					   snd_pcm_uframes_t *val)
 {
-	return _snd_pcm_hw_param_set_last(pcm, params, SND_PCM_HW_PARAM_BUFFER_SIZE,
-					 val, NULL);
+	return _snd_pcm_hw_param_set_last64(pcm, params, SNDRV_PCM_HW_PARAM_BUFFER_SIZE,
+					    val, NULL);
 }
 
 
@@ -1570,44 +1649,44 @@ static inline
 int snd_pcm_hw_params_get_tick_time(const snd_pcm_hw_params_t *params,
 				    unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_get(params, SND_PCM_HW_PARAM_TICK_TIME, val, dir);
+	return _snd_pcm_hw_param_get(params, SNDRV_PCM_HW_PARAM_TICK_TIME, val, dir);
 }
 
 static inline
 int snd_pcm_hw_params_get_tick_time_min(const snd_pcm_hw_params_t *params,
 					unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_get_min(params, SND_PCM_HW_PARAM_TICK_TIME, val, dir);
+	return _snd_pcm_hw_param_get_min(params, SNDRV_PCM_HW_PARAM_TICK_TIME, val, dir);
 }
 
 static inline
 int snd_pcm_hw_params_get_tick_time_max(const snd_pcm_hw_params_t *params,
 					unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_get_max(params, SND_PCM_HW_PARAM_TICK_TIME, val, dir);
+	return _snd_pcm_hw_param_get_max(params, SNDRV_PCM_HW_PARAM_TICK_TIME, val, dir);
 }
 
 static inline
 int snd_pcm_hw_params_test_tick_time(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				     unsigned int val, int dir)
 {
-	return _snd_pcm_hw_param_test(pcm, params, SND_PCM_HW_PARAM_TICK_TIME,
-				      val, dir);
+	return _snd_pcm_hw_param_test(pcm, params, SNDRV_PCM_HW_PARAM_TICK_TIME,
+				      val, &dir);
 }
 
 static inline
 int snd_pcm_hw_params_set_tick_time(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				    unsigned int val, int dir)
 {
-	return _snd_pcm_hw_param_set(pcm, params, SND_PCM_HW_PARAM_TICK_TIME,
-				    val, dir);
+	return _snd_pcm_hw_param_set(pcm, params, SNDRV_PCM_HW_PARAM_TICK_TIME,
+				    val, &dir);
 }
 
 static inline
 int snd_pcm_hw_params_set_tick_time_min(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_set_min(pcm, params, SND_PCM_HW_PARAM_TICK_TIME,
+	return _snd_pcm_hw_param_set_min(pcm, params, SNDRV_PCM_HW_PARAM_TICK_TIME,
 					val, dir);
 }
 
@@ -1615,7 +1694,7 @@ static inline
 int snd_pcm_hw_params_set_tick_time_max(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_set_max(pcm, params, SND_PCM_HW_PARAM_TICK_TIME,
+	return _snd_pcm_hw_param_set_max(pcm, params, SNDRV_PCM_HW_PARAM_TICK_TIME,
 					val, dir);
 }
 
@@ -1625,7 +1704,7 @@ int snd_pcm_hw_params_set_tick_time_minmax(snd_pcm_t *pcm,
 					   unsigned int *min, int *mindir,
 					   unsigned int *max, int *maxdir)
 {
-	return _snd_pcm_hw_param_set_minmax(pcm, params, SND_PCM_HW_PARAM_TICK_TIME,
+	return _snd_pcm_hw_param_set_minmax(pcm, params, SNDRV_PCM_HW_PARAM_TICK_TIME,
 					   min, mindir, max, maxdir);
 }
 
@@ -1633,7 +1712,7 @@ static inline
 int snd_pcm_hw_params_set_tick_time_near(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					 unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_set_near(pcm, params, SND_PCM_HW_PARAM_TICK_TIME,
+	return _snd_pcm_hw_param_set_near(pcm, params, SNDRV_PCM_HW_PARAM_TICK_TIME,
 					 val, dir);
 }
 
@@ -1641,7 +1720,7 @@ static inline
 int snd_pcm_hw_params_set_tick_time_first(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					  unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_set_first(pcm, params, SND_PCM_HW_PARAM_TICK_TIME,
+	return _snd_pcm_hw_param_set_first(pcm, params, SNDRV_PCM_HW_PARAM_TICK_TIME,
 					  val, dir);
 }
 
@@ -1649,7 +1728,7 @@ static inline
 int snd_pcm_hw_params_set_tick_time_last(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					 unsigned int *val, int *dir)
 {
-	return _snd_pcm_hw_param_set_last(pcm, params, SND_PCM_HW_PARAM_TICK_TIME,
+	return _snd_pcm_hw_param_set_last(pcm, params, SNDRV_PCM_HW_PARAM_TICK_TIME,
 					 val, dir);
 }
 
@@ -2035,18 +2114,4 @@ void snd_pcm_info_set_stream(snd_pcm_info_t *obj, snd_pcm_stream_t val)
 	obj->stream = val;
 }
 
-#define snd_pcm_info_alloca(ptr) do { *ptr = (snd_pcm_info_t *) alloca(snd_pcm_info_sizeof()); memset(*ptr, 0, snd_pcm_info_sizeof()); } while (0)
-
-#define snd_pcm_hw_params_alloca(ptr) do { *ptr = (snd_pcm_hw_params_t *) alloca(snd_pcm_hw_params_sizeof()); memset(*ptr, 0, snd_pcm_hw_params_sizeof()); } while (0)
-
-#define snd_pcm_sw_params_alloca(ptr) do { *ptr = (snd_pcm_sw_params_t *) alloca(snd_pcm_sw_params_sizeof()); memset(*ptr, 0, snd_pcm_sw_params_sizeof()); } while (0)
-
-#define snd_pcm_access_mask_alloca(ptr) do { *ptr = (snd_pcm_access_mask_t *) alloca(snd_pcm_access_mask_sizeof()); memset(*ptr, 0, snd_pcm_access_mask_sizeof()); } while (0)
-
-#define snd_pcm_format_mask_alloca(ptr) do { *ptr = (snd_pcm_format_mask_t *) alloca(snd_pcm_format_mask_sizeof()); memset(*ptr, 0, snd_pcm_format_mask_sizeof()); } while (0)
-
-#define snd_pcm_subformat_mask_alloca(ptr) do { *ptr = (snd_pcm_subformat_mask_t *) alloca(snd_pcm_subformat_mask_sizeof()); memset(*ptr, 0, snd_pcm_subformat_mask_sizeof()); } while (0)
-
-#define snd_pcm_status_alloca(ptr) do { *ptr = (snd_pcm_status_t *) alloca(snd_pcm_status_sizeof()); memset(*ptr, 0, snd_pcm_status_sizeof()); } while (0)
-
-
+#endif /* __ALSA_PCM_MACROS_H */

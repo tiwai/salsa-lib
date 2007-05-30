@@ -1,3 +1,35 @@
+/*
+ *  Control Interface
+ *
+ *  Copyright (c) 2007 by Takashi Iwai <tiwai@suse.de>
+ *
+ *   This library is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU Lesser General Public License as
+ *   published by the Free Software Foundation; either version 2.1 of
+ *   the License, or (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU Lesser General Public License for more details.
+ *
+ *   You should have received a copy of the GNU Lesser General Public
+ *   License along with this library; if not, write to the Free Software
+ *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+ *
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <unistd.h>
+#include <string.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <sys/poll.h>
+#include "hcontrol.h"
+#include "local.h"
+
 int snd_hctl_open(snd_hctl_t **hctlp, const char *name, int mode)
 {
 	snd_ctl_t *ctl;
@@ -76,7 +108,7 @@ static void del_elem_list(snd_hctl_t *hctl, snd_hctl_elem_t *elem)
 
 static int snd_hctl_elem_add(snd_hctl_t *hctl, snd_hctl_elem_t *elem)
 {
-	if (snd_hctl_find_elem(hctl, elem))
+	if (snd_hctl_find_elem(hctl, &elem->id))
 		return -EBUSY;
 	add_elem_list(hctl, elem);
 	return snd_hctl_throw_event(hctl, SNDRV_CTL_EVENT_MASK_ADD, elem);
@@ -97,12 +129,6 @@ int snd_hctl_free(snd_hctl_t *hctl)
 	return 0;
 }
 
-static inline
-int snd_hctl_set_compare(snd_hctl_t *hctl, snd_hctl_compare_t compare)
-{
-	return 0;
-}
-
 /* placeholder */
 int snd_hctl_compare_fast(const snd_hctl_elem_t *c1,
 			  const snd_hctl_elem_t *c2)
@@ -113,11 +139,11 @@ int snd_hctl_compare_fast(const snd_hctl_elem_t *c1,
 snd_hctl_elem_t *snd_hctl_find_elem(snd_hctl_t *hctl,
 				    const snd_ctl_elem_id_t *id)
 {
-	struct snd_hctl_elem_t *elem;
+	snd_hctl_elem_t *elem;
 	for (elem = hctl->first_elem; elem; elem = elem->next) {
 		if (elem->id.iface == id->iface &&
 		    elem->id.index == id->index &&
-		    !strcmp(elem->id.name, id->name))
+		    !strcmp((char *)elem->id.name, (char *)id->name))
 			return elem;
 	}
 	return NULL;
@@ -175,11 +201,11 @@ static int snd_hctl_handle_event(snd_hctl_t *hctl, snd_ctl_event_t *event)
 		return 0;
 	}
 	if (event->data.elem.mask == SNDRV_CTL_EVENT_MASK_REMOVE) {
-		int dir;
-		res = _snd_hctl_find_elem(hctl, &event->data.elem.id);
-		if (res < 0)
+		snd_hctl_elem_t *res;
+		res = snd_hctl_find_elem(hctl, &event->data.elem.id);
+		if (!res)
 			return -ENOENT;
-		snd_hctl_elem_remove(hctl, (unsigned int) res);
+		snd_hctl_elem_remove(hctl, res);
 		return 0;
 	}
 	if (event->data.elem.mask & SNDRV_CTL_EVENT_MASK_ADD) {
