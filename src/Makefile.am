@@ -1,10 +1,17 @@
 AM_CFLAGS = -Wall -g
 
 lib_LTLIBRARIES = libasound.la
-libasound_la_SOURCES = control.c hcontrol.c mixer.c cards.c \
-	pcm.c pcm_params.c pcm_misc.c \
-	rawmidi.c \
-	hwdep.c
+libasound_la_SOURCES = control.c cards.c \
+	pcm.c pcm_params.c pcm_misc.c
+if BUILD_MIXER
+libasound_la_SOURCES += hcontrol.c mixer.c
+endif
+if BUILD_RAWMIDI
+libasound_la_SOURCES += rawmidi.c
+endif
+if BUILD_HWDEP
+libasound_la_SOURCES += hwdep.c
+endif
 libasound_la_LDFLAGS = -version-number 2:0:0
 
 alsaincludedir = $(includedir)/alsa

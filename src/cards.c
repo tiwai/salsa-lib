@@ -12,17 +12,9 @@
 
 int snd_card_load(int card)
 {
-	int open_dev;
 	char control[sizeof(SND_FILE_CONTROL) + 10];
-
 	sprintf(control, SND_FILE_CONTROL, card);
-
-	open_dev = open(control, O_RDONLY);
-	if (open_dev >= 0) {
-		close(open_dev);
-		return 1;
-	}
-	return 0;
+	return !access(control, R_OK);
 }
 
 int snd_card_next(int *rcard)
@@ -43,27 +35,6 @@ int snd_card_next(int *rcard)
 	return 0;
 }
 
-int _snd_dev_get_device(const char *name, int *cardp, int *devp, int *subdevp)
-{
-	*cardp = 0;
-	if (devp)
-		*devp = 0;
-	if (subdevp)
-		*subdevp = -1;
-	if (!strcmp(name, "hw") || !strcmp(name, "default"))
-		return 0;
-	if (sscanf(name, "default:%d", cardp) > 0)
-		return 0;
-	if (devp) {
-		if (sscanf(name, "hw:%d,%d,%d", cardp, devp, subdevp) > 0)
-			return 0;
-	} else {
-		if (sscanf(name, "hw:%d", cardp) > 0)
-			return 0;
-	}
-	return -EINVAL;
-}
-
 int _snd_ctl_hw_open(snd_ctl_t **ctlp, int card)
 {
 	char name[16];
@@ -71,10 +42,23 @@ int _snd_ctl_hw_open(snd_ctl_t **ctlp, int card)
 	return snd_ctl_open(ctlp, name, 0);
 }
 
+static int get_card_info(int card, snd_ctl_card_info_t *info)
+{
+	int err;
+	snd_ctl_t *handle;
+
+	memset(info, 0, sizeof(*info));
+	err = _snd_ctl_hw_open(&handle, card);
+	if (err < 0)
+		return err;
+	err = snd_ctl_card_info(handle, info);
+	snd_ctl_close(handle);
+	return err;
+}
+
 int snd_card_get_index(const char *string)
 {
 	int card;
-	snd_ctl_t *handle;
 	snd_ctl_card_info_t info;
 
 	if (!string || *string == '\0')
@@ -90,15 +74,10 @@ int snd_card_get_index(const char *string)
 		return -ENODEV;
 	}
 	for (card = 0; card < 32; card++) {
-		if (! snd_card_load(card))
+		if (!snd_card_load(card))
 			continue;
-		if (_snd_ctl_hw_open(&handle, card) < 0)
+		if (get_card_info(card, &info) < 0)
 			continue;
-		if (snd_ctl_card_info(handle, &info) < 0) {
-			snd_ctl_close(handle);
-			continue;
-		}
-		snd_ctl_close(handle);
 		if (!strcmp((const char *)info.id, string))
 			return card;
 	}
@@ -107,19 +86,12 @@ int snd_card_get_index(const char *string)
 
 int snd_card_get_name(int card, char **name)
 {
-	snd_ctl_t *handle;
 	snd_ctl_card_info_t info;
 	int err;
 	
-	if (name == NULL)
-		return -EINVAL;
-	if ((err = _snd_ctl_hw_open(&handle, card)) < 0)
+	err = get_card_info(card, &info);
+	if (err < 0)
 		return err;
-	if ((err = snd_ctl_card_info(handle, &info)) < 0) {
-		snd_ctl_close(handle);
-		return err;
-	}
-	snd_ctl_close(handle);
 	*name = strdup((const char *)info.name);
 	if (*name == NULL)
 		return -ENOMEM;
@@ -128,21 +100,42 @@ int snd_card_get_name(int card, char **name)
 
 int snd_card_get_longname(int card, char **name)
 {
-	snd_ctl_t *handle;
 	snd_ctl_card_info_t info;
 	int err;
 	
-	if (name == NULL)
-		return -EINVAL;
-	if ((err = _snd_ctl_hw_open(&handle, card)) < 0)
+	err = get_card_info(card, &info);
+	if (err < 0)
 		return err;
-	if ((err = snd_ctl_card_info(handle, &info)) < 0) {
-		snd_ctl_close(handle);
-		return err;
-	}
-	snd_ctl_close(handle);
 	*name = strdup((const char *)info.longname);
 	if (*name == NULL)
 		return -ENOMEM;
+	return 0;
+}
+
+int _snd_dev_get_device(const char *name, int *cardp, int *devp, int *subdevp)
+{
+	int card;
+	*cardp = 0;
+	if (devp)
+		*devp = 0;
+	if (subdevp)
+		*subdevp = -1;
+	if (!strcmp(name, "hw") || !strcmp(name, "default"))
+		return 0;
+	if (!strncmp(name, "hw:", 3))
+		name += 3;
+	else if (!strncmp(name, "default:", 8))
+		name += 8;
+	else
+		return -EINVAL;
+	card = snd_card_get_index(name);
+	if (card < 0)
+		return card;
+	*cardp = card;
+	if (devp) {
+		name = strchr(name, ',');
+		if (name)
+			sscanf(name, "%d,%d",  devp, subdevp);
+	}
 	return 0;
 }
