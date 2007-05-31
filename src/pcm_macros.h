@@ -116,7 +116,7 @@ int snd_pcm_poll_descriptors(snd_pcm_t *pcm, struct pollfd *pfds,
 			     unsigned int space)
 {
 	*pfds = pcm->pollfd;
-	return 0;
+	return 1;
 }
 
 static inline

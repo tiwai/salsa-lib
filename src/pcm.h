@@ -4,8 +4,8 @@
 #ifndef __ALSA_PCM_H_INC
 #define __ALSA_PCM_H_INC
 
+#include "global.h"
 #include "output.h"
-#include "common_types.h"
 #include "pcm_types.h"
 
 int snd_pcm_open(snd_pcm_t **pcm, const char *name, 

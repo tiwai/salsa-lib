@@ -14,6 +14,7 @@
 
 #include "asoundef.h"
 #include "version.h"
+#include "global.h"
 /* #include "input.h" */
 #include "output.h"
 #include "error.h"

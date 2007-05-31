@@ -1,7 +1,7 @@
 #ifndef __ALSA_CONTROL_H
 #define __ALSA_CONTROL_H
 
-#include "common_types.h"
+#include "global.h"
 #include "ctl_types.h"
 
 int snd_card_load(int card);

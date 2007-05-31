@@ -33,8 +33,10 @@
 int _snd_dev_get_device(const char *name, int *cardp, int *devp, int *subdevp)
 {
 	*cardp = 0;
-	*devp = 0;
-	*subdevp = -1;
+	if (devp)
+		*devp = 0;
+	if (subdevp)
+		*subdevp = -1;
 	if (!strcmp(name, "hw") || !strcmp(name, "default"))
 		return 0;
 	if (sscanf(name, "default:%d", cardp) > 0)

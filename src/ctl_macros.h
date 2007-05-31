@@ -47,7 +47,7 @@ int snd_ctl_poll_descriptors(snd_ctl_t *ctl, struct pollfd *pfds,
 			     unsigned int space)
 {
 	*pfds = ctl->pollfd;
-	return 0;
+	return 1;
 }
 
 static inline
