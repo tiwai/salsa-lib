@@ -12,17 +12,25 @@
 #include <errno.h>
 #include <stdarg.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "asoundef.h"
 #include "version.h"
 #include "global.h"
-/* #include "input.h" */
+#include "input.h"
 #include "output.h"
 #include "error.h"
-#include "pcm.h"
-/* #include <alsa/rawmidi.h> */
-/* #include <alsa/timer.h> */
-/* #include <alsa/hwdep.h> */
 #include "control.h"
+#include "pcm.h"
+#include "rawmidi.h"
+#include "timer.h"
+#include "hwdep.h"
 #include "mixer.h"
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __ASOUNDLIB_H */

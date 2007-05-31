@@ -6,7 +6,6 @@
 
 int snd_hwdep_open(snd_hwdep_t **hwdep, const char *name, int mode);
 int snd_hwdep_close(snd_hwdep_t *hwdep);
-int snd_hwdep_nonblock(snd_hwdep_t *hwdep, int nonblock);
 
 #include "hwdep_macros.h"
 

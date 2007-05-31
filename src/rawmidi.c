@@ -182,23 +182,3 @@ int snd_rawmidi_close(snd_rawmidi_t *rmidi)
 	free(rmidi);
 	return 0;
 }
-
-int snd_rawmidi_nonblock(snd_rawmidi_t *rmidi, int nonblock)
-{
-	long flags;
-
-	flags = fcntl(rmidi->fd, F_GETFL);
-	if (flags < 0)
-		return -errno;
-	if (nonblock)
-		flags |= O_NONBLOCK;
-	else
-		flags &= ~O_NONBLOCK;
-	if (fcntl(rmidi->fd, F_SETFL, flags) < 0)
-		return -errno;
-	if (nonblock)
-		rmidi->mode |= SND_RAWMIDI_NONBLOCK;
-	else
-		rmidi->mode &= ~SND_RAWMIDI_NONBLOCK;
-	return 0;
-}

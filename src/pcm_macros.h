@@ -95,6 +95,12 @@ int snd_config_update_free_global(void)
 }
 
 static inline
+int snd_pcm_nonblock(snd_pcm_t *pcm, int nonblock)
+{
+	return _snd_set_nonblock(pcm->fd, nonblock);
+}
+
+static inline
 const char *snd_pcm_name(snd_pcm_t *pcm)
 {
 	return pcm->name;
@@ -630,7 +636,7 @@ size_t snd_pcm_access_mask_sizeof(void)
 static inline
 int snd_pcm_access_mask_malloc(snd_pcm_access_mask_t **ptr)
 {
-	*ptr = calloc(1, sizeof(snd_pcm_access_mask_t));
+	*ptr = calloc(1, sizeof(*ptr));
 	if (!*ptr)
 		return -ENOMEM;
 	return 0;
@@ -694,7 +700,7 @@ size_t snd_pcm_format_mask_sizeof(void)
 static inline
 int snd_pcm_format_mask_malloc(snd_pcm_format_mask_t **ptr)
 {
-	*ptr = calloc(1, sizeof(snd_pcm_format_mask_t));
+	*ptr = calloc(1, sizeof(*ptr));
 	if (!*ptr)
 		return -ENOMEM;
 	return 0;
@@ -758,7 +764,7 @@ size_t snd_pcm_subformat_mask_sizeof(void)
 static inline
 int snd_pcm_subformat_mask_malloc(snd_pcm_subformat_mask_t **ptr)
 {
-	*ptr = calloc(1, sizeof(snd_pcm_subformat_mask_t));
+	*ptr = calloc(1, sizeof(*ptr));
 	if (!*ptr)
 		return -ENOMEM;
 	return 0;
@@ -826,7 +832,7 @@ size_t snd_pcm_hw_params_sizeof(void)
 static inline
 int snd_pcm_hw_params_malloc(snd_pcm_hw_params_t **ptr)
 {
-	*ptr = calloc(1, sizeof(snd_pcm_hw_params_t));
+	*ptr = calloc(1, sizeof(*ptr));
 	if (!*ptr)
 		return -ENOMEM;
 	return 0;
@@ -1801,7 +1807,7 @@ size_t snd_pcm_sw_params_sizeof(void)
 static inline
 int snd_pcm_sw_params_malloc(snd_pcm_sw_params_t **ptr)
 {
-	*ptr = calloc(1, sizeof(snd_pcm_sw_params_t));
+	*ptr = calloc(1, sizeof(*ptr));
 	if (!*ptr)
 		return -ENOMEM;
 	return 0;
@@ -1971,7 +1977,7 @@ size_t snd_pcm_status_sizeof(void)
 static inline
 int snd_pcm_status_malloc(snd_pcm_status_t **ptr)
 {
-	*ptr = calloc(1, sizeof(snd_pcm_status_t));
+	*ptr = calloc(1, sizeof(*ptr));
 	if (!*ptr)
 		return -ENOMEM;
 	return 0;
@@ -2056,7 +2062,7 @@ size_t snd_pcm_info_sizeof(void)
 static inline
 int snd_pcm_info_malloc(snd_pcm_info_t **ptr)
 {
-	*ptr = calloc(1, sizeof(snd_pcm_info_t));
+	*ptr = calloc(1, sizeof(*ptr));
 	if (!*ptr)
 		return -ENOMEM;
 	return 0;

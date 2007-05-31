@@ -11,7 +11,6 @@
 int snd_pcm_open(snd_pcm_t **pcm, const char *name, 
 		 snd_pcm_stream_t stream, int mode);
 int snd_pcm_close(snd_pcm_t *pcm);
-int snd_pcm_nonblock(snd_pcm_t *pcm, int nonblock);
 #if 0 // ASYNC
 int snd_async_add_pcm_handler(snd_async_handler_t **handler, snd_pcm_t *pcm, 
 			      snd_async_callback_t callback,

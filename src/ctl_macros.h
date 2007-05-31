@@ -27,6 +27,12 @@ int snd_ctl_open_lconf(snd_ctl_t **ctlp, const char *name,
 }
 
 static inline
+int snd_ctl_nonblock(snd_ctl_t *ctl, int nonblock)
+{
+	return _snd_set_nonblock(ctl->fd, nonblock);
+}
+
+static inline
 const char *snd_ctl_name(snd_ctl_t *ctl)
 {
 	return ctl->name;

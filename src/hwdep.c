@@ -86,22 +86,3 @@ int snd_hwdep_close(snd_hwdep_t *hwdep)
 	free(hwdep);
 	return 0;
 }
-
-int snd_hwdep_nonblock(snd_hwdep_t *hwdep, int nonblock)
-{
-	long flags;
-	flags = fcntl(hwdep->fd, F_GETFL);
-	if (flags < 0)
-		return -errno;
-	if (nonblock)
-		flags |= O_NONBLOCK;
-	else
-		flags &= ~O_NONBLOCK;
-	if (fcntl(hwdep->fd, F_SETFL, flags) < 0)
-		return -errno;
-	if (nonblock)
-		hwdep->mode |= SND_HWDEP_OPEN_NONBLOCK;
-	else
-		hwdep->mode &= ~SND_HWDEP_OPEN_NONBLOCK;
-	return 0;
-}

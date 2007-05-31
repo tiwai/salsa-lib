@@ -174,19 +174,6 @@ int snd_pcm_close(snd_pcm_t *pcm)
 	return 0;
 }	
 
-int snd_pcm_nonblock(snd_pcm_t *pcm, int nonblock)
-{
-	int flags = fcntl(pcm->fd, F_GETFD);
-
-	if (nonblock)
-		flags |= O_NONBLOCK;
-	else
-		flags &= ~O_NONBLOCK;
-	fcntl(pcm->fd, F_SETFD, flags);
-	return 0;
-}
-
-
 
 /*
  * READ/WRITE

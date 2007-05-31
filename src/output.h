@@ -17,7 +17,6 @@ int snd_output_stdio_open(snd_output_t **outputp, const char *file, const char *
 	if ((*outputp = fopen(file, mode)) == NULL)
 		return -errno;
 	return 0;
-
 }
 
 static inline

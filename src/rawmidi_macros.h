@@ -28,11 +28,20 @@ struct _snd_rawmidi {
 	snd_rawmidi_hw_t *hw;
 };
 
+/*
+ */
+
 static inline
 int snd_rawmidi_open_lconf(snd_rawmidi_t **in_rmidi, snd_rawmidi_t **out_rmidi,
 			   const char *name, int mode, snd_config_t *lconf)
 {
 	return -ENODEV;
+}
+
+static inline
+int snd_rawmidi_nonblock(snd_rawmidi_t *rmidi, int nonblock)
+{
+	return _snd_set_nonblock(rmidi->fd, nonblock);
 }
 
 static inline

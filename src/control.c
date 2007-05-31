@@ -98,18 +98,6 @@ int snd_ctl_close(snd_ctl_t *ctl)
 	return 0;
 }
 
-int snd_ctl_nonblock(snd_ctl_t *ctl, int nonblock)
-{
-	int flags = fcntl(ctl->fd, F_GETFD);
-
-	if (nonblock)
-		flags |= O_NONBLOCK;
-	else
-		flags &= ~O_NONBLOCK;
-	fcntl(ctl->fd, F_SETFD, flags);
-	return 0;
-}
-
 #if 0 // ASYNC
 int snd_ctl_async(snd_ctl_t *ctl, int sig, pid_t pid)
 {

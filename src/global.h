@@ -22,4 +22,6 @@ typedef struct _snd_hwdep snd_hwdep_t;
 #define ATTRIBUTE_UNUSED __attribute__ ((__unused__))
 #endif
 
+int _snd_set_nonblock(int fd, int nonblock);
+
 #endif /* __ALSA_GLOBAL_H */

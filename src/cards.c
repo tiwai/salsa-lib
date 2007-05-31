@@ -8,6 +8,21 @@
 #include "control.h"
 #include "local.h"
 
+int _snd_set_nonblock(int fd, int nonblock)
+{
+	long flags;
+	flags = fcntl(fd, F_GETFL);
+	if (flags < 0)
+		return -errno;
+	if (nonblock)
+		flags |= O_NONBLOCK;
+	else
+		flags &= ~O_NONBLOCK;
+	if (fcntl(fd, F_SETFL, flags) < 0)
+		return -errno;
+	return 0;
+}
+
 #define SND_FILE_CONTROL	DEVPATH "/controlC%i"
 
 int snd_card_load(int card)

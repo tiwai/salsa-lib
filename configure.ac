@@ -23,10 +23,15 @@ AC_ARG_ENABLE(hwdep,
   AS_HELP_STRING([--disable-hwdep],
 		 [disable hwdep interface]),
   hwdep="$enableval", hwdep="yes")
+AC_ARG_ENABLE(timer,
+  AS_HELP_STRING([--disable-timer],
+		 [disable timer interface]),
+  timer="$enableval", timer="yes")
 
 AM_CONDITIONAL(BUILD_MIXER, test "$mixer" = "yes")
 AM_CONDITIONAL(BUILD_RAWMIDI, test "$rawmidi" = "yes")
 AM_CONDITIONAL(BUILD_HWDEP, test "$hwdep" = "yes")
+AM_CONDITIONAL(BUILD_TIMER, test "$timer" = "yes")
 
 AC_OUTPUT([
 	Makefile

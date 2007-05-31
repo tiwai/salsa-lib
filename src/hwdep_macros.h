@@ -22,6 +22,12 @@ struct _snd_hwdep {
 
 
 static inline
+int snd_hwdep_nonblock(snd_hwdep_t *hwdep, int nonblock)
+{
+	return _snd_set_nonblock(hwdep->fd, nonblock);
+}
+
+static inline
 int snd_hwdep_poll_descriptors_count(snd_rawmidi_t *rmidi)
 {
 	return 1;
