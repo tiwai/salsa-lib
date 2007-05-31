@@ -23,11 +23,24 @@ alsaincludedir = $(includedir)/alsa
 alsainclude_HEADERS = asoundlib.h version.h asound.h asoundef.h \
 	global.h input.h output.h error.h \
 	control.h ctl_types.h ctl_macros.h \
-	hcontrol.h hctl_types.h hctl_macros.h \
-	mixer.h mixer_types.h mixer_macros.h \
-	pcm.h pcm_types.h pcm_macros.h \
-	rawmidi.h rawmidi_types.h rawmidi_macros.h \
-	hwdep.h hwdep_types.h hwdep_macros.h \
-	timer.h timer_types.h timer_macros.h
+	pcm.h pcm_types.h pcm_macros.h
 
-noinst_HEADERS = local.h
+if BUILD_MIXER
+alsainclude_HEADERS += \
+	hcontrol.h hctl_types.h hctl_macros.h \
+	mixer.h mixer_types.h mixer_macros.h
+endif
+if BUILD_RAWMIDI
+alsainclude_HEADERS += \
+	rawmidi.h rawmidi_types.h rawmidi_macros.h
+endif
+if BUILD_HWDEP
+alsainclude_HEADERS += \
+	hwdep.h hwdep_types.h hwdep_macros.h
+endif
+if BUILD_TIMER
+alsainclude_HEADERS += \
+	timer.h timer_types.h timer_macros.h
+endif
+
+noinst_HEADERS = local.h asoundlib-head.h asoundlib-tail.h

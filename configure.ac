@@ -33,6 +33,14 @@ AM_CONDITIONAL(BUILD_RAWMIDI, test "$rawmidi" = "yes")
 AM_CONDITIONAL(BUILD_HWDEP, test "$hwdep" = "yes")
 AM_CONDITIONAL(BUILD_TIMER, test "$timer" = "yes")
 
+echo "Creating asoundlib.h..."
+cp "$srcdir"/src/asoundlib-head.h src/asoundlib.h
+test "$mixer" = "yes" && echo "#include \"mixer.h\"" >> src/asoundlib.h
+test "$rawmidi" = "yes" && echo "#include \"rawmidi.h\"" >> src/asoundlib.h
+test "$hwdep" = "yes" && echo "#include \"hwdep.h\"" >> src/asoundlib.h
+test "$timer" = "yes" && echo "#include \"timer.h\"" >> src/asoundlib.h
+cat "$srcdir"/src/asoundlib-tail.h >> src/asoundlib.h
+
 AC_OUTPUT([
 	Makefile
 	alsa.pc

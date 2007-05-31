@@ -24,13 +24,3 @@ extern "C" {
 #include "error.h"
 #include "control.h"
 #include "pcm.h"
-#include "rawmidi.h"
-#include "timer.h"
-#include "hwdep.h"
-#include "mixer.h"
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* __ASOUNDLIB_H */
