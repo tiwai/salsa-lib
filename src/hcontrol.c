@@ -117,8 +117,8 @@ static int snd_hctl_elem_add(snd_hctl_t *hctl, snd_hctl_elem_t *elem)
 static void snd_hctl_elem_remove(snd_hctl_t *hctl,
 				 snd_hctl_elem_t *elem)
 {
-	snd_hctl_elem_throw_event(elem, SNDRV_CTL_EVENT_MASK_REMOVE);
 	del_elem_list(hctl, elem);
+	snd_hctl_elem_throw_event(elem, SNDRV_CTL_EVENT_MASK_REMOVE);
 	free(elem);
 }
 

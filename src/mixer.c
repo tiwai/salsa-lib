@@ -337,7 +337,7 @@ static snd_selem_item_head_t *new_selem_vol_item(snd_ctl_elem_info_t *info,
 		return NULL;
 	vol->raw_min = info->value.integer.min;
 	vol->min = vol->raw_min;
-	vol->max = info->value.integer.max;
+	vol->raw_max = info->value.integer.max;
 	vol->max = vol->raw_max;
 	/* set initial values */
 	for (i = 0; i < info->count; i++)
@@ -942,6 +942,8 @@ int snd_mixer_selem_get_enum_item_name(snd_mixer_elem_t *elem,
 
 	eitem = elem->items[SND_SELEM_ITEM_ENUM];
 	if (!eitem)
+		return -EINVAL;
+	if (item >= eitem->items)
 		return -EINVAL;
 
 	snd_ctl_elem_info_alloca(&info);
