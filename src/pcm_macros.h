@@ -8,6 +8,7 @@
 #include "asound.h"
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <sys/ioctl.h>
 #include <sys/poll.h>
 

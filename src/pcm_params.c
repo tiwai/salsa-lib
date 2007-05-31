@@ -950,9 +950,6 @@ static int snd_pcm_hw_params_choose(snd_pcm_t *pcm, snd_pcm_hw_params_t *params)
 	return 0;
 }
 
-extern int _snd_pcm_mmap(snd_pcm_t *pcm);
-extern int _snd_pcm_munmap(snd_pcm_t *pcm);
-
 static int _snd_pcm_hw_params(snd_pcm_t *pcm, snd_pcm_hw_params_t *params)
 {
 	int err;

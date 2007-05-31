@@ -1,3 +1,17 @@
+/*
+ * h-control privates and macros
+ */
+
+#ifndef __ALSA_HCTL_MACROS_H
+#define __ALSA_HCTL_MACROS_H
+
+#include "asound.h"
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include <sys/ioctl.h>
+#include <sys/poll.h>
+
 struct _snd_hctl {
 	snd_ctl_t *ctl;
 	snd_hctl_callback_t callback;
@@ -227,3 +241,5 @@ int snd_hctl_async(snd_hctl_t *hctl, int sig, pid_t pid)
 	return snd_ctl_async(hctl->ctl, sig, pid);
 }
 #endif
+
+#endif /* __ALSA_HCTL_MACROS_H */

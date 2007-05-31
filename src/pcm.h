@@ -101,19 +101,19 @@ int snd_pcm_areas_copy(const snd_pcm_channel_area_t *dst_channels,
 
 #include "pcm_macros.h"
 
-#define snd_pcm_info_alloca(ptr) do { *ptr = (snd_pcm_info_t *) alloca(snd_pcm_info_sizeof()); memset(*ptr, 0, snd_pcm_info_sizeof()); } while (0)
+#define snd_pcm_info_alloca(ptr) do { *ptr = alloca(snd_pcm_info_sizeof()); memset(*ptr, 0, snd_pcm_info_sizeof()); } while (0)
 
-#define snd_pcm_hw_params_alloca(ptr) do { *ptr = (snd_pcm_hw_params_t *) alloca(snd_pcm_hw_params_sizeof()); memset(*ptr, 0, snd_pcm_hw_params_sizeof()); } while (0)
+#define snd_pcm_hw_params_alloca(ptr) do { *ptr = alloca(snd_pcm_hw_params_sizeof()); memset(*ptr, 0, snd_pcm_hw_params_sizeof()); } while (0)
 
-#define snd_pcm_sw_params_alloca(ptr) do { *ptr = (snd_pcm_sw_params_t *) alloca(snd_pcm_sw_params_sizeof()); memset(*ptr, 0, snd_pcm_sw_params_sizeof()); } while (0)
+#define snd_pcm_sw_params_alloca(ptr) do { *ptr = alloca(snd_pcm_sw_params_sizeof()); memset(*ptr, 0, snd_pcm_sw_params_sizeof()); } while (0)
 
-#define snd_pcm_access_mask_alloca(ptr) do { *ptr = (snd_pcm_access_mask_t *) alloca(snd_pcm_access_mask_sizeof()); memset(*ptr, 0, snd_pcm_access_mask_sizeof()); } while (0)
+#define snd_pcm_access_mask_alloca(ptr) do { *ptr = alloca(snd_pcm_access_mask_sizeof()); memset(*ptr, 0, snd_pcm_access_mask_sizeof()); } while (0)
 
-#define snd_pcm_format_mask_alloca(ptr) do { *ptr = (snd_pcm_format_mask_t *) alloca(snd_pcm_format_mask_sizeof()); memset(*ptr, 0, snd_pcm_format_mask_sizeof()); } while (0)
+#define snd_pcm_format_mask_alloca(ptr) do { *ptr = alloca(snd_pcm_format_mask_sizeof()); memset(*ptr, 0, snd_pcm_format_mask_sizeof()); } while (0)
 
-#define snd_pcm_subformat_mask_alloca(ptr) do { *ptr = (snd_pcm_subformat_mask_t *) alloca(snd_pcm_subformat_mask_sizeof()); memset(*ptr, 0, snd_pcm_subformat_mask_sizeof()); } while (0)
+#define snd_pcm_subformat_mask_alloca(ptr) do { *ptr = alloca(snd_pcm_subformat_mask_sizeof()); memset(*ptr, 0, snd_pcm_subformat_mask_sizeof()); } while (0)
 
-#define snd_pcm_status_alloca(ptr) do { *ptr = (snd_pcm_status_t *) alloca(snd_pcm_status_sizeof()); memset(*ptr, 0, snd_pcm_status_sizeof()); } while (0)
+#define snd_pcm_status_alloca(ptr) do { *ptr = alloca(snd_pcm_status_sizeof()); memset(*ptr, 0, snd_pcm_status_sizeof()); } while (0)
 
 
 #endif /* __ALSA_PCM_H_INC */

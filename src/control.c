@@ -30,27 +30,6 @@
 #include "control.h"
 #include "local.h"
 
-int _snd_dev_get_device(const char *name, int *cardp, int *devp, int *subdevp)
-{
-	*cardp = 0;
-	if (devp)
-		*devp = 0;
-	if (subdevp)
-		*subdevp = -1;
-	if (!strcmp(name, "hw") || !strcmp(name, "default"))
-		return 0;
-	if (sscanf(name, "default:%d", cardp) > 0)
-		return 0;
-	if (devp) {
-		if (sscanf(name, "hw:%d,%d,%d", cardp, devp, subdevp) > 0)
-			return 0;
-	} else {
-		if (sscanf(name, "hw:%d", cardp) > 0)
-			return 0;
-	}
-	return -EINVAL;
-}
-
 
 int snd_ctl_open(snd_ctl_t **ctlp, const char *name, int mode)
 {
@@ -108,16 +87,15 @@ int snd_ctl_open(snd_ctl_t **ctlp, const char *name, int mode)
 
 int snd_ctl_close(snd_ctl_t *ctl)
 {
-	int err;
 #if 0 // ASYNC
 	while (!list_empty(&ctl->async_handlers)) {
 		snd_async_handler_t *h = list_entry(&ctl->async_handlers.next, snd_async_handler_t, hlist);
 		snd_async_del_handler(h);
 	}
 #endif
-	err = close(ctl->fd) < 0 ? -errno : 0;
+	close(ctl->fd);
 	free(ctl);
-	return err;
+	return 0;
 }
 
 int snd_ctl_nonblock(snd_ctl_t *ctl, int nonblock)

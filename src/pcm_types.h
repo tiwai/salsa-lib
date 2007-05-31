@@ -255,9 +255,6 @@ typedef long snd_pcm_sframes_t;
 /** Async notification (flag for open mode) \hideinitializer */
 #define SND_PCM_ASYNC			0x0002
 
-/** PCM handle */
-typedef struct _snd_pcm snd_pcm_t;
-
 /** PCM type */
 enum _snd_pcm_type {
 	/** Kernel level PCM */

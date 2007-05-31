@@ -37,7 +37,7 @@ int snd_mixer_selem_set_enum_item(snd_mixer_elem_t *elem, snd_mixer_selem_channe
 
 #include "mixer_macros.h"
 
-#define snd_mixer_selem_id_alloca(ptr) do { assert(ptr); *ptr = (snd_mixer_selem_id_t *) alloca(snd_mixer_selem_id_sizeof()); memset(*ptr, 0, snd_mixer_selem_id_sizeof()); } while (0)
+#define snd_mixer_selem_id_alloca(ptr) do { *ptr = alloca(snd_mixer_selem_id_sizeof()); memset(*ptr, 0, snd_mixer_selem_id_sizeof()); } while (0)
 
 #endif /* __ALSA_MIXER_H */
 

@@ -1,10 +1,12 @@
 #ifndef __ALSA_CTL_MACROS_H
 #define __ALSA_CTL_MACROS_H
 
+#include "asound.h"
+#include <stdlib.h>
+#include <string.h>
 #include <errno.h>
 #include <sys/ioctl.h>
 #include <sys/poll.h>
-#include "asound.h"
 
 struct _snd_ctl {
 	char *name;

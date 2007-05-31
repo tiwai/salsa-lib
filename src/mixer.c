@@ -105,9 +105,9 @@ void snd_mixer_free(snd_mixer_t *mixer)
 
 int snd_mixer_close(snd_mixer_t *mixer)
 {
-	free(mixer->pelems);
 	if (mixer->hctl)
 		snd_hctl_close(mixer->hctl);
+	free(mixer->pelems);
 	free(mixer);
 	return 0;
 }

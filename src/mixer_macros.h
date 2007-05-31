@@ -1,3 +1,17 @@
+/*
+ * mixer privates and macros
+ */
+
+#ifndef __ALSA_MIXER_MACROS_H
+#define __ALSA_MIXER_MACROS_H
+
+#include "asound.h"
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include <sys/ioctl.h>
+#include <sys/poll.h>
+
 struct _snd_mixer {
 	snd_hctl_t *hctl;
 	int count;
@@ -605,3 +619,5 @@ int snd_mixer_selem_set_capture_dB_all(snd_mixer_elem_t *elem, long value,
 {
 	return -EINVAL;
 }
+
+#endif /* __ALSA_MIXER_MACROS_H */

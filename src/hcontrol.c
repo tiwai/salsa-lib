@@ -57,12 +57,10 @@ int snd_hctl_open_ctl(snd_hctl_t **hctlp, snd_ctl_t *ctl)
 
 int snd_hctl_close(snd_hctl_t *hctl)
 {
-	int err;
-
-	err = snd_ctl_close(hctl->ctl);
 	snd_hctl_free(hctl);
+	snd_ctl_close(hctl->ctl);
 	free(hctl);
-	return err;
+	return 0;
 }
 
 static inline

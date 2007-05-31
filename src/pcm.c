@@ -42,12 +42,10 @@ static int open_with_subdev(const char *filename, int fmode,
 			    int card, int subdev)
 {
 	snd_pcm_info_t info;
-	char ctlfile[8];
 	snd_ctl_t *ctl;
 	int err, counts, fd;
 
-	sprintf(ctlfile, "hw:%d", card);
-	err = snd_ctl_open(&ctl, ctlfile, 0);
+	err = _snd_ctl_hw_open(&ctl, card);
 	if (err < 0)
 		return err;
 
@@ -60,9 +58,8 @@ static int open_with_subdev(const char *filename, int fmode,
 		if (fd < 0)
 		        return -errno;
 		memset(&info, 0, sizeof(info));
-		if (ioctl(fd, SNDRV_PCM_IOCTL_INFO, &info) < 0)
-			return -errno;
-		if (info.subdevice == subdev) {
+		if (ioctl(fd, SNDRV_PCM_IOCTL_INFO, &info) >= 0 &&
+		    info.subdevice == subdev) {
 			snd_ctl_close(ctl);
 			return fd;
 		}
@@ -77,7 +74,7 @@ int snd_pcm_open(snd_pcm_t **pcmp, const char *name,
 {
 	char filename[32];
 	int card, dev, subdev;
-	int fd = -1, err, fmode, ver;
+	int fd, err, fmode, ver;
 	snd_pcm_t *pcm;
 
 	*pcmp = NULL;
@@ -93,13 +90,14 @@ int snd_pcm_open(snd_pcm_t **pcmp, const char *name,
 	if (mode & SND_PCM_ASYNC)
 		fmode |= O_ASYNC;
 
-	if (subdev >= 0)
+	if (subdev >= 0) {
 		fd = open_with_subdev(filename, fmode, card, subdev);
-	else
+		if (fd < 0)
+			return fd;
+	} else {
 		fd = open(filename, fmode);
-	if (fd < 0) {
-		err = -errno;
-		goto error;
+		if (fd < 0)
+			return -errno;
 	}
 	if (!(mode & SND_PCM_NONBLOCK)) {
 		fmode &= ~O_NONBLOCK;
