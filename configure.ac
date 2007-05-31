@@ -7,11 +7,12 @@ dnl AC_CONFIG_HEADERS(src/config.h)
 
 AC_PROG_CC
 AC_PROG_INSTALL
-AC_DISABLE_STATIC
+dnl AC_DISABLE_STATIC
 AM_PROG_LIBTOOL
 AC_HEADER_STDC
 
 AC_OUTPUT([
 	Makefile
+	alsa.pc
 	src/Makefile
 ])

@@ -22,5 +22,7 @@ ltmain.sh
 missing
 INSTALL
 COPYING
+*.pc
 
 .deps
+.libs
