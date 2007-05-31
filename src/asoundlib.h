@@ -13,6 +13,7 @@
 #include <stdarg.h>
 
 #include "asoundef.h"
+#include "version.h"
 /* #include "input.h" */
 #include "output.h"
 #include "error.h"

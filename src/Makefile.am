@@ -1,13 +1,13 @@
 AM_CFLAGS = -Wall -g
 
 lib_LTLIBRARIES = libasound.la
-libasound_la_SOURCES = control.c hcontrol.c mixer.c \
+libasound_la_SOURCES = control.c hcontrol.c mixer.c cards.c \
 	pcm.c pcm_params.c pcm_misc.c
 libasound_la_LDFLAGS = -version-number 2:0:0
 
 alsaincludedir = $(includedir)/alsa
 
-alsainclude_HEADERS = asoundlib.h asoundef.h \
+alsainclude_HEADERS = asoundlib.h version.h asound.h asoundef.h \
 	common_types.h output.h error.h \
 	control.h ctl_types.h ctl_macros.h \
 	hcontrol.h hctl_types.h hctl_macros.h \
