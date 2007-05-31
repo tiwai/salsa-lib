@@ -1,0 +1,17 @@
+AC_PREREQ(2.59)
+AC_INIT(src/control.c)
+AM_INIT_AUTOMAKE(diet-alsa-lib, 0.0.1)
+AC_PREFIX_DEFAULT(/usr)
+
+dnl AC_CONFIG_HEADERS(src/config.h)
+
+AC_PROG_CC
+AC_PROG_INSTALL
+AC_DISABLE_STATIC
+AM_PROG_LIBTOOL
+AC_HEADER_STDC
+
+AC_OUTPUT([
+	Makefile
+	src/Makefile
+])
