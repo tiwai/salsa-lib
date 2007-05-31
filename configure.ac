@@ -24,9 +24,9 @@ AC_ARG_ENABLE(hwdep,
 		 [disable hwdep interface]),
   hwdep="$enableval", hwdep="yes")
 
-AM_CONDITIONAL(BUILD_MIXER, test "$mixer"="yes")
-AM_CONDITIONAL(BUILD_RAWMIDI, test "$rawmidi"="yes")
-AM_CONDITIONAL(BUILD_HWDEP, test "$hwdep"="yes")
+AM_CONDITIONAL(BUILD_MIXER, test "$mixer" = "yes")
+AM_CONDITIONAL(BUILD_RAWMIDI, test "$rawmidi" = "yes")
+AM_CONDITIONAL(BUILD_HWDEP, test "$hwdep" = "yes")
 
 AC_OUTPUT([
 	Makefile

@@ -526,7 +526,7 @@ int _snd_mask_empty(const snd_mask_t *mask)
 #undef MASK_BIT
 
 
-#ifdef BUILD_64BIT
+#if __WORDSIZE == 64
 
 #define DEFINE_GET64(name) \
 static inline \
