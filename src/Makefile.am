@@ -44,3 +44,6 @@ alsainclude_HEADERS += \
 endif
 
 noinst_HEADERS = local.h asoundlib-head.h asoundlib-tail.h
+
+distclean::
+	rm -f asoundlib.h
