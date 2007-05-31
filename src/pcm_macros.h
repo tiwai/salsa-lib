@@ -88,6 +88,12 @@ int snd_pcm_open_lconf(snd_pcm_t **pcm, const char *name,
 }
 
 static inline
+int snd_config_update_free_global(void)
+{
+	return 0;
+}
+
+static inline
 const char *snd_pcm_name(snd_pcm_t *pcm)
 {
 	return pcm->name;
@@ -129,7 +135,7 @@ int snd_pcm_poll_descriptors_revents(snd_pcm_t *pcm, struct pollfd *pfds,
 }
 
 static inline
-int snd_pcm_hw_info(snd_pcm_t *pcm, snd_pcm_info_t *info)
+int snd_pcm_info(snd_pcm_t *pcm, snd_pcm_info_t *info)
 {
 	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_INFO, info) < 0)
 		return -errno;
@@ -449,7 +455,7 @@ extern int _snd_pcm_hw_param_test(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				  int type, unsigned int val, int *dir);
 extern snd_mask_t * _snd_pcm_hw_param_get_mask(snd_pcm_hw_params_t *params, int type);
 extern int _snd_pcm_hw_param_set_mask(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
-				      int type, snd_mask_t *mask);
+				      int type, const snd_mask_t *mask);
 extern int _snd_pcm_hw_param_set_integer(snd_pcm_t *pcm,
 					 snd_pcm_hw_params_t *params, int type);
 extern int _snd_pcm_hw_param_get_min(const snd_pcm_hw_params_t *params,

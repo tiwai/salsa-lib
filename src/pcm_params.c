@@ -126,6 +126,20 @@ static int snd_mask_full(const snd_mask_t *mask)
 	return 1;
 }
 
+static inline int snd_mask_refine(snd_mask_t *mask, const snd_mask_t *v)
+{
+	int i;
+	snd_mask_t old;
+	if (_snd_mask_empty(mask))
+		return -ENOENT;
+	old = *mask;
+	for (i = 0; i < MASK_SIZE; i++)
+		mask->bits[i] &= v->bits[i];
+	if (_snd_mask_empty(mask))
+		return -EINVAL;
+	return !! memcmp(mask, &old, MASK_SIZE * 4);
+}
+
 static inline int snd_mask_refine_first(snd_mask_t *mask)
 {
 	if (_snd_mask_empty(mask))
@@ -862,6 +876,19 @@ int _snd_pcm_hw_param_set_integer(snd_pcm_t *pcm,
 	return err;
 }
 
+int _snd_pcm_hw_param_set_mask(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
+			       int var, const snd_mask_t *val)
+{
+	if (snd_mask_refine(hw_param_mask(params, var), val)) {
+		params->cmask |= 1 << var;
+		params->rmask |= 1 << var;
+	}
+	if (params->rmask)
+		return snd_pcm_hw_refine(pcm, params);
+	return 0;
+}
+
+
 static int hw_param_set_first(snd_pcm_hw_params_t *params, int var)
 {
 	int changed;
@@ -917,6 +944,107 @@ int _snd_pcm_hw_param_set_last(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 	if (err < 0)
 		return err;
 	return hw_param_update(pcm, params, var, val, dir);
+}
+
+/*
+ */
+static void boundary_sub(int a, int adir, int b, int bdir, int *c, int *cdir)
+{
+	adir = adir < 0 ? -1 : (adir > 0 ? 1 : 0);
+	bdir = bdir < 0 ? -1 : (bdir > 0 ? 1 : 0);
+	*c = a - b;
+	*cdir = adir - bdir;
+	if (*cdir == -2) {
+		(*c)--;
+	} else if (*cdir == 2) {
+		(*c)++;
+	}
+}
+
+static int boundary_lt(unsigned int a, int adir, unsigned int b, int bdir)
+{
+	if (adir < 0) {
+		a--;
+		adir = 1;
+	} else if (adir > 0)
+		adir = 1;
+	if (bdir < 0) {
+		b--;
+		bdir = 1;
+	} else if (bdir > 0)
+		bdir = 1;
+	return a < b || (a == b && adir < bdir);
+}
+
+/* Return 1 if min is nearer to best than max */
+static int boundary_nearer(int min, int mindir, int best, int bestdir, int max, int maxdir)
+{
+	int dmin, dmindir;
+	int dmax, dmaxdir;
+	boundary_sub(best, bestdir, min, mindir, &dmin, &dmindir);
+	boundary_sub(max, maxdir, best, bestdir, &dmax, &dmaxdir);
+	return boundary_lt(dmin, dmindir, dmax, dmaxdir);
+}
+
+int _snd_pcm_hw_param_set_near(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
+			       int var, unsigned int *val, int *dir)
+{
+	snd_pcm_hw_params_t save;
+	int err;
+	unsigned int best = *val, saved_min;
+	int last = 0;
+	unsigned int min, max;
+	int mindir, maxdir;
+	int valdir = dir ? *dir : 0;
+	snd_interval_t *i;
+
+	/* FIXME */
+	if (best > INT_MAX)
+		best = INT_MAX;
+	min = max = best;
+	mindir = maxdir = valdir;
+	if (maxdir > 0)
+		maxdir = 0;
+	else if (maxdir == 0)
+		maxdir = -1;
+	else {
+		maxdir = 1;
+		max--;
+	}
+	save = *params;
+	saved_min = min;
+	err = _snd_pcm_hw_param_set_min(pcm, params, var, &min, &mindir);
+
+	i = hw_param_interval(params, var);
+	if (!snd_interval_empty(i) && snd_interval_single(i))
+		return _snd_pcm_hw_param_get_min(params, var, val, dir);
+	
+	if (err >= 0) {
+		snd_pcm_hw_params_t params1;
+		if (min == saved_min && mindir == valdir)
+			goto _end;
+		params1 = save;
+		err = _snd_pcm_hw_param_set_max(pcm, &params1, var,
+						&max, &maxdir);
+		if (err < 0)
+			goto _end;
+		if (boundary_nearer(max, maxdir, best, valdir, min, mindir)) {
+			*params = params1;
+			last = 1;
+		}
+	} else {
+		*params = save;
+		err = _snd_pcm_hw_param_set_max(pcm, params, var, &max, &maxdir);
+		if (err < 0)
+			return err;
+		last = 1;
+	}
+ _end:
+	if (last)
+		err = _snd_pcm_hw_param_set_last(pcm, params, var, val, dir);
+	else
+		err = _snd_pcm_hw_param_set_first(pcm, params, var, val, dir);
+	return err;
 }
 
 static int snd_pcm_hw_params_choose(snd_pcm_t *pcm, snd_pcm_hw_params_t *params)

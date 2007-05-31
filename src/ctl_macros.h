@@ -1129,4 +1129,26 @@ void snd_ctl_elem_value_set_iec958(snd_ctl_elem_value_t *obj,
 	memcpy(&obj->value.iec958, ptr, sizeof(obj->value.iec958));
 }
 
+/*
+ * not implemented yet
+ */
+
+static inline
+int snd_device_name_hint(int card, const char *iface, void ***hints)
+{
+	return -ENXIO;
+}
+
+static inline
+int snd_device_name_free_hint(void **hints)
+{
+	return 0;
+}
+
+static inline
+char *snd_device_name_get_hint(const void *hint, const char *id)
+{
+	return NULL;
+}
+
 #endif /* __ALSA_CTL_MACROS_H */

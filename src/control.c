@@ -58,6 +58,8 @@ int snd_ctl_open(snd_ctl_t **ctlp, const char *name, int mode)
 	char filename[32];
 	int err, fmode, fd, card, ver;
 
+	*ctlp = NULL;
+
 	err = _snd_dev_get_device(name, &card, NULL, NULL);
 	if (err < 0)
 		return err;

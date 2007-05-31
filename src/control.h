@@ -10,10 +10,6 @@ int snd_card_get_index(const char *name);
 int snd_card_get_name(int card, char **name);
 int snd_card_get_longname(int card, char **name);
 
-int snd_device_name_hint(int card, const char *iface, void ***hints);
-int snd_device_name_free_hint(void **hints);
-char *snd_device_name_get_hint(const void *hint, const char *id);
-
 int snd_ctl_open(snd_ctl_t **ctl, const char *name, int mode);
 int snd_ctl_close(snd_ctl_t *ctl);
 int snd_ctl_nonblock(snd_ctl_t *ctl, int nonblock);

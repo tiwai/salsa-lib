@@ -37,9 +37,9 @@ int snd_mixer_open(snd_mixer_t **mixerp, int mode)
 {
 	snd_mixer_t *mixer;
 	mixer = calloc(1, sizeof(*mixer));
+	*mixerp = mixer;
 	if (mixer == NULL)
 		return -ENOMEM;
-	*mixerp = mixer;
 	return 0;
 }
 

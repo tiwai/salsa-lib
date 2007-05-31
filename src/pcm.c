@@ -80,6 +80,8 @@ int snd_pcm_open(snd_pcm_t **pcmp, const char *name,
 	int fd = -1, err, fmode, ver;
 	snd_pcm_t *pcm;
 
+	*pcmp = NULL;
+
 	err = _snd_dev_get_device(name, &card, &dev, &subdev);
 	if (err < 0)
 		return err;
@@ -87,7 +89,7 @@ int snd_pcm_open(snd_pcm_t **pcmp, const char *name,
 	snprintf(filename, sizeof(filename), "%s/pcmC%dD%d%c",
 		 DEVPATH, card, dev,
 		 (stream == SND_PCM_STREAM_PLAYBACK ? 'p' : 'c'));
-	fmode = O_RDWR | SND_PCM_NONBLOCK;
+	fmode = O_RDWR | O_NONBLOCK;
 	if (mode & SND_PCM_ASYNC)
 		fmode |= O_ASYNC;
 
@@ -144,6 +146,7 @@ int snd_pcm_open(snd_pcm_t **pcmp, const char *name,
 	if (err < 0)
 		goto error;
 
+	*pcmp = pcm;
 	return 0;
 
  error:
@@ -932,6 +935,7 @@ static int snd_pcm_hw_mmap_status(snd_pcm_t *pcm)
 		return -ENOMEM;
 	pcm->mmap_status = &pcm->sync_ptr->s.status;
 	pcm->mmap_control = &pcm->sync_ptr->c.control;
+	_snd_pcm_sync_ptr(pcm, 0);
 	return 0;
 }
 

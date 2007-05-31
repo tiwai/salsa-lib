@@ -18,7 +18,6 @@ int snd_async_add_pcm_handler(snd_async_handler_t **handler, snd_pcm_t *pcm,
 			      void *private_data);
 snd_pcm_t *snd_async_handler_get_pcm(snd_async_handler_t *handler);
 #endif
-int snd_pcm_info(snd_pcm_t *pcm, snd_pcm_info_t *info);
 int snd_pcm_hw_params(snd_pcm_t *pcm, snd_pcm_hw_params_t *params);
 int snd_pcm_hw_free(snd_pcm_t *pcm);
 int snd_pcm_sw_params(snd_pcm_t *pcm, snd_pcm_sw_params_t *params);
