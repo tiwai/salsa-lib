@@ -7,15 +7,18 @@ GENERAL
 SALSA-Lib is a small, light-weight, hot and spicy version of the ALSA
 library, mainly for embedded systems with limited resources.
 The library is designed to be source-level compatible with ALSA
-library API for limited contents.  Some components like ALSA sequencer
-aren't supported, and most of all, the alsa-lib plugins and
-configurations are completely dropped.
+library API for limited contents.  Most of function calls are inlined,
+and accesses directly to the hardware via system calls.
+Some components like ALSA sequencer aren't supported, and most of all,
+the alsa-lib plugins and configurations are completely dropped.  Thus,
+neither dmix nor format conversion is available with SALSA-lib.
 
 The current features are like below:
 
 CONFIG
-  o No functions snd_config_*() at all.  SALSA-Lib doesn't support
-    the configuration files.  (Thus currently alsactl can't be built.)
+  o All functions snd_config_*() are replaced with dummy ones since
+    SALSA-Lib doesn't support the configuration files.
+    The apps accessing config stuff won't work.
 
 PCM
   o Supports only the hw layer, i.e. no up/down-mixing, format
@@ -39,30 +42,38 @@ MIXER
   o No linear <-> log dB conversion
 
 TIMER
+  o Disabled as default
   o No query interface
   o No async handler
 
 RAWMIDI
-  o Almost OK
+  o Disabled as default
 
 HWDEP
-  o Almost OK
+  o Disabled as default
 
-SEQUENCER / INSTRUMENT LAYER
-  o Not supported at all yet, no API functions defined
-    (alsa-utils/seq/* can't be built)
+SEQUENCER
+  o All replaced with dummy functions.  The apps using sequencer won't
+    work properly.
+
+INSTRUMENT LAYER
+  o No APIs are provided
 
 
 INSTALLATION
 ------------
 
 Some configure options are available to reduce the binary size.
-The mixer, rawmidi, hwdep and timer components can be stripped via
---disable-mixer, --disable-rawmidi, etc. options.  These componenets
-are enabled as default.
-
+As default, rawmidi, hwdep, timer, conf and seq components are
+disabled.  They can be enabled via --enable-xxx option, such as
+--enable-rawmidi.
+The mixer component is enabled as default, and can be disabled via
+--disable-mixer option, as well.
 The dB range support can be enabled via --enable-tlv option.  It's
 disabled as default.
+
+All these options can be enabled via a single option,
+--enable-everything, for your convenience.
 
 The library is installed as $LIBDIR/libsalsa.so.*.
 This package provides also the compatible alsa.m4 and alsa.pc.  If the

@@ -42,6 +42,14 @@ if BUILD_TIMER
 alsainclude_HEADERS += \
 	timer.h timer_types.h timer_macros.h
 endif
+if BUILD_CONF
+alsainclude_HEADERS += \
+	conf.h
+endif
+if BUILD_SEQ
+alsainclude_HEADERS += \
+	seq.h seq_event.h seqmid.h
+endif
 
 noinst_HEADERS = local.h 
 

@@ -175,3 +175,5 @@ int _snd_dev_get_device(const char *name, int *cardp, int *devp, int *subdevp)
 	}
 	return 0;
 }
+
+snd_config_t *snd_config; /* placeholder */

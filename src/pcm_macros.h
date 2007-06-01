@@ -81,12 +81,6 @@ struct _snd_pcm {
  */
 
 static inline
-int snd_config_update_free_global(void)
-{
-	return 0;
-}
-
-static inline
 int snd_pcm_nonblock(snd_pcm_t *pcm, int nonblock)
 {
 	return _snd_set_nonblock(pcm->fd, nonblock);

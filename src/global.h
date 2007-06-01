@@ -22,7 +22,7 @@
 #ifndef __ALSA_GLOBAL_H
 #define __ALSA_GLOBAL_H
 
-typedef struct snd_config snd_config_t;
+typedef struct _snd_config snd_config_t;
 typedef struct _snd_async_handler snd_async_handler_t;
 typedef void (*snd_async_callback_t)(snd_async_handler_t *handler);
 
@@ -49,6 +49,7 @@ typedef struct _snd_ctl snd_ctl_t;
 typedef struct _snd_pcm snd_pcm_t;
 typedef struct _snd_rawmidi snd_rawmidi_t;
 typedef struct _snd_hwdep snd_hwdep_t;
+typedef struct _snd_seq snd_seq_t;
 
 #ifndef ATTRIBUTE_UNUSED
 /** do not print warning (gcc) when function parameter is not used */
