@@ -11,6 +11,8 @@ dnl AC_DISABLE_STATIC
 AM_PROG_LIBTOOL
 AC_HEADER_STDC
 
+dnl Component selections
+
 AC_ARG_ENABLE(mixer,
   AS_HELP_STRING([--disable-mixer],
 		 [disable mixer interface]),
@@ -33,6 +35,8 @@ AM_CONDITIONAL(BUILD_RAWMIDI, test "$rawmidi" = "yes")
 AM_CONDITIONAL(BUILD_HWDEP, test "$hwdep" = "yes")
 AM_CONDITIONAL(BUILD_TIMER, test "$timer" = "yes")
 
+dnl TLV support
+
 AC_ARG_ENABLE(tlv,
   AS_HELP_STRING([--enable-tlv],
 	 	 [enable TLV (dB) support]),
@@ -43,6 +47,26 @@ else
   SALSA_HAS_TLV_SUPPORT=0
 fi
 AC_SUBST(SALSA_HAS_TLV_SUPPORT)
+
+dnl Check for symbolic-functions
+
+AC_MSG_CHECKING(for symbolic-functions)
+AC_ARG_ENABLE(symbolic-functions,
+  AS_HELP_STRING([--enable-symbolic-functions],
+    [use -Bsymbolic-functions option if available (optmization for size and speed)]),
+  symfuncs="$enableval", symfuncs="no")
+if test "$symfuncs" = "yes"; then
+  if ld --help | grep -q -- '-Bsymbolic-functions'; then
+    AC_MSG_RESULT(yes)
+  else
+    AC_MSG_RESULT(not supported by ld)
+  fi
+else
+  AC_MSG_RESULT(no)
+fi
+AM_CONDITIONAL(SYMBOLIC_FUNCTIONS, test x"$symfuncs" = xyes)
+
+dnl OK, let's output...
 
 AC_OUTPUT([
 	Makefile

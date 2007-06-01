@@ -18,6 +18,10 @@ endif
 
 libsalsa_la_LDFLAGS = -version-number 0:0:1
 
+if SYMBOLIC_FUNCTIONS
+libsalsa_la_LDFLAGS += -Wl,-Bsymbolic-functions
+endif
+
 alsaincludedir = $(includedir)/alsa
 
 alsainclude_HEADERS = asoundlib.h version.h recipe.h asound.h asoundef.h \
