@@ -64,9 +64,6 @@ are enabled as default.
 The dB range support can be enabled via --enable-tlv option.  It's
 disabled as default.
 
-The option --enable-symbolic-functions can be used to enable
-symbolic-functions linker option for recent versions of ld.
-
 The library is installed as $LIBDIR/libsalsa.so.*.
 This package provides also the compatible alsa.m4 and alsa.pc.  If the
 other packages can be autoreconf'ed, you'll be able to link libsalsa
