@@ -327,6 +327,9 @@ static snd_mixer_elem_t *new_mixer_elem(const char *name, int index,
 #define USR_IDX(i)	((i) << 1)
 #define RAW_IDX(i)	(((i) << 1) + 1)
 
+#define INVALID_DB_INFO		(unsigned int *)(-1)
+
+
 /*
  * create a volume item
  */
@@ -343,6 +346,7 @@ static snd_selem_item_head_t *new_selem_vol_item(snd_ctl_elem_info_t *info,
 	vol->min = vol->raw_min;
 	vol->raw_max = info->value.integer.max;
 	vol->max = vol->raw_max;
+	vol->db_info = NULL;
 	/* set initial values */
 	for (i = 0; i < info->count; i++)
 		vol->vol[USR_IDX(i)] = vol->vol[RAW_IDX(i)] =
@@ -589,6 +593,16 @@ static int remove_simple_element(snd_hctl_elem_t *hp, int remove_mixer)
 				elem->items[SND_SELEM_ITEM_CSWITCH] = NULL;
 			break;
 		}
+
+#if SALSA_HAS_TLV_SUPPORT
+		if (i <= SND_SELEM_ITEM_CVOLUME) {
+			snd_selem_vol_item_t *vol =
+				(snd_selem_vol_item_t *)head;
+			/* release db_info entry if needed */
+			if (vol->db_info && vol->db_info != INVALID_DB_INFO)
+				free(vol->db_info);
+		}
+#endif
 		free(head);
 
 		if (!remove_mixer)
@@ -983,3 +997,284 @@ int snd_mixer_selem_set_enum_item(snd_mixer_elem_t *elem,
 	snd_ctl_elem_value_set_enumerated(ctl, channel, item);
 	return snd_hctl_elem_write(eitem->head.helem, ctl);
 }
+
+
+#if SALSA_HAS_TLV_SUPPORT
+
+/*
+ * dB conversion
+ *
+ * For simplicity, we don't support the linear - log conversion
+ */
+
+/* convert to index of integer array */
+#define int_index(size)	(((size) + sizeof(int) - 1) / sizeof(int))
+
+/* max size of a TLV entry for dB information (including compound one) */
+#define MAX_TLV_RANGE_SIZE	256
+
+/* parse TLV stream and retrieve dB information
+ * return 0 if successly found and stored to rec,
+ * return 1 if no information is found,
+ * or return a negative error code
+ */
+static int parse_db_range(snd_selem_vol_item_t *item, unsigned int *tlv,
+			  unsigned int tlv_size)
+{
+	unsigned int type;
+	unsigned int size;
+	int err;
+
+	type = tlv[0];
+	size = tlv[1];
+	tlv_size -= 2 * sizeof(int);
+	if (size > tlv_size)
+		return -EINVAL;
+	switch (type) {
+	case SND_CTL_TLVT_CONTAINER:
+		size = int_index(size) * sizeof(int);
+		tlv += 2;
+		while (size > 0) {
+			unsigned int len;
+			err = parse_db_range(item, tlv, size);
+			if (err <= 0)
+				return err; /* error or found dB */
+			len = int_index(tlv[1]) + 2;
+			size -= len * sizeof(int);
+			tlv += len;
+		}
+		break;
+	case SND_CTL_TLVT_DB_SCALE:
+	case SND_CTL_TLVT_DB_RANGE: {
+		unsigned int minsize;
+		if (type == SND_CTL_TLVT_DB_RANGE)
+			minsize = 4 * sizeof(int);
+		else
+			minsize = 2 * sizeof(int);
+		if (size < minsize)
+			return -EINVAL;
+		if (size > MAX_TLV_RANGE_SIZE)
+			return -EINVAL;
+		item->db_info = malloc(size + sizeof(int) * 2);
+		if (!item->db_info)
+			return -ENOMEM;
+		memcpy(item->db_info, tlv, size + sizeof(int) * 2);
+		return 0;
+	}
+	default:
+		break;
+	}
+	return -EINVAL; /* not found */
+}
+
+/* initialize dB range information, reading TLV via hcontrol
+ */
+static int init_db_info(snd_selem_vol_item_t *item)
+{
+	snd_ctl_elem_info_t *info;
+	unsigned int *tlv = NULL;
+	const unsigned int tlv_size = 4096;
+
+	if (!item)
+		return -EINVAL;
+	if (item->db_info)
+		return item->db_info == INVALID_DB_INFO ? -EINVAL : 0;
+
+	snd_ctl_elem_info_alloca(&info);
+	if (snd_hctl_elem_info(item->head.helem, info) < 0)
+		goto error;
+	if (!snd_ctl_elem_info_is_tlv_readable(info))
+		goto error;
+	tlv = malloc(tlv_size);
+	if (!tlv)
+		return -ENOMEM;
+	if (snd_hctl_elem_tlv_read(item->head.helem, tlv, tlv_size) < 0)
+		goto error;
+	if (parse_db_range(item, tlv, tlv_size) < 0)
+		goto error;
+	free(tlv);
+	return 0;
+
+ error:
+	free(tlv);
+	item->db_info = INVALID_DB_INFO;
+	return -EINVAL;
+}
+
+
+/* convert the given raw volume value to a dB gain
+ */
+
+static int convert_to_dB(unsigned int *tlv, long rangemin, long rangemax,
+			 long volume, long *db_gain)
+{
+	switch (tlv[0]) {
+	case SND_CTL_TLVT_DB_RANGE: {
+		unsigned int pos, len;
+		len = int_index(tlv[1]);
+		if (len > MAX_TLV_RANGE_SIZE)
+			return -EINVAL;
+		pos = 2;
+		while (pos + 4 <= len) {
+			rangemin = (int)tlv[pos];
+			rangemax = (int)tlv[pos + 1];
+			if (volume >= rangemin && volume <= rangemax)
+				return convert_to_dB(tlv + pos + 2,
+						     rangemin, rangemax,
+						     volume, db_gain);
+			pos += int_index(tlv[pos + 3]) + 4;
+		}
+		return -EINVAL;
+	}
+	case SND_CTL_TLVT_DB_SCALE: {
+		int min, step, mute;
+		min = tlv[2];
+		step = (tlv[3] & 0xffff);
+		mute = (tlv[3] >> 16) & 1;
+		if (mute && volume == rangemin)
+			*db_gain = SND_CTL_TLV_DB_GAIN_MUTE;
+		else
+			*db_gain = (volume - rangemin) * step + min;
+		return 0;
+	}
+	}
+	return -EINVAL;
+}
+
+int _snd_selem_vol_get_dB(snd_selem_vol_item_t *item, int channel,
+			  long *value)
+{
+	if (init_db_info(item) < 0)
+		return -EINVAL;
+	if (channel >= item->head.channels)
+		channel = 0;
+	return convert_to_dB(item->db_info, item->raw_min, item->raw_max,
+			     item->vol[RAW_IDX(channel)], value);
+}
+
+/* Get the dB min/max values
+ */
+static int get_dB_range(unsigned int *tlv, long rangemin, long rangemax,
+			long *min, long *max)
+{
+	switch (tlv[0]) {
+	case SND_CTL_TLVT_DB_RANGE: {
+		unsigned int pos, len;
+		len = int_index(tlv[1]);
+		if (len > MAX_TLV_RANGE_SIZE)
+			return -EINVAL;
+		pos = 2;
+		while (pos + 4 <= len) {
+			long rmin, rmax;
+			rangemin = (int)tlv[pos];
+			rangemax = (int)tlv[pos + 1];
+			get_dB_range(tlv + pos + 2, rangemin, rangemax,
+				     &rmin, &rmax);
+			if (pos > 2) {
+				if (rmin < *min)
+					*min = rmin;
+				if (rmax > *max)
+					*max = rmax;
+			} else {
+				*min = rmin;
+				*max = rmax;
+			}
+			pos += int_index(tlv[pos + 3]) + 4;
+		}
+		return 0;
+	}
+	case SND_CTL_TLVT_DB_SCALE: {
+		int step;
+		*min = (int)tlv[2];
+		step = (tlv[3] & 0xffff);
+		*max = *min + (long)(step * (rangemax - rangemin));
+		return 0;
+	}
+	case SND_CTL_TLVT_DB_LINEAR:
+		*min = (int)tlv[2];
+		*max = (int)tlv[3];
+		return 0;
+	}
+	return -EINVAL;
+}
+
+int _snd_selem_vol_get_dB_range(snd_selem_vol_item_t *item,
+				long *min, long *max)
+{
+	if (init_db_info(item) < 0)
+		return -EINVAL;
+	return get_dB_range(item->db_info, item->raw_min, item->raw_max,
+			    min, max);
+}
+	
+/* Convert from dB gain to the corresponding raw value.
+ * The value is round up when xdir > 0.
+ */
+static int convert_from_dB(unsigned int *tlv, long rangemin, long rangemax,
+			   long db_gain, long *value, int xdir)
+{
+	switch (tlv[0]) {
+	case SND_CTL_TLVT_DB_RANGE: {
+		unsigned int pos, len;
+		len = int_index(tlv[1]);
+		if (len > MAX_TLV_RANGE_SIZE)
+			return -EINVAL;
+		pos = 2;
+		while (pos + 4 <= len) {
+			long dbmin, dbmax;
+			rangemin = (int)tlv[pos];
+			rangemax = (int)tlv[pos + 1];
+			if (!get_dB_range(tlv + pos + 2, rangemin, rangemax,
+					  &dbmin, &dbmax) &&
+			    db_gain >= dbmin && db_gain <= dbmax)
+				return convert_from_dB(tlv + pos + 2,
+						       rangemin, rangemax,
+						       db_gain, value, xdir);
+			pos += int_index(tlv[pos + 3]) + 4;
+		}
+		return -EINVAL;
+	}
+	case SND_CTL_TLVT_DB_SCALE: {
+		int min, step, max;
+		min = tlv[2];
+		step = (tlv[3] & 0xffff);
+		max = min + (int)(step * (rangemax - rangemin));
+		if (db_gain <= min)
+			*value = rangemin;
+		else if (db_gain >= max)
+			*value = rangemax;
+		else {
+			long v = (db_gain - min) * (rangemax - rangemin);
+			if (xdir > 0)
+				v += (max - min) - 1;
+			v = v / (max - min) + rangemin;
+			*value = v;
+		}
+		return 0;
+	}
+	default:
+		break;
+	}
+	return -EINVAL;
+}
+
+int _snd_selem_vol_set_dB(snd_selem_vol_item_t *item,
+			  snd_mixer_selem_channel_id_t channel,
+			  long db_gain, int xdir)
+{
+	int err;
+	long value;
+
+	if (init_db_info(item) < 0)
+		return -EINVAL;
+	if (channel >= item->head.channels)
+		channel = 0;
+	err = convert_from_dB(item->db_info, item->raw_min, item->raw_max,
+			      db_gain, &value, xdir);
+	if (err < 0)
+		return err;
+	item->vol[USR_IDX(channel)] = convert_to_user(item, value);
+	return 0;
+}
+
+#endif

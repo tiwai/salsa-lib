@@ -43,6 +43,8 @@ alsainclude_HEADERS += \
 	timer.h timer_types.h timer_macros.h
 endif
 
-noinst_HEADERS = local.h asoundlib-head.h asoundlib-tail.h recipe.h.in
+noinst_HEADERS = local.h 
+
+EXTRA_DIST = asoundlib-head.h asoundlib-tail.h recipe.h.in
 
 DISTCLEANFILES = asoundlib.h recipe.h

@@ -4,6 +4,7 @@
 #ifndef __ALSA_PCM_H_INC
 #define __ALSA_PCM_H_INC
 
+#include "recipe.h"
 #include "global.h"
 #include "output.h"
 #include "pcm_types.h"

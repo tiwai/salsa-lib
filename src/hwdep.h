@@ -1,6 +1,7 @@
 #ifndef __ALSA_HWDEP_H
 #define __ALSA_HWDEP_H
 
+#include "recipe.h"
 #include "global.h"
 #include "hwdep_types.h"
 

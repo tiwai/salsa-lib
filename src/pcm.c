@@ -108,12 +108,6 @@ int snd_pcm_open(snd_pcm_t **pcmp, const char *name,
 		err = -errno;
 		goto error;
 	}
-#if 0 // VCHECK
-	if (SNDRV_PROTOCOL_INCOMPATIBLE(ver, SNDRV_PCM_VERSION_MAX)) {
-		err = -SND_ERROR_INCOMPATIBLE_VERSION;
-		goto error;
-	}
-#endif
 	if (subdev < 0) {
 		snd_pcm_info_t info;
 		memset(&info, 0, sizeof(info));

@@ -38,8 +38,11 @@ AC_ARG_ENABLE(tlv,
 	 	 [enable TLV (dB) support]),
   tlv="$enableval", tlv="no")
 if test "$tlv" = "yes"; then
-  AC_DEFINE(SALSA_HAS_TLV_SUPPORT,,[Build with TLV support])
+  SALSA_HAS_TLV_SUPPORT=1
+else
+  SALSA_HAS_TLV_SUPPORT=0
 fi
+AC_SUBST(SALSA_HAS_TLV_SUPPORT)
 
 AC_OUTPUT([
 	Makefile

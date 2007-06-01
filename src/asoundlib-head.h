@@ -16,6 +16,7 @@
 extern "C" {
 #endif
 
+#include "recipe.h"
 #include "asoundef.h"
 #include "version.h"
 #include "global.h"

@@ -45,33 +45,8 @@ int snd_mixer_selem_set_enum_item(snd_mixer_elem_t *elem,
 				  snd_mixer_selem_channel_id_t channel,
 				  unsigned int idx);
 
-#ifdef SALSA_HAS_TLV_SUPPORT
-/* dB handler */
-int snd_mixer_selem_get_playback_dB_range(snd_mixer_elem_t *elem,
-					  long *min, long *max);
-int snd_mixer_selem_get_playback_dB(snd_mixer_elem_t *elem,
-				    snd_mixer_selem_channel_id_t channel,
-				    long *value);
-int snd_mixer_selem_set_playback_dB(snd_mixer_elem_t *elem,
-				    snd_mixer_selem_channel_id_t channel,
-				    long value, int dir);
-int snd_mixer_selem_set_playback_dB_all(snd_mixer_elem_t *elem, long value,
-					int dir);
-int snd_mixer_selem_get_capture_dB_range(snd_mixer_elem_t *elem,
-					 long *min, long *max);
-int snd_mixer_selem_get_capture_dB(snd_mixer_elem_t *elem,
-				   snd_mixer_selem_channel_id_t channel,
-				   long *value);
-int snd_mixer_selem_set_capture_dB(snd_mixer_elem_t *elem,
-				   snd_mixer_selem_channel_id_t channel,
-				   long value, int dir);
-int snd_mixer_selem_set_capture_dB_all(snd_mixer_elem_t *elem, long value,
-				       int dir);
-#endif /* SALSA_HAS_TLV_SUPPORT */
-
 #include "mixer_macros.h"
 
 #define snd_mixer_selem_id_alloca(ptr) do { *ptr = alloca(snd_mixer_selem_id_sizeof()); memset(*ptr, 0, snd_mixer_selem_id_sizeof()); } while (0)
 
 #endif /* __ALSA_MIXER_H */
-

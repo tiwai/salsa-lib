@@ -63,12 +63,6 @@ int snd_ctl_open(snd_ctl_t **ctlp, const char *name, int mode)
 		close(fd);
 		return err;
 	}
-#if 0 // VCHECK
-	if (SNDRV_PROTOCOL_INCOMPATIBLE(ver, SNDRV_CTL_VERSION_MAX)) {
-		close(fd);
-		return -SND_ERROR_INCOMPATIBLE_VERSION;
-	}
-#endif
 
 	ctl = calloc(1, sizeof(*ctl));
 	if (!ctl) {
@@ -121,7 +115,7 @@ int snd_ctl_elem_add_integer(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
 	info.id = *id;
 	info.type = SND_CTL_ELEM_TYPE_INTEGER;
 	info.access = SNDRV_CTL_ELEM_ACCESS_READWRITE;
-#ifdef SALSA_HAS_TLV_SUPPORT
+#if SALSA_HAS_TLV_SUPPORT
 	info.access |= SNDRV_CTL_ELEM_ACCESS_TLV_READWRITE;
 #endif
 	info.count = count;
@@ -189,67 +183,55 @@ int snd_ctl_elem_add_iec958(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id)
 	return snd_ctl_elem_add(ctl, &info);
 }
 
-#ifdef SALSA_HAS_TLV_SUPPORT
-static int hw_elem_tlv(snd_ctl_t *handle, int op_flag,
+#if SALSA_HAS_TLV_SUPPORT
+static int hw_elem_tlv(snd_ctl_t *ctl, int inum,
 		       unsigned int numid,
 		       unsigned int *tlv, unsigned int tlv_size)
 {
-	int inum;
 	struct sndrv_ctl_tlv *xtlv;
 	
 	/* we don't support TLV on protocol ver 2.0.3 or earlier */
 	if (ctl->protocol < SNDRV_PROTOCOL_VERSION(2, 0, 4))
 		return -ENXIO;
 
-	switch (op_flag) {
-	case -1: inum = SNDRV_CTL_IOCTL_TLV_COMMAND; break;
- 	case 0:	inum = SNDRV_CTL_IOCTL_TLV_READ; break;
-	case 1:	inum = SNDRV_CTL_IOCTL_TLV_WRITE; break;
-	default: return -EINVAL;
-	}
 	xtlv = malloc(sizeof(struct sndrv_ctl_tlv) + tlv_size);
 	if (xtlv == NULL)
 		return -ENOMEM; 
 	xtlv->numid = numid;
 	xtlv->length = tlv_size;
 	memcpy(xtlv->tlv, tlv, tlv_size);
-	if (ioctl(hw->fd, inum, xtlv) < 0) {
+	if (ioctl(ctl->fd, inum, xtlv) < 0) {
 		free(xtlv);
 		return -errno;
 	}
-	if (op_flag == 0) {
-		if (xtlv->tlv[1] + 2 * sizeof(unsigned int) > tlv_size)
+	if (inum == SNDRV_CTL_IOCTL_TLV_READ) {
+		if (xtlv->tlv[1] + 2 * sizeof(unsigned int) > tlv_size) {
+			free(xtlv);
 			return -EFAULT;
+		}
 		memcpy(tlv, xtlv->tlv, xtlv->tlv[1] + 2 * sizeof(unsigned int));
 	}
 	free(xtlv);
 	return 0;
 }
 
-static int snd_ctl_tlv_do(snd_ctl_t *ctl, int op_flag,
+static int snd_ctl_tlv_do(snd_ctl_t *ctl, int cmd,
 			  const snd_ctl_elem_id_t *id,
 		          unsigned int *tlv, unsigned int tlv_size)
 {
-	snd_ctl_elem_info_t info;
-	int err;
-
-	if (id->numid == 0) {
+	if (!id->numid) {
+		int err;
+		snd_ctl_elem_info_t info;
 		memset(&info, 0, sizeof(info));
 		info.id = *id;
 		id = &info.id;
 		err = snd_ctl_elem_info(ctl, &info);
 		if (err < 0)
-			goto __err;
-		if (id->numid == 0) {
-			err = -ENOENT;
-			goto __err;
-		}
+			return err;
+		if (!id->numid)
+			return -ENOENT;
 	}
-	err = hw_elem_tlv(ctl, op_flag, id->numid, tlv, tlv_size);
-      __err:
-      	if (info)
-      		free(info);
-	return err;
+	return hw_elem_tlv(ctl, cmd, id->numid, tlv, tlv_size);
 }
 
 int snd_ctl_elem_tlv_read(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
@@ -260,7 +242,7 @@ int snd_ctl_elem_tlv_read(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
 		return -EINVAL;
 	tlv[0] = -1;
 	tlv[1] = 0;
-	err = snd_ctl_tlv_do(ctl, 0, id, tlv, tlv_size);
+	err = snd_ctl_tlv_do(ctl, SNDRV_CTL_IOCTL_TLV_READ, id, tlv, tlv_size);
 	if (err >= 0 && tlv[0] == (unsigned int)-1)
 		err = -ENXIO;
 	return err;
@@ -269,7 +251,7 @@ int snd_ctl_elem_tlv_read(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
 int snd_ctl_elem_tlv_write(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
 			   const unsigned int *tlv)
 {
-	return snd_ctl_tlv_do(ctl, 1, id,
+	return snd_ctl_tlv_do(ctl, SNDRV_CTL_IOCTL_TLV_WRITE, id,
 			      (unsigned int *)tlv,
 			      tlv[1] + 2 * sizeof(unsigned int));
 }
@@ -277,7 +259,7 @@ int snd_ctl_elem_tlv_write(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
 int snd_ctl_elem_tlv_command(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
 			     const unsigned int *tlv)
 {
-	return snd_ctl_tlv_do(ctl, -1, id,
+	return snd_ctl_tlv_do(ctl, SNDRV_CTL_IOCTL_TLV_COMMAND, id,
 			      (unsigned int *)tlv,
 			      tlv[1] + 2 * sizeof(unsigned int));
 }

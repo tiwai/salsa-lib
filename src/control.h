@@ -1,6 +1,7 @@
 #ifndef __ALSA_CONTROL_H
 #define __ALSA_CONTROL_H
 
+#include "recipe.h"
 #include "global.h"
 #include "ctl_types.h"
 
@@ -19,7 +20,7 @@ int snd_async_add_ctl_handler(snd_async_handler_t **handler, snd_ctl_t *ctl,
 snd_ctl_t *snd_async_handler_get_ctl(snd_async_handler_t *handler);
 #endif
 
-#ifdef SALSA_HAS_TLV_SUPPORT
+#if SALSA_HAS_TLV_SUPPORT
 int snd_ctl_elem_tlv_read(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
 			  unsigned int *tlv, unsigned int tlv_size);
 int snd_ctl_elem_tlv_write(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,

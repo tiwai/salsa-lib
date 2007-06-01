@@ -718,7 +718,7 @@ int snd_ctl_elem_info_is_user(const snd_ctl_elem_info_t *obj)
 static inline
 int snd_ctl_elem_info_is_tlv_readable(const snd_ctl_elem_info_t *obj)
 {
-#ifdef HAVE_DB_SUPPORT
+#if SALSA_HAS_TLV_SUPPORT
 	return !!(obj->access & SNDRV_CTL_ELEM_ACCESS_TLV_READ);
 #else
 	return 0;
@@ -728,7 +728,7 @@ int snd_ctl_elem_info_is_tlv_readable(const snd_ctl_elem_info_t *obj)
 static inline
 int snd_ctl_elem_info_is_tlv_writable(const snd_ctl_elem_info_t *obj)
 {
-#ifdef HAVE_DB_SUPPORT
+#if SALSA_HAS_TLV_SUPPORT
 	return !!(obj->access & SNDRV_CTL_ELEM_ACCESS_TLV_WRITE);
 #else
 	return 0;
@@ -738,7 +738,7 @@ int snd_ctl_elem_info_is_tlv_writable(const snd_ctl_elem_info_t *obj)
 static inline
 int snd_ctl_elem_info_is_tlv_commandable(const snd_ctl_elem_info_t *obj)
 {
-#ifdef HAVE_DB_SUPPORT
+#if SALSA_HAS_TLV_SUPPORT
 	return !!(obj->access & SNDRV_CTL_ELEM_ACCESS_TLV_COMMAND);
 #else
 	return 0;
@@ -1139,7 +1139,7 @@ void snd_ctl_elem_value_set_iec958(snd_ctl_elem_value_t *obj,
 
 /*
  */
-#ifndef SALSA_HAS_TLV_SUPPORT
+#if !SALSA_HAS_TLV_SUPPORT
 static inline
 int snd_ctl_elem_tlv_read(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
 			  unsigned int *tlv, unsigned int tlv_size)

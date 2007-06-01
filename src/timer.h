@@ -1,6 +1,7 @@
 #ifndef __ALSA_TIMER_H
 #define __ALSA_TIMER_H
 
+#include "recipe.h"
 #include "global.h"
 #include "timer_types.h"
 
