@@ -116,19 +116,22 @@ int snd_hctl_elem_info(snd_hctl_elem_t *elem, snd_ctl_elem_info_t *info)
 }
 
 static inline
-int snd_hctl_elem_read(snd_hctl_elem_t *elem, snd_ctl_elem_value_t * value)
+int snd_hctl_elem_read(snd_hctl_elem_t *elem, snd_ctl_elem_value_t *value)
 {
+	value->id = elem->id;
 	return snd_ctl_elem_read(elem->hctl->ctl, value);
 }
 
 static inline
-int snd_hctl_elem_write(snd_hctl_elem_t *elem, snd_ctl_elem_value_t * value)
+int snd_hctl_elem_write(snd_hctl_elem_t *elem, snd_ctl_elem_value_t *value)
 {
+	value->id = elem->id;
 	return snd_ctl_elem_write(elem->hctl->ctl, value);
 }
 
 static inline
-int snd_hctl_elem_tlv_read(snd_hctl_elem_t *elem, unsigned int *tlv, unsigned int tlv_size)
+int snd_hctl_elem_tlv_read(snd_hctl_elem_t *elem, unsigned int *tlv,
+			   unsigned int tlv_size)
 {
 	return snd_ctl_elem_tlv_read(elem->hctl->ctl, &elem->id, tlv, tlv_size);
 }
