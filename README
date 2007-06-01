@@ -19,6 +19,7 @@ CONFIG
   o All functions snd_config_*() are replaced with dummy ones since
     SALSA-Lib doesn't support the configuration files.
     The apps accessing config stuff won't work.
+  o Disabled as default
 
 PCM
   o Supports only the hw layer, i.e. no up/down-mixing, format
@@ -42,19 +43,22 @@ MIXER
   o No linear <-> log dB conversion
 
 TIMER
-  o Disabled as default
   o No query interface
   o No async handler
+  o Disabled as default
 
 RAWMIDI
+  o Should work
   o Disabled as default
 
 HWDEP
+  o Should work
   o Disabled as default
 
 SEQUENCER
   o All replaced with dummy functions.  The apps using sequencer won't
     work properly.
+  o Disabled as default
 
 INSTRUMENT LAYER
   o No APIs are provided
