@@ -238,11 +238,15 @@ snd_hctl_elem_t *snd_hctl_elem_prev(snd_hctl_elem_t *elem)
 	return elem->prev;
 }
 
-#if 0 // ASYNC
+
+/*
+ * not implemented yet
+ */
+
+static inline
 int snd_hctl_async(snd_hctl_t *hctl, int sig, pid_t pid)
 {
-	return snd_ctl_async(hctl->ctl, sig, pid);
+	return -ENXIO;
 }
-#endif
 
 #endif /* __ALSA_HCTL_MACROS_H */

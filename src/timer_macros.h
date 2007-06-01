@@ -523,13 +523,14 @@ long snd_timer_status_get_queue(snd_timer_status_t * status)
 static inline
 int snd_timer_query_open(snd_timer_query_t **handle, const char *name, int mode)
 {
-	return -ENODEV;
+	return -ENXIO;
 }
 
 static inline
-int snd_timer_query_open_lconf(snd_timer_query_t **handle, const char *name, int mode, snd_config_t *lconf)
+int snd_timer_query_open_lconf(snd_timer_query_t **handle, const char *name,
+			       int mode, snd_config_t *lconf)
 {
-	return -ENODEV;
+	return -ENXIO;
 }
 
 static inline
@@ -541,31 +542,49 @@ int snd_timer_query_close(snd_timer_query_t *handle)
 static inline
 int snd_timer_query_next_device(snd_timer_query_t *handle, snd_timer_id_t *tid)
 {
-	return -ENODEV;
+	return -ENXIO;
 }
 
 static inline
 int snd_timer_query_info(snd_timer_query_t *handle, snd_timer_ginfo_t *info)
 {
-	return -ENODEV;
+	return -ENXIO;
 }
 
 static inline
-int snd_timer_query_params(snd_timer_query_t *handle, snd_timer_gparams_t *params)
+int snd_timer_query_params(snd_timer_query_t *handle,
+			   snd_timer_gparams_t *params)
 {
-	return -ENODEV;
+	return -ENXIO;
 }
 
 static inline
-int snd_timer_query_status(snd_timer_query_t *handle, snd_timer_gstatus_t *status)
+int snd_timer_query_status(snd_timer_query_t *handle,
+			   snd_timer_gstatus_t *status)
 {
-	return -ENODEV;
+	return -ENXIO;
 }
 
 static inline
-int snd_timer_open_lconf(snd_timer_t **handle, const char *name, int mode, snd_config_t *lconf)
+int snd_timer_open_lconf(snd_timer_t **handle, const char *name, int mode,
+			 snd_config_t *lconf)
 {
-	return -ENODEV;
+	return -ENXIO;
+}
+
+static inline
+int snd_async_add_timer_handler(snd_async_handler_t **handler,
+				snd_timer_t *timer,
+				snd_async_callback_t callback,
+				void *private_data)
+{
+	return -ENXIO;
+}
+
+static inline
+snd_timer_t *snd_async_handler_get_timer(snd_async_handler_t *handler)
+{
+	return NULL;
 }
 
 #endif /* __ALSA_TIMER_MACROS_H */

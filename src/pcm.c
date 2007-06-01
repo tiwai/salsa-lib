@@ -157,12 +157,6 @@ int snd_pcm_close(snd_pcm_t *pcm)
 	}
 	_snd_pcm_munmap(pcm);
 	snd_pcm_hw_munmap_status(pcm);
-#if 0 // ASYNC
-	while (!list_empty(&pcm->async_handlers)) {
-		snd_async_handler_t *h = list_entry(pcm->async_handlers.next, snd_async_handler_t, hlist);
-		snd_async_del_handler(h);
-	}
-#endif
 	close(pcm->fd);
 	free(pcm);
 	return 0;
@@ -539,64 +533,18 @@ int snd_pcm_dump(snd_pcm_t *pcm, snd_output_t *out)
 }
 
 
-#if 0 // ASYNC
 /*
- * ASYNC
+ * SILENCE AND COPY AREAS
  */
-static int snd_pcm_async(snd_pcm_t *pcm, int sig, pid_t pid)
-{
-	if (sig == 0)
-		sig = SIGIO;
-	if (pid == 0)
-		pid = getpid();
-	return pcm->ops->async(pcm->op_arg, sig, pid);
-}
 
-int snd_async_add_pcm_handler(snd_async_handler_t **handler, snd_pcm_t *pcm, 
-			      snd_async_callback_t callback, void *private_data)
-{
-	int err;
-	int was_empty;
-	snd_async_handler_t *h;
-	err = snd_async_add_handler(&h, _snd_pcm_async_descriptor(pcm),
-				    callback, private_data);
-	if (err < 0)
-		return err;
-	h->type = SND_ASYNC_HANDLER_PCM;
-	h->u.pcm = pcm;
-	was_empty = list_empty(&pcm->async_handlers);
-	list_add_tail(&h->hlist, &pcm->async_handlers);
-	if (was_empty) {
-		err = snd_pcm_async(pcm, snd_async_handler_get_signo(h), getpid());
-		if (err < 0) {
-			snd_async_del_handler(h);
-			return err;
-		}
-	}
-	*handler = h;
-	return 0;
-}
-
-snd_pcm_t *snd_async_handler_get_pcm(snd_async_handler_t *handler)
-{
-	if (handler->type != SND_ASYNC_HANDLER_PCM) {
-		SNDMSG("invalid handler type %d", handler->type);
-		return NULL;
-	}
-	return handler->u.pcm;
-}
-#endif // ASYNC
-
-
-static inline void *snd_pcm_channel_area_addr(const snd_pcm_channel_area_t *area, snd_pcm_uframes_t offset)
+static inline
+void *snd_pcm_channel_area_addr(const snd_pcm_channel_area_t *area,
+				snd_pcm_uframes_t offset)
 {
 	unsigned int bitofs = area->first + area->step * offset;
 	return (char *) area->addr + bitofs / 8;
 }
 
-/*
- * SILENCE AND COPY AREAS
- */
 static int area_silence_4bit(const snd_pcm_channel_area_t *dst_area,
 			     snd_pcm_uframes_t dst_offset,
 			     unsigned int samples, snd_pcm_format_t format)
@@ -669,7 +617,8 @@ static int area_copy_4bit(const snd_pcm_channel_area_t *dst_area,
 	int srcbit_step = src_area->step % 8;
 	int dstbit = dst_area->first % 8;
 	int dstbit_step = dst_area->step % 8;
-	const unsigned char *src = snd_pcm_channel_area_addr(src_area, src_offset);
+	const unsigned char *src = snd_pcm_channel_area_addr(src_area,
+							     src_offset);
 	unsigned char *dst = snd_pcm_channel_area_addr(dst_area, dst_offset);
 	int src_step = src_area->step / 8;
 	int dst_step = dst_area->step / 8;
@@ -902,7 +851,8 @@ static int snd_pcm_hw_mmap_status(snd_pcm_t *pcm)
 	if (pcm->mmap_control == MAP_FAILED)
 		pcm->mmap_control = NULL;
 	if (!pcm->mmap_control) {
-		munmap(pcm->mmap_status, page_align(sizeof(struct sndrv_pcm_mmap_status)));
+		munmap(pcm->mmap_status,
+		       page_align(sizeof(struct sndrv_pcm_mmap_status)));
 		pcm->mmap_status = NULL;
 		goto no_mmap;
 	}
@@ -924,8 +874,10 @@ static void snd_pcm_hw_munmap_status(snd_pcm_t *pcm)
 		free(pcm->sync_ptr);
 		pcm->sync_ptr = NULL;
 	} else {
-		munmap(pcm->mmap_status, page_align(sizeof(struct sndrv_pcm_mmap_status)));
-		munmap(pcm->mmap_control, page_align(sizeof(struct sndrv_pcm_mmap_control)));
+		munmap(pcm->mmap_status,
+		       page_align(sizeof(struct sndrv_pcm_mmap_status)));
+		munmap(pcm->mmap_control,
+		       page_align(sizeof(struct sndrv_pcm_mmap_control)));
 	}
 	pcm->mmap_status = NULL;
 	pcm->mmap_control = NULL;
@@ -1033,7 +985,7 @@ int snd_pcm_wait(snd_pcm_t *pcm, int timeout)
 	struct pollfd pfd;
 	int err;
 	
-#if 0 // NEEDED?
+#if 0 /* FIXME: NEEDED? */
 	_snd_pcm_sync_ptr(pcm, SNDRV_PCM_SYNC_PTR_APPL);
 	if (snd_pcm_mmap_avail(pcm) >= pcm->sw_params.avail_min)
 		return correct_pcm_error(pcm, 1);

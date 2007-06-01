@@ -518,7 +518,7 @@ size_t snd_mixer_selem_id_sizeof(void)
 static inline
 int snd_mixer_selem_id_malloc(snd_mixer_selem_id_t **ptr)
 {
-	*ptr = calloc(1, sizeof(snd_mixer_selem_id_t));
+	*ptr = calloc(1, sizeof(*ptr));
 	if (!*ptr)
 		return -ENOMEM;
 	return 0;

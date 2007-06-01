@@ -14,11 +14,6 @@ int snd_card_get_longname(int card, char **name);
 int snd_ctl_open(snd_ctl_t **ctl, const char *name, int mode);
 int snd_ctl_close(snd_ctl_t *ctl);
 int snd_ctl_wait(snd_ctl_t *ctl, int timeout);
-#if 0 // ASYNC
-int snd_async_add_ctl_handler(snd_async_handler_t **handler, snd_ctl_t *ctl, 
-			      snd_async_callback_t callback, void *private_data);
-snd_ctl_t *snd_async_handler_get_ctl(snd_async_handler_t *handler);
-#endif
 
 #if SALSA_HAS_TLV_SUPPORT
 int snd_ctl_elem_tlv_read(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,

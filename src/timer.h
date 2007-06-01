@@ -8,11 +8,6 @@
 
 int snd_timer_open(snd_timer_t **handle, const char *name, int mode);
 int snd_timer_close(snd_timer_t *handle);
-#if 0 // ASYNC
-int snd_async_add_timer_handler(snd_async_handler_t **handler, snd_timer_t *timer,
-				snd_async_callback_t callback, void *private_data);
-snd_timer_t *snd_async_handler_get_timer(snd_async_handler_t *handler);
-#endif
 
 #include "timer_macros.h"
 

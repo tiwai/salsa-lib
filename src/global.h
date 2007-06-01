@@ -2,10 +2,22 @@
 #define __ALSA_GLOBAL_H
 
 typedef struct snd_config snd_config_t;
+typedef struct _snd_async_handler snd_async_handler_t;
+typedef void (*snd_async_callback_t)(snd_async_handler_t *handler);
 
-/** Timestamp */
+#if !defined(_POSIX_C_SOURCE) && !defined(_POSIX_SOURCE)
+struct timeval {
+	time_t		tv_sec;		/* seconds */
+	long		tv_usec;	/* microseconds */
+};
+
+struct timespec {
+	time_t		tv_sec;		/* seconds */
+	long		tv_nsec;	/* nanoseconds */
+};
+#endif
+
 typedef struct timeval snd_timestamp_t;
-/** Hi-res timestamp */
 typedef struct timespec snd_htimestamp_t;
 
 typedef struct sndrv_pcm_info snd_pcm_info_t;

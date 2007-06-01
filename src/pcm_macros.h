@@ -81,14 +81,6 @@ struct _snd_pcm {
  */
 
 static inline
-int snd_pcm_open_lconf(snd_pcm_t **pcm, const char *name, 
-		       snd_pcm_stream_t stream, int mode,
-		       snd_config_t *lconf)
-{
-	return -ENXIO;
-}
-
-static inline
 int snd_config_update_free_global(void)
 {
 	return 0;
@@ -298,29 +290,6 @@ int snd_pcm_unlink(snd_pcm_t *pcm)
 	return 0;
 }
 
-static inline
-snd_pcm_sframes_t snd_pcm_mmap_writei(snd_pcm_t *pcm, const void *buffer, snd_pcm_uframes_t size)
-{
-	return -ENXIO;
-}
-
-static inline
-snd_pcm_sframes_t snd_pcm_mmap_writen(snd_pcm_t *pcm, void **bufs, snd_pcm_uframes_t size)
-{
-	return -ENXIO;
-}
-
-static inline
-snd_pcm_sframes_t snd_pcm_mmap_readi(snd_pcm_t *pcm, void *buffer, snd_pcm_uframes_t size)
-{
-	return -ENXIO;
-}
-
-static inline
-snd_pcm_sframes_t snd_pcm_mmap_readn(snd_pcm_t *pcm, void **bufs, snd_pcm_uframes_t size)
-{
-	return -ENXIO;
-}
 
 extern const char *_snd_pcm_stream_names[];
 extern const char *_snd_pcm_state_names[];
@@ -2170,6 +2139,61 @@ static inline
 void snd_pcm_info_set_stream(snd_pcm_info_t *obj, snd_pcm_stream_t val)
 {
 	obj->stream = val;
+}
+
+
+/*
+ * not implemented yet
+ */
+
+static inline
+int snd_pcm_open_lconf(snd_pcm_t **pcm, const char *name, 
+		       snd_pcm_stream_t stream, int mode,
+		       snd_config_t *lconf)
+{
+	return -ENXIO;
+}
+
+static inline
+snd_pcm_sframes_t snd_pcm_mmap_writei(snd_pcm_t *pcm, const void *buffer,
+				      snd_pcm_uframes_t size)
+{
+	return -ENXIO;
+}
+
+static inline
+snd_pcm_sframes_t snd_pcm_mmap_writen(snd_pcm_t *pcm, void **bufs,
+				      snd_pcm_uframes_t size)
+{
+	return -ENXIO;
+}
+
+static inline
+snd_pcm_sframes_t snd_pcm_mmap_readi(snd_pcm_t *pcm, void *buffer,
+				     snd_pcm_uframes_t size)
+{
+	return -ENXIO;
+}
+
+static inline
+snd_pcm_sframes_t snd_pcm_mmap_readn(snd_pcm_t *pcm, void **bufs,
+				     snd_pcm_uframes_t size)
+{
+	return -ENXIO;
+}
+
+static inline
+int snd_async_add_pcm_handler(snd_async_handler_t **handler, snd_pcm_t *pcm, 
+			      snd_async_callback_t callback,
+			      void *private_data)
+{
+	return -ENXIO;
+}
+
+static inline
+snd_pcm_t *snd_async_handler_get_pcm(snd_async_handler_t *handler)
+{
+	return NULL;
 }
 
 #endif /* __ALSA_PCM_MACROS_H */

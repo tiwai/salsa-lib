@@ -20,13 +20,6 @@ struct _snd_ctl {
 
 
 static inline
-int snd_ctl_open_lconf(snd_ctl_t **ctlp, const char *name,
-		       int mode, snd_config_t *lconf)
-{
-	return -ENODEV;
-}
-
-static inline
 int snd_ctl_nonblock(snd_ctl_t *ctl, int nonblock)
 {
 	return _snd_set_nonblock(ctl->fd, nonblock);
@@ -211,18 +204,6 @@ int snd_ctl_rawmidi_prefer_subdevice(snd_ctl_t *ctl, int subdev)
 }
 
 static inline
-int snd_ctl_set_power_state(snd_ctl_t *ctl, unsigned int state)
-{
-	return -ENXIO;
-}
-
-static inline
-int snd_ctl_get_power_state(snd_ctl_t *ctl, unsigned int *state)
-{
-	return -ENXIO;
-}
-
-static inline
 int snd_ctl_read(snd_ctl_t *ctl, snd_ctl_event_t *event)
 {
 	ssize_t res = read(ctl->fd, event, sizeof(*event));
@@ -320,7 +301,7 @@ size_t snd_ctl_elem_id_sizeof(void)
 static inline
 int snd_ctl_elem_id_malloc(snd_ctl_elem_id_t **ptr)
 {
-	*ptr = calloc(1, sizeof(snd_ctl_elem_id_t));
+	*ptr = calloc(1, sizeof(*ptr));
 	if (!*ptr)
 		return -ENOMEM;
 	return 0;
@@ -426,7 +407,7 @@ size_t snd_ctl_card_info_sizeof(void)
 static inline
 int snd_ctl_card_info_malloc(snd_ctl_card_info_t **ptr)
 {
-	*ptr = calloc(1, sizeof(snd_ctl_card_info_t));
+	*ptr = calloc(1, sizeof(*ptr));
 	if (!*ptr)
 		return -ENOMEM;
 	return 0;
@@ -502,7 +483,7 @@ size_t snd_ctl_event_sizeof(void)
 static inline
 int snd_ctl_event_malloc(snd_ctl_event_t **ptr)
 {
-	*ptr = calloc(1, sizeof(snd_ctl_event_t));
+	*ptr = calloc(1, sizeof(*ptr));
 	if (!*ptr)
 		return -ENOMEM;
 	return 0;
@@ -541,7 +522,7 @@ size_t snd_ctl_elem_list_sizeof(void)
 static inline
 int snd_ctl_elem_list_malloc(snd_ctl_elem_list_t **ptr)
 {
-	*ptr = calloc(1, sizeof(snd_ctl_elem_list_t));
+	*ptr = calloc(1, sizeof(*ptr));
 	if (!*ptr)
 		return -ENOMEM;
 	return 0;
@@ -642,7 +623,7 @@ size_t snd_ctl_elem_info_sizeof(void)
 static inline
 int snd_ctl_elem_info_malloc(snd_ctl_elem_info_t **ptr)
 {
-	*ptr = calloc(1, sizeof(snd_ctl_elem_info_t));
+	*ptr = calloc(1, sizeof(*ptr));
 	if (!*ptr)
 		return -ENOMEM;
 	return 0;
@@ -927,7 +908,7 @@ size_t snd_ctl_elem_value_sizeof(void)
 static inline
 int snd_ctl_elem_value_malloc(snd_ctl_elem_value_t **ptr)
 {
-	*ptr = calloc(1, sizeof(snd_ctl_elem_value_t));
+	*ptr = calloc(1, sizeof(*ptr));
 	if (!*ptr)
 		return -ENOMEM;
 	return 0;
@@ -1167,6 +1148,24 @@ int snd_ctl_elem_tlv_command(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
  */
 
 static inline
+int snd_ctl_open_lconf(snd_ctl_t **ctlp, const char *name,
+		       int mode, snd_config_t *lconf)
+{
+	return -ENODEV;
+}
+static inline
+int snd_ctl_set_power_state(snd_ctl_t *ctl, unsigned int state)
+{
+	return -ENXIO;
+}
+
+static inline
+int snd_ctl_get_power_state(snd_ctl_t *ctl, unsigned int *state)
+{
+	return -ENXIO;
+}
+
+static inline
 int snd_device_name_hint(int card, const char *iface, void ***hints)
 {
 	return -ENXIO;
@@ -1180,6 +1179,20 @@ int snd_device_name_free_hint(void **hints)
 
 static inline
 char *snd_device_name_get_hint(const void *hint, const char *id)
+{
+	return NULL;
+}
+
+static inline
+int snd_async_add_ctl_handler(snd_async_handler_t **handler, snd_ctl_t *ctl, 
+			      snd_async_callback_t callback,
+			      void *private_data)
+{
+	return -ENXIO;
+}
+
+static inline
+snd_ctl_t *snd_async_handler_get_ctl(snd_async_handler_t *handler)
 {
 	return NULL;
 }

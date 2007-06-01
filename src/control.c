@@ -81,27 +81,10 @@ int snd_ctl_open(snd_ctl_t **ctlp, const char *name, int mode)
 
 int snd_ctl_close(snd_ctl_t *ctl)
 {
-#if 0 // ASYNC
-	while (!list_empty(&ctl->async_handlers)) {
-		snd_async_handler_t *h = list_entry(&ctl->async_handlers.next, snd_async_handler_t, hlist);
-		snd_async_del_handler(h);
-	}
-#endif
 	close(ctl->fd);
 	free(ctl);
 	return 0;
 }
-
-#if 0 // ASYNC
-int snd_ctl_async(snd_ctl_t *ctl, int sig, pid_t pid)
-{
-	if (sig == 0)
-		sig = SIGIO;
-	if (pid == 0)
-		pid = getpid();
-	return ctl->ops->async(ctl, sig, pid);
-}
-#endif
 
 int snd_ctl_elem_add_integer(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
 			     unsigned int count, long min, long max, long step)
@@ -284,39 +267,9 @@ int snd_ctl_wait(snd_ctl_t *ctl, int timeout)
 	}
 }
 
-#if 0 // ASYNC
-int snd_async_add_ctl_handler(snd_async_handler_t **handler, snd_ctl_t *ctl, 
-			      snd_async_callback_t callback, void *private_data)
-{
-	int err;
-	int was_empty;
-	snd_async_handler_t *h;
-	err = snd_async_add_handler(&h, _snd_ctl_async_descriptor(ctl),
-				    callback, private_data);
-	if (err < 0)
-		return err;
-	h->type = SND_ASYNC_HANDLER_CTL;
-	h->u.ctl = ctl;
-	was_empty = list_empty(&ctl->async_handlers);
-	list_add_tail(&h->hlist, &ctl->async_handlers);
-	if (was_empty) {
-		err = snd_ctl_async(ctl, snd_async_handler_get_signo(h), getpid());
-		if (err < 0) {
-			snd_async_del_handler(h);
-			return err;
-		}
-	}
-	*handler = h;
-	return 0;
-}
-
-snd_ctl_t *snd_async_handler_get_ctl(snd_async_handler_t *handler)
-{
-	assert(handler->type == SND_ASYNC_HANDLER_CTL);
-	return handler->u.ctl;
-}
-#endif
-
+/*
+ * strings
+ */
 #define TYPE(v) [SND_CTL_ELEM_TYPE_##v] = #v
 #define IFACE(v) [SND_CTL_ELEM_IFACE_##v] = #v
 #define IFACE1(v, n) [SND_CTL_ELEM_IFACE_##v] = #n
