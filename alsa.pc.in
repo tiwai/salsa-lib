@@ -4,8 +4,8 @@ libdir=@libdir@
 includedir=@includedir@
 
 Name: alsa
-Description: Advanced Linux Sound Architecture (ALSA) - Library
+Description: Small Advanced Linux Sound Architecture (SALSA) - Library
 Version: @VERSION@
 Requires: 
-Libs: -L${libdir} -lasound
+Libs: -L${libdir} -lsalsa
 Cflags: -I${includedir}

@@ -4,7 +4,7 @@ dnl Christopher Lansdown <lansdoct@cs.alfred.edu>
 dnl Jaroslav Kysela <perex@suse.cz>
 dnl Last modification: $Id: alsa.m4,v 1.24 2004/09/15 18:48:07 tiwai Exp $
 dnl AM_PATH_ALSA([MINIMUM-VERSION [, ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]]])
-dnl Test for libasound, and define ALSA_CFLAGS and ALSA_LIBS as appropriate.
+dnl Test for libsalsa, and define ALSA_CFLAGS and ALSA_LIBS as appropriate.
 dnl enables arguments --with-alsa-prefix=
 dnl                   --with-alsa-enc-prefix=
 dnl                   --disable-alsatest
@@ -52,13 +52,13 @@ if test "$alsa_prefix" != "" ; then
 fi
 
 dnl add the alsa library
-ALSA_LIBS="$ALSA_LIBS -lasound -lm -ldl -lpthread"
+ALSA_LIBS="$ALSA_LIBS -lsalsa"
 LIBS="$ALSA_LIBS $LIBS"
 AC_MSG_RESULT($ALSA_LIBS)
 
-dnl Check for a working version of libasound that is of the right version.
+dnl Check for a working version of libsalsa that is of the right version.
 min_alsa_version=ifelse([$1], ,0.1.1,$1)
-AC_MSG_CHECKING(for libasound headers version >= $min_alsa_version)
+AC_MSG_CHECKING(for libsalsa headers version >= $min_alsa_version)
 no_alsa=""
     alsa_min_major_version=`echo $min_alsa_version | \
            sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\1/'`
@@ -106,24 +106,24 @@ exit(0);
 ],
   [AC_MSG_RESULT(found.)],
   [AC_MSG_RESULT(not present.)
-   ifelse([$3], , [AC_MSG_ERROR(Sufficiently new version of libasound not found.)])
+   ifelse([$3], , [AC_MSG_ERROR(Sufficiently new version of libsalsa not found.)])
    alsa_found=no]
 )
 AC_LANG_RESTORE
 
 dnl Now that we know that we have the right version, let's see if we have the library and not just the headers.
 if test "x$enable_alsatest" = "xyes"; then
-AC_CHECK_LIB([asound], [snd_ctl_open],,
-	[ifelse([$3], , [AC_MSG_ERROR(No linkable libasound was found.)])
+AC_CHECK_LIB([salsa], [snd_ctl_open],,
+	[ifelse([$3], , [AC_MSG_ERROR(No linkable libsalsa was found.)])
 	 alsa_found=no]
 )
 fi
 
 if test "x$alsa_found" = "xyes" ; then
    ifelse([$2], , :, [$2])
-   LIBS=`echo $LIBS | sed 's/-lasound//g'`
+   LIBS=`echo $LIBS | sed 's/-lsalsa//g'`
    LIBS=`echo $LIBS | sed 's/  //'`
-   LIBS="-lasound $LIBS"
+   LIBS="-lsalsa $LIBS"
 fi
 if test "x$alsa_found" = "xno" ; then
    ifelse([$3], , :, [$3])
