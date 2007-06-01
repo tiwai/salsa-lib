@@ -183,7 +183,7 @@ static int remove_mixer_elem(snd_mixer_elem_t *elem)
 
 	memmove(mixer->pelems + idx,
 		mixer->pelems + idx + 1,
-		mixer->count - idx - 1);
+		sizeof(*elem) * (mixer->count - idx - 1));
 	mixer->count--;
 	for (i = idx; i < mixer->count; i++)
 		mixer->pelems[i]->index = i;

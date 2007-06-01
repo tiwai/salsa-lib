@@ -35,7 +35,8 @@ int snd_hctl_open(snd_hctl_t **hctlp, const char *name, int mode)
 	snd_ctl_t *ctl;
 	int err;
 	
-	if ((err = snd_ctl_open(&ctl, name, mode)) < 0)
+	err = snd_ctl_open(&ctl, name, mode);
+	if (err < 0)
 		return err;
 	err = snd_hctl_open_ctl(hctlp, ctl);
 	if (err < 0)
@@ -47,11 +48,10 @@ int snd_hctl_open_ctl(snd_hctl_t **hctlp, snd_ctl_t *ctl)
 {
 	snd_hctl_t *hctl;
 
-	*hctlp = NULL;
-	if ((hctl = (snd_hctl_t *)calloc(1, sizeof(snd_hctl_t))) == NULL)
+	*hctlp = hctl = calloc(1, sizeof(*hctl));
+	if (!hctl)
 		return -ENOMEM;
 	hctl->ctl = ctl;
-	*hctlp = hctl;
 	return 0;
 }
 
@@ -90,10 +90,12 @@ static void add_elem_list(snd_hctl_t *hctl, snd_hctl_elem_t *elem)
 	else
 		hctl->first_elem = elem;
 	hctl->last_elem = elem;
+	hctl->count++;
 }
 
 static void del_elem_list(snd_hctl_t *hctl, snd_hctl_elem_t *elem)
 {
+	hctl->count--;
 	if (elem->prev)
 		elem->prev->next = elem->next;
 	else
@@ -122,8 +124,8 @@ static void snd_hctl_elem_remove(snd_hctl_t *hctl,
 
 int snd_hctl_free(snd_hctl_t *hctl)
 {
-	while (hctl->first_elem)
-		snd_hctl_elem_remove(hctl, hctl->first_elem);
+	while (hctl->last_elem)
+		snd_hctl_elem_remove(hctl, hctl->last_elem);
 	return 0;
 }
 
@@ -165,8 +167,8 @@ int snd_hctl_load(snd_hctl_t *hctl)
 			goto _end;
 	}
 	for (idx = 0; idx < list.count; idx++) {
-		elem = calloc(1, sizeof(snd_hctl_elem_t));
-		if (elem == NULL) {
+		elem = calloc(1, sizeof(*elem));
+		if (!elem) {
 			snd_hctl_free(hctl);
 			err = -ENOMEM;
 			goto _end;
