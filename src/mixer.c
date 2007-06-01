@@ -179,14 +179,18 @@ static int add_mixer_elem(snd_mixer_elem_t *elem, snd_mixer_t *mixer)
 static int remove_mixer_elem(snd_mixer_elem_t *elem)
 {
 	snd_mixer_t *mixer = elem->mixer;
-	int i, idx = elem->index;
+	int i;
 
-	memmove(mixer->pelems + idx,
-		mixer->pelems + idx + 1,
-		sizeof(*elem) * (mixer->count - idx - 1));
-	mixer->count--;
-	for (i = idx; i < mixer->count; i++)
-		mixer->pelems[i]->index = i;
+	for (i = 0; i < mixer->count; i++) {
+		if (mixer->pelems[i] == elem) {
+			mixer->count--;
+			for (; i < mixer->count; i++) {
+				mixer->pelems[i] = mixer->pelems[i + 1];
+				mixer->pelems[i]->index = i;
+			}
+			break;
+		}
+	}
 	free(elem);
 	return 0;
 }
@@ -414,6 +418,7 @@ static snd_selem_item_head_t *new_selem_item(snd_hctl_elem_t *hp,
 
 	if (!item)
 		return NULL;
+	item->helem = hp;
 	item->numid = info->id.numid;
 	item->channels = info->count;
 	return item;
@@ -532,20 +537,17 @@ static int add_simple_element(snd_hctl_elem_t *hp, snd_mixer_t *mixer)
 	item = new_selem_item(hp, info);
 	if (!item)
 		return -ENOMEM;
-	item->helem = hp;
 
 	/* check matching element */
 	index = 0;
 	for (i = 0; i < mixer->count; i++) {
 		elem = mixer->pelems[i];
 		if (!strcmp(elem->sid.name, name)) {
+			if (index <= elem->sid.index)
+				index = elem->sid.index + 1;
 			/* already occupied? */
-			if (elem->items[type]) {
-				/* check the available index number */
-				while (index <= elem->sid.index)
-					index++;
+			if (elem->items[type])
 				continue;
-			}
 			add_cap(elem, caps, type, item);
 			return 0;
 		}
