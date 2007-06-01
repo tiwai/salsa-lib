@@ -1138,6 +1138,31 @@ void snd_ctl_elem_value_set_iec958(snd_ctl_elem_value_t *obj,
 }
 
 /*
+ */
+#ifndef SALSA_HAS_TLV_SUPPORT
+static inline
+int snd_ctl_elem_tlv_read(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
+			  unsigned int *tlv, unsigned int tlv_size)
+{
+	return -ENXIO;
+}
+
+static inline
+int snd_ctl_elem_tlv_write(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
+			   const unsigned int *tlv)
+{
+	return -ENXIO;
+}
+
+static inline
+int snd_ctl_elem_tlv_command(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
+			     const unsigned int *tlv)
+{
+	return -ENXIO;
+}
+#endif /* !SALSA_HAS_TLV_SUPPORT */
+
+/*
  * not implemented yet
  */
 

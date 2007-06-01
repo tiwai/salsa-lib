@@ -20,7 +20,7 @@ libsalsa_la_LDFLAGS = -version-number 0:0:1
 
 alsaincludedir = $(includedir)/alsa
 
-alsainclude_HEADERS = asoundlib.h version.h asound.h asoundef.h \
+alsainclude_HEADERS = asoundlib.h version.h recipe.h asound.h asoundef.h \
 	global.h input.h output.h error.h \
 	control.h ctl_types.h ctl_macros.h \
 	pcm.h pcm_types.h pcm_macros.h
@@ -43,7 +43,6 @@ alsainclude_HEADERS += \
 	timer.h timer_types.h timer_macros.h
 endif
 
-noinst_HEADERS = local.h asoundlib-head.h asoundlib-tail.h
+noinst_HEADERS = local.h asoundlib-head.h asoundlib-tail.h recipe.h.in
 
-distclean::
-	rm -f asoundlib.h
+DISTCLEANFILES = asoundlib.h recipe.h

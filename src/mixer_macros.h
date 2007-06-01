@@ -564,15 +564,13 @@ void snd_mixer_selem_id_set_index(snd_mixer_selem_id_t *obj, unsigned int val)
 }
 
 
-/*
- * dB handler - not implemented yet
- */
-
+#ifndef SALSA_HAS_TLV_SUPPORT
+/* dB handler */
 static inline
 int snd_mixer_selem_get_playback_dB_range(snd_mixer_elem_t *elem,
 					  long *min, long *max)
 {
-	return -EINVAL;
+	return -ENXIO;
 }
 
 static inline
@@ -580,7 +578,7 @@ int snd_mixer_selem_get_playback_dB(snd_mixer_elem_t *elem,
 				    snd_mixer_selem_channel_id_t channel,
 				    long *value)
 {
-	return -EINVAL;
+	return -ENXIO;
 }
 
 static inline
@@ -588,21 +586,21 @@ int snd_mixer_selem_set_playback_dB(snd_mixer_elem_t *elem,
 				    snd_mixer_selem_channel_id_t channel,
 				    long value, int dir)
 {
-	return -EINVAL;
+	return -ENXIO;
 }
 
 static inline
 int snd_mixer_selem_set_playback_dB_all(snd_mixer_elem_t *elem, long value,
 					int dir)
 {
-	return -EINVAL;
+	return -ENXIO;
 }
 
 static inline
 int snd_mixer_selem_get_capture_dB_range(snd_mixer_elem_t *elem,
 					 long *min, long *max)
 {
-	return -EINVAL;
+	return -ENXIO;
 }
 
 static inline
@@ -610,7 +608,7 @@ int snd_mixer_selem_get_capture_dB(snd_mixer_elem_t *elem,
 				   snd_mixer_selem_channel_id_t channel,
 				   long *value)
 {
-	return -EINVAL;
+	return -ENXIO;
 }
 
 static inline
@@ -618,14 +616,15 @@ int snd_mixer_selem_set_capture_dB(snd_mixer_elem_t *elem,
 				   snd_mixer_selem_channel_id_t channel,
 				   long value, int dir)
 {
-	return -EINVAL;
+	return -ENXIO;
 }
 
 static inline
 int snd_mixer_selem_set_capture_dB_all(snd_mixer_elem_t *elem, long value,
 				       int dir)
 {
-	return -EINVAL;
+	return -ENXIO;
 }
+#endif /* !SALSA_HAS_TLV_SUPPORT */
 
 #endif /* __ALSA_MIXER_MACROS_H */

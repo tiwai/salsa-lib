@@ -20,12 +20,20 @@ int snd_mixer_selem_register(snd_mixer_t *mixer,
 snd_mixer_elem_t *snd_mixer_find_selem(snd_mixer_t *mixer,
 				       const snd_mixer_selem_id_t *id);
 
-int snd_mixer_selem_set_playback_volume(snd_mixer_elem_t *elem, snd_mixer_selem_channel_id_t channel, long value);
-int snd_mixer_selem_set_capture_volume(snd_mixer_elem_t *elem, snd_mixer_selem_channel_id_t channel, long value);
+int snd_mixer_selem_set_playback_volume(snd_mixer_elem_t *elem,
+					snd_mixer_selem_channel_id_t channel,
+					long value);
+int snd_mixer_selem_set_capture_volume(snd_mixer_elem_t *elem,
+				       snd_mixer_selem_channel_id_t channel,
+				       long value);
 int snd_mixer_selem_set_playback_volume_all(snd_mixer_elem_t *elem, long value);
 int snd_mixer_selem_set_capture_volume_all(snd_mixer_elem_t *elem, long value);
-int snd_mixer_selem_set_playback_switch(snd_mixer_elem_t *elem, snd_mixer_selem_channel_id_t channel, int value);
-int snd_mixer_selem_set_capture_switch(snd_mixer_elem_t *elem, snd_mixer_selem_channel_id_t channel, int value);
+int snd_mixer_selem_set_playback_switch(snd_mixer_elem_t *elem,
+					snd_mixer_selem_channel_id_t channel,
+					int value);
+int snd_mixer_selem_set_capture_switch(snd_mixer_elem_t *elem,
+				       snd_mixer_selem_channel_id_t channel,
+				       int value);
 int snd_mixer_selem_set_playback_switch_all(snd_mixer_elem_t *elem, int value);
 int snd_mixer_selem_set_capture_switch_all(snd_mixer_elem_t *elem, int value);
 int snd_mixer_selem_set_playback_volume_range(snd_mixer_elem_t *elem, 
@@ -33,7 +41,33 @@ int snd_mixer_selem_set_playback_volume_range(snd_mixer_elem_t *elem,
 int snd_mixer_selem_set_capture_volume_range(snd_mixer_elem_t *elem, 
 					     long min, long max);
 
-int snd_mixer_selem_set_enum_item(snd_mixer_elem_t *elem, snd_mixer_selem_channel_id_t channel, unsigned int idx);
+int snd_mixer_selem_set_enum_item(snd_mixer_elem_t *elem,
+				  snd_mixer_selem_channel_id_t channel,
+				  unsigned int idx);
+
+#ifdef SALSA_HAS_TLV_SUPPORT
+/* dB handler */
+int snd_mixer_selem_get_playback_dB_range(snd_mixer_elem_t *elem,
+					  long *min, long *max);
+int snd_mixer_selem_get_playback_dB(snd_mixer_elem_t *elem,
+				    snd_mixer_selem_channel_id_t channel,
+				    long *value);
+int snd_mixer_selem_set_playback_dB(snd_mixer_elem_t *elem,
+				    snd_mixer_selem_channel_id_t channel,
+				    long value, int dir);
+int snd_mixer_selem_set_playback_dB_all(snd_mixer_elem_t *elem, long value,
+					int dir);
+int snd_mixer_selem_get_capture_dB_range(snd_mixer_elem_t *elem,
+					 long *min, long *max);
+int snd_mixer_selem_get_capture_dB(snd_mixer_elem_t *elem,
+				   snd_mixer_selem_channel_id_t channel,
+				   long *value);
+int snd_mixer_selem_set_capture_dB(snd_mixer_elem_t *elem,
+				   snd_mixer_selem_channel_id_t channel,
+				   long value, int dir);
+int snd_mixer_selem_set_capture_dB_all(snd_mixer_elem_t *elem, long value,
+				       int dir);
+#endif /* SALSA_HAS_TLV_SUPPORT */
 
 #include "mixer_macros.h"
 

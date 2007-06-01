@@ -1,0 +1,7 @@
+#ifndef __ALSA_RECIPE_H
+#define __ALSA_RECIPE_H
+
+/* Build with TLV support */
+#undef SALSA_HAS_TLV_SUPPORT
+
+#endif /* __ALSA_RECIPE_H */

@@ -21,9 +21,10 @@ libtool
 ltmain.sh
 missing
 INSTALL
-COPYING
+
 src/asoundlib.h
-*.pc
+src/recipe.h
+alsa.pc
 
 .deps
 .libs

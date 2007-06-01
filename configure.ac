@@ -1,6 +1,6 @@
 AC_PREREQ(2.59)
 AC_INIT(src/control.c)
-AM_INIT_AUTOMAKE(libsalsa, 0.0.1)
+AM_INIT_AUTOMAKE(salsa-lib, 0.0.1)
 AC_PREFIX_DEFAULT(/usr)
 
 dnl AC_CONFIG_HEADERS(src/config.h)
@@ -33,10 +33,19 @@ AM_CONDITIONAL(BUILD_RAWMIDI, test "$rawmidi" = "yes")
 AM_CONDITIONAL(BUILD_HWDEP, test "$hwdep" = "yes")
 AM_CONDITIONAL(BUILD_TIMER, test "$timer" = "yes")
 
+AC_ARG_ENABLE(tlv,
+  AS_HELP_STRING([--enable-tlv],
+	 	 [enable TLV (dB) support]),
+  tlv="$enableval", tlv="no")
+if test "$tlv" = "yes"; then
+  AC_DEFINE(SALSA_HAS_TLV_SUPPORT,,[Build with TLV support])
+fi
+
 AC_OUTPUT([
 	Makefile
 	alsa.pc
 	src/Makefile
+	src/recipe.h
 ])
 
 echo "Creating asoundlib.h..."
