@@ -1,22 +1,22 @@
 AM_CFLAGS = -Wall -g
 
-lib_LTLIBRARIES = libasound.la
-libasound_la_SOURCES = control.c cards.c \
+lib_LTLIBRARIES = libsalsa.la
+libsalsa_la_SOURCES = control.c cards.c \
 	pcm.c pcm_params.c pcm_misc.c
 if BUILD_MIXER
-libasound_la_SOURCES += hcontrol.c mixer.c
+libsalsa_la_SOURCES += hcontrol.c mixer.c
 endif
 if BUILD_RAWMIDI
-libasound_la_SOURCES += rawmidi.c
+libsalsa_la_SOURCES += rawmidi.c
 endif
 if BUILD_HWDEP
-libasound_la_SOURCES += hwdep.c
+libsalsa_la_SOURCES += hwdep.c
 endif
 if BUILD_TIMER
-libasound_la_SOURCES += timer.c
+libsalsa_la_SOURCES += timer.c
 endif
 
-libasound_la_LDFLAGS = -version-number 2:0:0
+libsalsa_la_LDFLAGS = -version-number 0:0:1
 
 alsaincludedir = $(includedir)/alsa
 
