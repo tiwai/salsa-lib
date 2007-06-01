@@ -31,6 +31,10 @@
 #include "local.h"
 
 
+/*
+ * open/close
+ */
+
 int snd_ctl_open(snd_ctl_t **ctlp, const char *name, int mode)
 {
 	snd_ctl_t *ctl;
@@ -85,6 +89,11 @@ int snd_ctl_close(snd_ctl_t *ctl)
 	free(ctl);
 	return 0;
 }
+
+
+/*
+ * add/remove user-defined controls
+ */
 
 int snd_ctl_elem_add_integer(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
 			     unsigned int count, long min, long max, long step)
@@ -166,7 +175,11 @@ int snd_ctl_elem_add_iec958(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id)
 	return snd_ctl_elem_add(ctl, &info);
 }
 
+
 #if SALSA_HAS_TLV_SUPPORT
+/*
+ * TLV support
+ */
 static int hw_elem_tlv(snd_ctl_t *ctl, int inum,
 		       unsigned int numid,
 		       unsigned int *tlv, unsigned int tlv_size)
@@ -248,6 +261,10 @@ int snd_ctl_elem_tlv_command(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
 }
 #endif /* SALSA_HAS_TLV_SUPPORT */
 
+
+/*
+ * Misc routines
+ */
 int snd_ctl_wait(snd_ctl_t *ctl, int timeout)
 {
 	struct pollfd pfd;

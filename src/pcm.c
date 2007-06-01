@@ -37,7 +37,10 @@ static int snd_pcm_hw_mmap_status(snd_pcm_t *pcm);
 static void snd_pcm_hw_munmap_status(snd_pcm_t *pcm);
 
 /*
+ * open/close
  */
+
+/* open the substream with the given subdevice number */
 static int open_with_subdev(const char *filename, int fmode,
 			    int card, int subdev)
 {
@@ -146,8 +149,6 @@ int snd_pcm_open(snd_pcm_t **pcmp, const char *name,
 		close(fd);
 	return err;
 }
-
-int _snd_pcm_munmap(snd_pcm_t *pcm);
 
 int snd_pcm_close(snd_pcm_t *pcm)
 {
@@ -978,6 +979,7 @@ snd_pcm_sframes_t snd_pcm_mmap_commit(snd_pcm_t *pcm,
 
 
 /*
+ * HELPERS
  */
 
 int snd_pcm_wait(snd_pcm_t *pcm, int timeout)

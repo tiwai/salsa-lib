@@ -30,6 +30,10 @@
 #include "hcontrol.h"
 #include "local.h"
 
+
+/*
+ * open/close
+ */
 int snd_hctl_open(snd_hctl_t **hctlp, const char *name, int mode)
 {
 	snd_ctl_t *ctl;
@@ -63,6 +67,10 @@ int snd_hctl_close(snd_hctl_t *hctl)
 	return 0;
 }
 
+
+/*
+ * event handlers
+ */
 static inline
 int snd_hctl_throw_event(snd_hctl_t *hctl, unsigned int mask,
 			 snd_hctl_elem_t *elem)
@@ -81,6 +89,10 @@ int snd_hctl_elem_throw_event(snd_hctl_elem_t *elem,
 	return 0;
 }
 
+
+/*
+ * add/remove a hcontrol element
+ */
 static void add_elem_list(snd_hctl_t *hctl, snd_hctl_elem_t *elem)
 {
 	elem->next = NULL;
@@ -122,6 +134,9 @@ static void snd_hctl_elem_remove(snd_hctl_t *hctl,
 	free(elem);
 }
 
+/*
+ * release all elements
+ */
 int snd_hctl_free(snd_hctl_t *hctl)
 {
 	while (hctl->last_elem)

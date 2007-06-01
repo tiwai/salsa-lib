@@ -197,6 +197,7 @@ static int snd_mask_refine_set(snd_mask_t *mask, unsigned int val)
 }
 
 /*
+ * Operations for interval types
  */
 
 static void snd_interval_any(snd_interval_t *i)
@@ -390,8 +391,10 @@ static int snd_interval_refine_set(snd_interval_t *i, unsigned int val)
 }
 
 /*
+ * HANDLE HW_PARAMS, SW_PARAMS
  */
 
+/* set up default sw_params values */
 static int snd_pcm_sw_params_default(snd_pcm_t *pcm,
 				     snd_pcm_sw_params_t *params)
 {
@@ -1053,7 +1056,7 @@ int snd_pcm_sw_params(snd_pcm_t *pcm, snd_pcm_sw_params_t *params)
 }
 
 /*
- * DUMP
+ * DUMP HW PARAMS
  */
 
 static void snd_interval_print(const snd_interval_t *i, snd_output_t *out)
