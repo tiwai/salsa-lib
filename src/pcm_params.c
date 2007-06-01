@@ -1,5 +1,5 @@
 /*
- * PCM HW/SW PARAMS
+ *  SALSA-Lib - PCM HW/SW PARAMS
  *
  *  Copyright (c) 2007 by Takashi Iwai <tiwai@suse.de>
  *

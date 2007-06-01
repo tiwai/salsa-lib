@@ -1,3 +1,7 @@
+/*
+ * Control privates and macros
+ */
+
 #ifndef __ALSA_CTL_MACROS_H
 #define __ALSA_CTL_MACROS_H
 

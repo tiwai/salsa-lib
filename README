@@ -1,0 +1,76 @@
+		SALSA-Lib - Small ALSA Library
+		==============================
+
+GENERAL
+-------
+
+SALSA-Lib is a small, light-weight, hot and spicy version of the ALSA
+library, mainly for embedded systems with limited resources.
+The library is designed to be source-level compatible with ALSA
+library API for limited contents.  Some components like ALSA sequencer
+isn't supported, and most of all, the alsa-lib plugins and
+configurations are completely dropped.
+
+The current features are like below:
+
+PCM
+  o Supports only the hw layer, i.e. no up/down-mixing, format
+    conversion, rate conversion, etc, and no external plug-in
+  o Accepts the limited PCM name, "hw", "default", "default:x",
+    and "hw:x,y,z"
+  o snd_pcm_mmap_read/write*() aren't included
+  o No async handler
+
+CONTROL
+  o Supports only the hw layer, no plug-in
+  o Some H-control functions are not included
+
+MIXER
+  o No sort with weight as default, sorted in the order of numid
+  o Simple-none layer only
+  o "Capture Source" isn't split to switches but handled as an enum
+    (I personally like this better :)
+  o dB support can be selected via configure option
+  o No linear <-> log dB conversion
+
+TIMER
+  o No query interface
+
+RAWMIDI
+  o Almost OK
+
+HWDEP
+  o Almost OK
+
+SEQUENCER
+  o Not supported at all yet, no API functions defined
+
+
+INSTALLATION
+------------
+
+The library is installed as $LIBDIR/libsalsa.so.*.
+This package provides also the compatible alsa.m4 and alsa.pc.  If the
+other packages can be autoreconf'ed, you'll be able to link libsalsa
+as it is.
+
+Otherwise, if your package needs libasound.so for checking/linking,
+simply create a symlink to libsalsa.so:
+
+	# cd /usr/lib
+	# ln -s libsalsa.so libasound.so
+
+The C header files are installed into $INCLUDEDIR/alsa.  The
+alsa/asoundlib.h should be compatible with the normal alsa-lib's one.
+
+
+DOCUMENTATION
+-------------
+
+See alsa-lib reference.  It's compatible!
+
+
+LICENSE
+-------
+
+Distributed under LGPL.  See COPYING file.

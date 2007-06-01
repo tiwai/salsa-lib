@@ -1,3 +1,6 @@
+#ifndef __ALSA_TIMER_TYPES_H
+#define __ALSA_TIMER_TYPES_H
+
 /** timer identification structure */
 typedef struct sndrv_timer_id snd_timer_id_t;
 /** timer global info structure */
@@ -90,3 +93,5 @@ typedef enum _snd_timer_type {
 typedef struct _snd_timer_query snd_timer_query_t;
 /** timer handle */
 typedef struct _snd_timer snd_timer_t;
+
+#endif /* __ALSA_TIMER_TYPES_H */

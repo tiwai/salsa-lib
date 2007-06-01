@@ -1,5 +1,5 @@
 /*
- *  Control Interface
+ *  SALSA-Lib - Mixer abstraction layer
  *
  *  Copyright (c) 2007 by Takashi Iwai <tiwai@suse.de>
  *

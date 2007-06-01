@@ -1,3 +1,6 @@
+#ifndef __ALSA_MIXER_TYPES_H
+#define __ALSA_MIXER_TYPES_H
+
 #include "pcm.h"
 
 typedef struct _snd_mixer snd_mixer_t;
@@ -100,3 +103,5 @@ struct snd_mixer_selem_regopt {
 
 /** Mixer simple element identifier */
 typedef struct _snd_mixer_selem_id snd_mixer_selem_id_t;
+
+#endif /* __ALSA_MIXER_TYPES_H */

@@ -1,14 +1,10 @@
-/**
- * \file include/asoundef.h
- * \brief Application interface library for the ALSA driver
- * \author Jaroslav Kysela <perex@suse.cz>
- * \author Abramo Bagnara <abramo@alsa-project.org>
- * \author Takashi Iwai <tiwai@suse.de>
- * \date 1998-2001
- *
- * Definitions of constants for the ALSA driver
- */
 /*
+ *  SALSA-Lib - Constants
+ *
+ *  Copyright (c) 2007 by Takashi Iwai <tiwai@suse.de>
+ *
+ *  Copied from ALSA-Lib
+ *
  *   This library is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU Lesser General Public License as
  *   published by the Free Software Foundation; either version 2.1 of
@@ -27,16 +23,6 @@
 
 #ifndef __ALSA_ASOUNDEF_H
 #define __ALSA_ASOUNDEF_H
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/**
- * \defgroup Digital_Audio_Interface Constants for Digital Audio Interfaces
- * AES/IEC958 channel status bits.
- * \{
- */
 
 #define IEC958_AES0_PROFESSIONAL	(1<<0)	/**< 0 = consumer, 1 = professional */
 #define IEC958_AES0_NONAUDIO		(1<<1)	/**< 0 = audio, 1 = non-audio */
@@ -122,22 +108,8 @@ extern "C" {
 #define IEC958_AES3_CON_CLOCK_50PPM	(1<<4)	/**< 50 ppm */
 #define IEC958_AES3_CON_CLOCK_VARIABLE	(2<<4)	/**< variable pitch */
 
-/** \} */
-
-/**
- * \defgroup MIDI_Interface Constants for MIDI v1.0
- * Constants for MIDI v1.0.
- * \{
- */
-
 #define MIDI_CHANNELS			16	/**< Number of channels per port/cable. */
 #define MIDI_GM_DRUM_CHANNEL		(10-1)	/**< Channel number for GM drums. */
-
-/**
- * \defgroup MIDI_Commands MIDI Commands
- * MIDI command codes.
- * \{
- */
 
 #define MIDI_CMD_NOTE_OFF		0x80	/**< note off */
 #define MIDI_CMD_NOTE_ON		0x90	/**< note on */
@@ -159,14 +131,6 @@ extern "C" {
 #define MIDI_CMD_COMMON_STOP		0xfc	/**< stop */
 #define MIDI_CMD_COMMON_SENSING		0xfe	/**< active sensing */
 #define MIDI_CMD_COMMON_RESET		0xff	/**< reset */
-
-/** \} */
-
-/**
- * \defgroup MIDI_Controllers MIDI Controllers
- * MIDI controller numbers.
- * \{
- */
 
 #define MIDI_CTL_MSB_BANK		0x00	/**< Bank selection */
 #define MIDI_CTL_MSB_MODWHEEL         	0x01	/**< Modulation */
@@ -241,13 +205,5 @@ extern "C" {
 #define MIDI_CTL_OMNI_ON		0x7d	/**< Omni on */
 #define MIDI_CTL_MONO1			0x7e	/**< Mono1 */
 #define MIDI_CTL_MONO2			0x7f	/**< Mono2 */
-
-/** \} */
-
-/** \} */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* __ALSA_ASOUNDEF_H */

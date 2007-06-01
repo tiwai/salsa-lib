@@ -1,5 +1,5 @@
 /*
- *  Timer Interface
+ *  SALSA-Lib - Timer Interface
  *
  *  Copyright (c) 2007 by Takashi Iwai <tiwai@suse.de>
  *

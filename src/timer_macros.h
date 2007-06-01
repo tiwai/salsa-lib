@@ -1,3 +1,7 @@
+/*
+ * timer privates and macros
+ */
+
 #ifndef __ALSA_TIMER_MACROS_H
 #define __ALSA_TIMER_MACROS_H
 

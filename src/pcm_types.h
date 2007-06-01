@@ -1,3 +1,6 @@
+#ifndef __ALSA_PCM_TYPES_H
+#define __ALSA_PCM_TYPES_H
+
 #include <unistd.h>
 #include <stdint.h>
 
@@ -344,3 +347,4 @@ typedef union _snd_pcm_sync_id {
 	unsigned int id32[4];
 } snd_pcm_sync_id_t;
 
+#endif /* __ALSA_PCM_TYPES_H */

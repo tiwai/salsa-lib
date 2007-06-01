@@ -1,3 +1,6 @@
+#ifndef __ALSA_RAWMIDI_TYPES_H
+#define __ALSA_RAWMIDI_TYPES_H
+
 /** RawMidi settings container */
 typedef struct sndrv_rawmidi_params snd_rawmidi_params_t;
 /** RawMidi status container */
@@ -31,3 +34,4 @@ typedef enum _snd_rawmidi_type {
 	SND_RAWMIDI_TYPE_VIRTUAL
 } snd_rawmidi_type_t;
 
+#endif /* __ALSA_RAWMIDI_TYPES_H */

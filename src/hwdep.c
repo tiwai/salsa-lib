@@ -1,5 +1,5 @@
 /*
- *  Hardware Dependent Interface
+ *  SALSA-Lib - Hardware Dependent Interface
  *
  *  Copyright (c) 2007 by Takashi Iwai <tiwai@suse.de>
  *

@@ -1,3 +1,6 @@
+#ifndef __ALSA_CTL_TYPES_H
+#define __ALSA_CTL_TYPES_H
+
 #include <unistd.h>
 #include <stdint.h>
 
@@ -158,3 +161,4 @@ typedef enum _snd_ctl_type {
 /** Read only (flag for open mode) \hideinitializer */
 #define SND_CTL_READONLY		0x0004
 
+#endif /* __ALSA_CTL_TYPES_H */
