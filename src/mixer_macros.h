@@ -613,6 +613,7 @@ int snd_mixer_selem_get_capture_dB(snd_mixer_elem_t *elem,
 	return -EINVAL;
 }
 
+static inline
 int snd_mixer_selem_set_capture_dB(snd_mixer_elem_t *elem,
 				   snd_mixer_selem_channel_id_t channel,
 				   long value, int dir)
@@ -620,6 +621,7 @@ int snd_mixer_selem_set_capture_dB(snd_mixer_elem_t *elem,
 	return -EINVAL;
 }
 
+static inline
 int snd_mixer_selem_set_capture_dB_all(snd_mixer_elem_t *elem, long value,
 				       int dir)
 {
