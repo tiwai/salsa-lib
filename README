@@ -69,8 +69,13 @@ disabled.  They can be enabled via --enable-xxx option, such as
 --enable-rawmidi.
 The mixer component is enabled as default, and can be disabled via
 --disable-mixer option, as well.
+
 The dB range support can be enabled via --enable-tlv option.  It's
 disabled as default.
+
+With option --enable-libasound, libasound.so will be created as a
+symlink to libsalsa.so.  This is useful for apps that require
+libasound for linking/checking.
 
 All these options can be enabled via a single option,
 --enable-everything, for your convenience.
@@ -79,12 +84,6 @@ The library is installed as $LIBDIR/libsalsa.so.*.
 This package provides also the compatible alsa.m4 and alsa.pc.  If the
 other packages can be autoreconf'ed, you'll be able to link libsalsa
 as it is.
-
-Otherwise, if your package needs libasound.so for checking/linking,
-simply create a symlink to libsalsa.so:
-
-	# cd /usr/lib
-	# ln -s libsalsa.so libasound.so
 
 The C header files are installed into $INCLUDEDIR/alsa.  The
 alsa/asoundlib.h should be compatible with the normal alsa-lib's one.

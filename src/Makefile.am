@@ -56,3 +56,9 @@ noinst_HEADERS = local.h
 EXTRA_DIST = asoundlib-head.h asoundlib-tail.h recipe.h.in
 
 DISTCLEANFILES = asoundlib.h recipe.h
+
+if LINK_LIBASOUND
+install-exec-hook: libsalsa.la
+	rm -f $(DESTDIR)$(libdir)/libasound.so
+	$(LN_S) libsalsa.so $(DESTDIR)$(libdir)/libasound.so
+endif

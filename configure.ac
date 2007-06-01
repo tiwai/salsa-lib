@@ -43,19 +43,25 @@ AC_ARG_ENABLE(tlv,
 	 	 [enable TLV (dB) support]),
   tlv="$enableval", tlv="no")
 
-AC_ARG_ENABLE(seq,
+AC_ARG_ENABLE(libasound,
+  AS_HELP_STRING([--enable-libasound],
+		 [build a symlink to libasound.so]),
+  libasound="$enableval", libasound="no")
+
+AC_ARG_ENABLE(everything,
   AS_HELP_STRING([--enable-everyhing],
 		 [enable everyhing :)]),
   everything="$enableval", everything="no")
 
 if test "$everything" = "yes"; then
-  mixer=yes
-  rawmidi=yes
-  hwdep=yes
-  timer=yes
-  sndconf=yes
-  sndseq=yes
-  tlv=yes
+  mixer="yes"
+  rawmidi="yes"
+  hwdep="yes"
+  timer="yes"
+  sndconf="yes"
+  sndseq="yes"
+  tlv="yes"
+  libasound="yes"
 fi
 
 AM_CONDITIONAL(BUILD_MIXER, test "$mixer" = "yes")
@@ -71,6 +77,8 @@ else
   SALSA_HAS_TLV_SUPPORT=0
 fi
 AC_SUBST(SALSA_HAS_TLV_SUPPORT)
+
+AM_CONDITIONAL(LINK_LIBASOUND, test "$libasound" = "yes")
 
 dnl OK, let's output...
 
