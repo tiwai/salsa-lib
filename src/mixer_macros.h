@@ -405,8 +405,10 @@ int _snd_mixer_selem_get_volume(snd_mixer_elem_t *elem, int type,
 {
 	snd_selem_vol_item_t *vol;
 	vol = elem->items[type];
-	if (!vol || channel >= vol->head.channels)
+	if (!vol)
 		return -EINVAL;
+	if (channel >= vol->head.channels)
+		channel = 0;
 	*value = vol->vol[channel];
 	return 0;
 }
@@ -427,8 +429,10 @@ int _snd_mixer_selem_get_switch(snd_mixer_elem_t *elem, int type,
 {
 	snd_selem_sw_item_t *sw;
 	sw = elem->items[type];
-	if (!sw || channel >= sw->head.channels)
+	if (!sw)
 		return -EINVAL;
+	if (channel >= sw->head.channels)
+		channel = 0;
 	*value = !!(sw->sw & (1 << channel));
 	return 0;
 }
@@ -494,8 +498,10 @@ int snd_mixer_selem_get_enum_item(snd_mixer_elem_t *elem,
 				  unsigned int *itemp)
 {
 	snd_selem_enum_item_t *eitem = elem->items[SND_SELEM_ITEM_ENUM];
-	if (!eitem || channel >= eitem->head.channels)
+	if (!eitem)
 		return -EINVAL;
+	if (channel >= eitem->head.channels)
+		channel = 0;
 	*itemp =  eitem->item[channel];
 	return 0;
 }
