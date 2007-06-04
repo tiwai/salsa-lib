@@ -24,9 +24,9 @@ SND_LIB_SUBMINOR=14
 SND_LIB_EXTRAVER=1000000
 case "$compatver" in
 *.*.*)
-  SND_LIB_MAJOR=`echo $VERSION | cut -d . -f 1`
-  SND_LIB_MINOR=`echo $VERSION | cut -d . -f 2`
-  SND_LIB_SUBMINOR=`echo $VERSION | cut -d . -f 3`
+  SND_LIB_MAJOR=`echo $SND_LIB_VERSION | cut -d . -f 1`
+  SND_LIB_MINOR=`echo $SND_LIB_VERSION | cut -d . -f 2`
+  SND_LIB_SUBMINOR=`echo $SND_LIB_VERSION | cut -d . -f 3`
   ;;
 esac
 AC_SUBST(SND_LIB_VERSION)
@@ -111,6 +111,7 @@ AC_OUTPUT([
 	alsa.pc
 	src/Makefile
 	src/recipe.h
+	src/version.h
 ])
 
 echo "Creating asoundlib.h..."
