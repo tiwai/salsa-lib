@@ -18,7 +18,11 @@ The current features are like below:
 CONFIG
   o All functions snd_config_*() are replaced with dummy ones since
     SALSA-Lib doesn't support the configuration files.
-    The apps accessing config stuff won't work.
+    The apps accessing config stuff won't work properly as expected.
+  o The API functions that are not supported but defined have
+    "deprecated" attribute.  You'll get compile warnings when
+    compiling the code using such functions.  (The same is true for
+    the all components below.)
   o Disabled as default
 
 PCM
