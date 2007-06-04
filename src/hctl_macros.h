@@ -243,7 +243,7 @@ snd_hctl_elem_t *snd_hctl_elem_prev(snd_hctl_elem_t *elem)
  * not implemented yet
  */
 
-static inline
+static inline __attribute__ ((deprecated))
 int snd_hctl_async(snd_hctl_t *hctl, int sig, pid_t pid)
 {
 	return -ENXIO;

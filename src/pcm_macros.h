@@ -2140,7 +2140,7 @@ void snd_pcm_info_set_stream(snd_pcm_info_t *obj, snd_pcm_stream_t val)
  * not implemented yet
  */
 
-static inline
+static inline __attribute__ ((deprecated))
 int snd_pcm_open_lconf(snd_pcm_t **pcm, const char *name, 
 		       snd_pcm_stream_t stream, int mode,
 		       snd_config_t *lconf)
@@ -2148,35 +2148,35 @@ int snd_pcm_open_lconf(snd_pcm_t **pcm, const char *name,
 	return -ENXIO;
 }
 
-static inline
+static inline __attribute__ ((deprecated))
 snd_pcm_sframes_t snd_pcm_mmap_writei(snd_pcm_t *pcm, const void *buffer,
 				      snd_pcm_uframes_t size)
 {
 	return -ENXIO;
 }
 
-static inline
+static inline __attribute__ ((deprecated))
 snd_pcm_sframes_t snd_pcm_mmap_writen(snd_pcm_t *pcm, void **bufs,
 				      snd_pcm_uframes_t size)
 {
 	return -ENXIO;
 }
 
-static inline
+static inline __attribute__ ((deprecated))
 snd_pcm_sframes_t snd_pcm_mmap_readi(snd_pcm_t *pcm, void *buffer,
 				     snd_pcm_uframes_t size)
 {
 	return -ENXIO;
 }
 
-static inline
+static inline __attribute__ ((deprecated))
 snd_pcm_sframes_t snd_pcm_mmap_readn(snd_pcm_t *pcm, void **bufs,
 				     snd_pcm_uframes_t size)
 {
 	return -ENXIO;
 }
 
-static inline
+static inline __attribute__ ((deprecated))
 int snd_async_add_pcm_handler(snd_async_handler_t **handler, snd_pcm_t *pcm, 
 			      snd_async_callback_t callback,
 			      void *private_data)
@@ -2184,7 +2184,7 @@ int snd_async_add_pcm_handler(snd_async_handler_t **handler, snd_pcm_t *pcm,
 	return -ENXIO;
 }
 
-static inline
+static inline __attribute__ ((deprecated))
 snd_pcm_t *snd_async_handler_get_pcm(snd_async_handler_t *handler)
 {
 	return NULL;

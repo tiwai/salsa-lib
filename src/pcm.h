@@ -32,6 +32,9 @@ int snd_pcm_open(snd_pcm_t **pcm, const char *name,
 int snd_pcm_close(snd_pcm_t *pcm);
 int snd_pcm_hw_params(snd_pcm_t *pcm, snd_pcm_hw_params_t *params);
 int snd_pcm_hw_free(snd_pcm_t *pcm);
+int snd_pcm_hw_params_any(snd_pcm_t *pcm, snd_pcm_hw_params_t *params);
+int snd_pcm_hw_params_get_min_align(const snd_pcm_hw_params_t *params,
+				    snd_pcm_uframes_t *val);
 int snd_pcm_sw_params(snd_pcm_t *pcm, snd_pcm_sw_params_t *params);
 
 snd_pcm_sframes_t snd_pcm_avail_update(snd_pcm_t *pcm);

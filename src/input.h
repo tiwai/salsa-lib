@@ -54,10 +54,10 @@ int snd_input_stdio_attach(snd_input_t **inputp, FILE *fp, int _close)
 #define snd_input_getc(input)		getc(input)
 #define snd_input_ungetc(input,c)	ungetc(c, input)
 
-static inline
+static inline __attribute__ ((deprecated))
 int snd_input_buffer_open(snd_input_t **inputp, const char *buffer, ssize_t size)
 {
-	return -ENODEV;
+	return -ENXIO;
 }
 
 #endif /* __ALSA_INPUT_H */
