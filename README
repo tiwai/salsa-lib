@@ -88,6 +88,9 @@ libasound for linking/checking.
 All these options can be enabled via a single option,
 --enable-everything, for your convenience.
 
+The alsa-library version to be compatbible can be given explicitly via
+--with-compat-version option.  As default, 1.0.14 is set.
+
 The library is installed as $LIBDIR/libsalsa.so.*.
 This package provides also the compatible alsa.m4 and alsa.pc.  If the
 other packages can be autoreconf'ed, you'll be able to link libsalsa
