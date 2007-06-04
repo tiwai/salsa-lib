@@ -520,7 +520,7 @@ DEFINE_GET64(get_max);
 
 #define DEFINE_SET64(name) \
 static inline \
-int __snd_pcm_hw_param_ ## name ##64(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,\
+int __snd_pcm_hw_param_ ## name ## 64(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,\
 				    int type, unsigned long *val, int *dir)\
 {\
 	unsigned int _val = *val;\
@@ -533,16 +533,16 @@ DEFINE_SET64(set_max);
 DEFINE_SET64(set_near);
 DEFINE_SET64(set_first);
 DEFINE_SET64(set_last);
-#define _snd_pcm_hw_param_set_min64(params, type, ptr, dir) \
-	__snd_pcm_hw_param_set_min64(params, type, (unsigned long *)(ptr), dir)
-#define _snd_pcm_hw_param_set_max64(params, type, ptr, dir) \
-	__snd_pcm_hw_param_get_max64(params, type, (unsigned long *)(ptr), dir)
-#define _snd_pcm_hw_param_set_near64(params, type, ptr, dir) \
-	__snd_pcm_hw_param_get_near64(params, type, (unsigned long *)(ptr), dir)
-#define _snd_pcm_hw_param_set_first64(params, type, ptr, dir) \
-	__snd_pcm_hw_param_get_first64(params, type, (unsigned long *)(ptr), dir)
-#define _snd_pcm_hw_param_set_last64(params, type, ptr, dir) \
-	__snd_pcm_hw_param_get_last64(params, type, (unsigned long *)(ptr), dir)
+#define _snd_pcm_hw_param_set_min64(pcm, params, type, ptr, dir) \
+	__snd_pcm_hw_param_set_min64(pcm, params, type, (unsigned long *)(ptr), dir)
+#define _snd_pcm_hw_param_set_max64(pcm, params, type, ptr, dir) \
+	__snd_pcm_hw_param_set_max64(pcm, params, type, (unsigned long *)(ptr), dir)
+#define _snd_pcm_hw_param_set_near64(pcm, params, type, ptr, dir) \
+	__snd_pcm_hw_param_set_near64(pcm, params, type, (unsigned long *)(ptr), dir)
+#define _snd_pcm_hw_param_set_first64(pcm, params, type, ptr, dir) \
+	__snd_pcm_hw_param_set_first64(pcm, params, type, (unsigned long *)(ptr), dir)
+#define _snd_pcm_hw_param_set_last64(pcm, params, type, ptr, dir) \
+	__snd_pcm_hw_param_set_last64(pcm, params, type, (unsigned long *)(ptr), dir)
 
 static inline
 int __snd_pcm_hw_param_set_minmax64(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
@@ -550,16 +550,16 @@ int __snd_pcm_hw_param_set_minmax64(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				   unsigned long *minval, int *mindir,
 				   unsigned long *maxval, int *maxdir)
 {
-	unsigned int _min = *min;
-	unsigned int _max = *max;
+	unsigned int _min = *minval;
+	unsigned int _max = *maxval;
 	int err = _snd_pcm_hw_param_set_minmax(pcm, params, type,
 					      &_min, mindir, &_max, maxdir);
-	*min = _min;
-	*max = _max;
+	*minval = _min;
+	*maxval = _max;
 	return err;
 }
-#define _snd_pcm_hw_param_set_minmax64(params, type, minptr, mindir, maxptr, maxdir) \
-	__snd_pcm_hw_param_set_minmax64(params, type, \
+#define _snd_pcm_hw_param_set_minmax64(pcm, params, type, minptr, mindir, maxptr, maxdir) \
+	__snd_pcm_hw_param_set_minmax64(pcm, params, type, \
 				       (unsigned long *)(minptr), mindir, \
 				       (unsigned long *)(maxptr), maxdir)
 
