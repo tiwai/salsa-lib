@@ -11,6 +11,30 @@ dnl AC_DISABLE_STATIC
 AM_PROG_LIBTOOL
 AC_HEADER_STDC
 
+dnl Compatible version
+AC_ARG_WITH(compat-version,
+  AS_HELP_STRING([--with-compat-version=VERSION],
+		 [specify the compatible version with ALSA-lib (default=1.0.14)]),
+  compatver="$withval", compatver="1.0.14")
+
+SND_LIB_VERSION="$compatver"
+SND_LIB_MAJOR=1
+SND_LIB_MINOR=0
+SND_LIB_SUBMINOR=14
+SND_LIB_EXTRAVER=1000000
+case "$compatver" in
+*.*.*)
+  SND_LIB_MAJOR=`echo $VERSION | cut -d . -f 1`
+  SND_LIB_MINOR=`echo $VERSION | cut -d . -f 2`
+  SND_LIB_SUBMINOR=`echo $VERSION | cut -d . -f 3`
+  ;;
+esac
+AC_SUBST(SND_LIB_VERSION)
+AC_SUBST(SND_LIB_MAJOR)
+AC_SUBST(SND_LIB_MINOR)
+AC_SUBST(SND_LIB_SUBMINOR)
+AC_SUBST(SND_LIB_EXTRAVER)
+
 dnl Component selections
 
 AC_ARG_ENABLE(mixer,

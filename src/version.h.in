@@ -1,16 +1,16 @@
 #ifndef __ALSA_VERSION_H
 #define __ALSA_VERSION_H
 
-#define SND_LIB_MAJOR		1 /**< major number of library version */
-#define SND_LIB_MINOR		0 /**< minor number of library version */
-#define SND_LIB_SUBMINOR	14 /**< subminor number of library version */
-#define SND_LIB_EXTRAVER	1000000 /**< extra version number, used mainly for betas */
+#define SND_LIB_MAJOR		@SND_LIB_MAJOR@
+#define SND_LIB_MINOR		@SND_LIB_MINOR@
+#define SND_LIB_SUBMINOR	@SND_LIB_SUBMINOR@
+#define SND_LIB_EXTRAVER	@SND_LIB_EXTRAVER@
 /** library version */
 #define SND_LIB_VERSION		((SND_LIB_MAJOR<<16)|\
 				 (SND_LIB_MINOR<<8)|\
 				  SND_LIB_SUBMINOR)
 /** library version (string) */
-#define SND_LIB_VERSION_STR	"1.0.14"
+#define SND_LIB_VERSION_STR	"@SND_LIB_VERSION@"
 
 static inline
 const char *snd_asoundlib_version(void)

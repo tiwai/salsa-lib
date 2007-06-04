@@ -53,9 +53,9 @@ endif
 
 noinst_HEADERS = local.h 
 
-EXTRA_DIST = asoundlib-head.h asoundlib-tail.h recipe.h.in
+EXTRA_DIST = asoundlib-head.h asoundlib-tail.h recipe.h.in version.h.in
 
-DISTCLEANFILES = asoundlib.h recipe.h
+DISTCLEANFILES = asoundlib.h recipe.h version.h
 
 if LINK_LIBASOUND
 install-exec-hook: libsalsa.la
