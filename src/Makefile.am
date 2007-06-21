@@ -16,7 +16,7 @@ if BUILD_TIMER
 libsalsa_la_SOURCES += timer.c
 endif
 
-libsalsa_la_LDFLAGS = -version-number 0:0:1
+libsalsa_la_LDFLAGS = -version-info 0:1:0
 
 alsaincludedir = $(includedir)/alsa
 

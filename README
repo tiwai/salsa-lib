@@ -100,6 +100,20 @@ The C header files are installed into $INCLUDEDIR/alsa.  The
 alsa/asoundlib.h should be compatible with the normal alsa-lib's one.
 
 
+CROSS-COMIPLATION
+-----------------
+
+For compiling the library with a cross compiler, run like the
+following:
+
+	% CC=arm-linux-gcc \
+	  ./configure --target=arm-linux --host=i686-linux
+
+Don't forget to add "-linux" to the host option value.  Otherwise
+configure script won't detect the host type correctly, and the shared
+library won't be built properly.
+
+
 DOCUMENTATION
 -------------
 

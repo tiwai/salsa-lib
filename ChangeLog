@@ -1,2 +1,7 @@
+Version 0.0.2:
+	* Fix the libtool option to use -version-info instead of
+	  -version-number
+	* Add a brief description about cross-compiling
+	
 Version 0.0.1:
 	* Initial release
