@@ -1,3 +1,7 @@
+Version 0.0.3:
+	* Fix the stupid bug of wrong sizeof() usage in *_malloc()
+	  functions.
+
 Version 0.0.2:
 	* Fix the libtool option to use -version-info instead of
 	  -version-number

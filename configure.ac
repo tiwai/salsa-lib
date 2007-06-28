@@ -1,6 +1,6 @@
 AC_PREREQ(2.59)
 AC_INIT(src/control.c)
-AM_INIT_AUTOMAKE(salsa-lib, 0.0.2)
+AM_INIT_AUTOMAKE(salsa-lib, 0.0.3)
 AC_PREFIX_DEFAULT(/usr)
 
 dnl AC_CONFIG_HEADERS(src/config.h)
