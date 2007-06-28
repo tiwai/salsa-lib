@@ -305,7 +305,7 @@ size_t snd_ctl_elem_id_sizeof(void)
 static inline
 int snd_ctl_elem_id_malloc(snd_ctl_elem_id_t **ptr)
 {
-	*ptr = calloc(1, sizeof(*ptr));
+	*ptr = calloc(1, sizeof(**ptr));
 	if (!*ptr)
 		return -ENOMEM;
 	return 0;
@@ -411,7 +411,7 @@ size_t snd_ctl_card_info_sizeof(void)
 static inline
 int snd_ctl_card_info_malloc(snd_ctl_card_info_t **ptr)
 {
-	*ptr = calloc(1, sizeof(*ptr));
+	*ptr = calloc(1, sizeof(**ptr));
 	if (!*ptr)
 		return -ENOMEM;
 	return 0;
@@ -487,7 +487,7 @@ size_t snd_ctl_event_sizeof(void)
 static inline
 int snd_ctl_event_malloc(snd_ctl_event_t **ptr)
 {
-	*ptr = calloc(1, sizeof(*ptr));
+	*ptr = calloc(1, sizeof(**ptr));
 	if (!*ptr)
 		return -ENOMEM;
 	return 0;
@@ -526,7 +526,7 @@ size_t snd_ctl_elem_list_sizeof(void)
 static inline
 int snd_ctl_elem_list_malloc(snd_ctl_elem_list_t **ptr)
 {
-	*ptr = calloc(1, sizeof(*ptr));
+	*ptr = calloc(1, sizeof(**ptr));
 	if (!*ptr)
 		return -ENOMEM;
 	return 0;
@@ -627,7 +627,7 @@ size_t snd_ctl_elem_info_sizeof(void)
 static inline
 int snd_ctl_elem_info_malloc(snd_ctl_elem_info_t **ptr)
 {
-	*ptr = calloc(1, sizeof(*ptr));
+	*ptr = calloc(1, sizeof(**ptr));
 	if (!*ptr)
 		return -ENOMEM;
 	return 0;
@@ -912,7 +912,7 @@ size_t snd_ctl_elem_value_sizeof(void)
 static inline
 int snd_ctl_elem_value_malloc(snd_ctl_elem_value_t **ptr)
 {
-	*ptr = calloc(1, sizeof(*ptr));
+	*ptr = calloc(1, sizeof(**ptr));
 	if (!*ptr)
 		return -ENOMEM;
 	return 0;

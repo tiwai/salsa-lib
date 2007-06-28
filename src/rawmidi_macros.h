@@ -77,7 +77,7 @@ size_t snd_rawmidi_info_sizeof(void)
 static inline
 int snd_rawmidi_info_malloc(snd_rawmidi_info_t **ptr)
 {
-	*ptr = calloc(1, sizeof(*ptr));
+	*ptr = calloc(1, sizeof(**ptr));
 	if (!ptr)
 		return -ENOMEM;
 	return 0;
@@ -193,7 +193,7 @@ size_t snd_rawmidi_params_sizeof(void)
 static inline
 int snd_rawmidi_params_malloc(snd_rawmidi_params_t **ptr)
 {
-	*ptr = calloc(1, sizeof(*ptr));
+	*ptr = calloc(1, sizeof(**ptr));
 	if (!ptr)
 		return -ENOMEM;
 	return 0;
@@ -283,7 +283,7 @@ size_t snd_rawmidi_status_sizeof(void)
 static inline
 int snd_rawmidi_status_malloc(snd_rawmidi_status_t **ptr)
 {
-	*ptr = calloc(1, sizeof(*ptr));
+	*ptr = calloc(1, sizeof(**ptr));
 	if (!ptr)
 		return -ENOMEM;
 	return 0;

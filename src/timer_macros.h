@@ -124,7 +124,7 @@ size_t snd_timer_id_sizeof(void)
 static inline
 int snd_timer_id_malloc(snd_timer_id_t **ptr)
 {
-	*ptr = calloc(1, sizeof(*ptr));
+	*ptr = calloc(1, sizeof(**ptr));
 	if (!*ptr)
 		return -ENOMEM;
 	return 0;
@@ -211,7 +211,7 @@ size_t snd_timer_ginfo_sizeof(void)
 static inline
 int snd_timer_ginfo_malloc(snd_timer_ginfo_t **ptr)
 {
-	*ptr = calloc(1, sizeof(*ptr));
+	*ptr = calloc(1, sizeof(**ptr));
 	if (!*ptr)
 		return -ENOMEM;
 	return 0;
@@ -299,7 +299,7 @@ size_t snd_timer_info_sizeof(void)
 static inline
 int snd_timer_info_malloc(snd_timer_info_t **ptr)
 {
-	*ptr = calloc(1, sizeof(*ptr));
+	*ptr = calloc(1, sizeof(**ptr));
 	if (!*ptr)
 		return -ENOMEM;
 	return 0;
@@ -356,7 +356,7 @@ size_t snd_timer_params_sizeof(void)
 static inline
 int snd_timer_params_malloc(snd_timer_params_t **ptr)
 {
-	*ptr = calloc(1, sizeof(*ptr));
+	*ptr = calloc(1, sizeof(**ptr));
 	if (!*ptr)
 		return -ENOMEM;
 	return 0;
@@ -472,7 +472,7 @@ size_t snd_timer_status_sizeof(void)
 static inline
 int snd_timer_status_malloc(snd_timer_status_t **ptr)
 {
-	*ptr = calloc(1, sizeof(*ptr));
+	*ptr = calloc(1, sizeof(**ptr));
 	if (!*ptr)
 		return -ENOMEM;
 	return 0;

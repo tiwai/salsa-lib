@@ -107,7 +107,7 @@ size_t snd_hwdep_info_sizeof(void)
 static inline
 int snd_hwdep_info_malloc(snd_hwdep_info_t **ptr)
 {
-	*ptr = calloc(1, sizeof(*ptr));
+	*ptr = calloc(1, sizeof(**ptr));
 	if (!*ptr)
 		return -ENOMEM;
 	return 0;
@@ -170,7 +170,7 @@ size_t snd_hwdep_dsp_status_sizeof(void)
 static inline
 int snd_hwdep_dsp_status_malloc(snd_hwdep_dsp_status_t **ptr)
 {
-	*ptr = calloc(1, sizeof(*ptr));
+	*ptr = calloc(1, sizeof(**ptr));
 	if (!*ptr)
 		return -ENOMEM;
 	return 0;
@@ -228,7 +228,7 @@ size_t snd_hwdep_dsp_image_sizeof(void)
 static inline
 int snd_hwdep_dsp_image_malloc(snd_hwdep_dsp_image_t **ptr)
 {
-	*ptr = calloc(1, sizeof(*ptr));
+	*ptr = calloc(1, sizeof(**ptr));
 	if (!*ptr)
 		return -ENOMEM;
 	return 0;
