@@ -1,3 +1,9 @@
+Version 0.0.4:
+	* Fix the missing return from _snd_mixer_selem_get_volume_range()
+	* Fix the check of stop_threshold in snd_pcm_avail_update().
+	* Removed unused fields (of snd_pcm_sw_params_t) from snd_pcm_t
+	  structure
+
 Version 0.0.3:
 	* Fix the stupid bug of wrong sizeof() usage in *_malloc()
 	  functions.
