@@ -45,16 +45,6 @@ struct _snd_pcm {
 	unsigned int period_time;	/* period duration */
 	snd_interval_t periods;
 	unsigned int tick_time;
-	snd_pcm_tstamp_t tstamp_mode;	/* timestamp mode */
-	unsigned int period_step;
-	unsigned int sleep_min;
-	snd_pcm_uframes_t avail_min;	/* min avail frames for wakeup */
-	snd_pcm_uframes_t start_threshold;	
-	snd_pcm_uframes_t stop_threshold;	
-	snd_pcm_uframes_t silence_threshold;	/* Silence filling happens when
-					   noise is nearest than this */
-	snd_pcm_uframes_t silence_size;	/* Silence filling size */
-	snd_pcm_uframes_t xfer_align;	/* xfer size need to be a multiple */
 	snd_pcm_uframes_t boundary;	/* pointers wrap point */
 	unsigned int info;		/* Info for returned setup */
 	unsigned int msbits;		/* used most significant bits */

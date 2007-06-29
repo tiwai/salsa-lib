@@ -923,7 +923,7 @@ snd_pcm_sframes_t snd_pcm_avail_update(snd_pcm_t *pcm)
 	avail = snd_pcm_mmap_avail(pcm);
 	switch (snd_pcm_state(pcm)) {
 	case SNDRV_PCM_STATE_RUNNING:
-		if (avail >= pcm->stop_threshold) {
+		if (avail >= pcm->sw_params.stop_threshold) {
 			if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_XRUN) < 0)
 				return -errno;
 			/* everything is ok,
