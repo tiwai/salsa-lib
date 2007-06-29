@@ -297,6 +297,7 @@ int _snd_mixer_selem_get_volume_range(snd_mixer_elem_t *elem, int type,
 		return -EINVAL;
 	*min = vol->min;
 	*max = vol->max;
+	return 0;
 }
 
 static inline
