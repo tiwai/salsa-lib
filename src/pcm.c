@@ -857,6 +857,7 @@ static int snd_pcm_hw_mmap_status(snd_pcm_t *pcm)
 		pcm->mmap_status = NULL;
 		goto no_mmap;
 	}
+	pcm->mmap_control->avail_min = 1;
 	return 0;
 
  no_mmap:
@@ -865,6 +866,7 @@ static int snd_pcm_hw_mmap_status(snd_pcm_t *pcm)
 		return -ENOMEM;
 	pcm->mmap_status = &pcm->sync_ptr->s.status;
 	pcm->mmap_control = &pcm->sync_ptr->c.control;
+	pcm->mmap_control->avail_min = 1;
 	_snd_pcm_sync_ptr(pcm, 0);
 	return 0;
 }

@@ -1052,6 +1052,7 @@ int snd_pcm_sw_params(snd_pcm_t *pcm, snd_pcm_sw_params_t *params)
 	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_SW_PARAMS, params) < 0)
 		return -errno;
 	pcm->sw_params = *params;
+	pcm->mmap_control->avail_min = params->avail_min;
 	return 0;
 }
 
