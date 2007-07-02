@@ -747,7 +747,7 @@ int _snd_pcm_mmap(snd_pcm_t *pcm)
 	for (c = 0; c < pcm->channels; ++c) {
 		snd_pcm_channel_info_t *i = &pcm->mmap_channels[c];
 		i->info.channel = c;
-		if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_CHANNEL_INFO, &i) < 0)
+		if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_CHANNEL_INFO, &i->info) < 0)
 			return -errno;
 	}
 	for (c = 0; c < pcm->channels; ++c) {
