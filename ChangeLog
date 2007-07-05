@@ -1,3 +1,7 @@
+Version 0.0.7:
+	* Add optional async handler support.  Disabled as default.
+	* Allow to disable PCM component via configure option.
+	
 Version 0.0.6:
 	* Fix channel_info parameter called from _snd_pcm_mmap().
 	* More notes in README about known problems.
