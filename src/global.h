@@ -23,20 +23,6 @@
 #define __ALSA_GLOBAL_H
 
 typedef struct _snd_config snd_config_t;
-typedef struct _snd_async_handler snd_async_handler_t;
-typedef void (*snd_async_callback_t)(snd_async_handler_t *handler);
-
-#if !defined(_POSIX_C_SOURCE) && !defined(_POSIX_SOURCE)
-struct timeval {
-	time_t		tv_sec;		/* seconds */
-	long		tv_usec;	/* microseconds */
-};
-
-struct timespec {
-	time_t		tv_sec;		/* seconds */
-	long		tv_nsec;	/* nanoseconds */
-};
-#endif
 
 typedef struct timeval snd_timestamp_t;
 typedef struct timespec snd_htimestamp_t;
@@ -56,6 +42,48 @@ typedef struct _snd_seq snd_seq_t;
 #define ATTRIBUTE_UNUSED __attribute__ ((__unused__))
 #endif
 
+/* async helpers */
+typedef struct _snd_async_handler snd_async_handler_t;
+typedef void (*snd_async_callback_t)(snd_async_handler_t *handler);
+
+#if SALSA_HAS_ASYNC_SUPPORT
+
+struct _snd_async_handler {
+	int fd;
+	snd_async_callback_t callback;
+	void *private_data;
+	void *rec;
+	struct _snd_async_handler **pointer;
+	struct _snd_async_handler *next;
+};
+
+#define snd_async_handler_get_signo(h)	SIGIO
+#define snd_async_handler_get_fd(h)	(h)->fd
+#define snd_async_handler_get_callback_private(h)	(h)->private_data
+int snd_async_add_handler(snd_async_handler_t **handler, int fd, 
+			  snd_async_callback_t callback, void *private_data);
+int snd_async_del_handler(snd_async_handler_t *handler);
+
+#else
+
+#define snd_async_handler_get_signo(h)	-1
+#define snd_async_handler_get_fd(h)	-1
+#define snd_async_handler_get_callback_private(h)	NULL
+static inline __attribute__((deprecated))
+int snd_async_add_handler(snd_async_handler_t **handler, int fd, 
+			  snd_async_callback_t callback, void *private_data)
+{
+	return -ENXIO;
+}
+static inline __attribute__((deprecated))
+int snd_async_del_handler(snd_async_handler_t *handler)
+{
+	return -ENXIO;
+}
+
+#endif /* SALSA_HAS_ASYNC_SUPPORT */
+
+/* only for internal use */
 int _snd_set_nonblock(int fd, int nonblock);
 
 #endif /* __ALSA_GLOBAL_H */

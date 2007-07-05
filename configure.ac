@@ -37,6 +37,10 @@ AC_SUBST(SND_LIB_EXTRAVER)
 
 dnl Component selections
 
+AC_ARG_ENABLE(pcm,
+  AS_HELP_STRING([--disable-pcm],
+		 [disable PCM interface]),
+  pcm="$enableval", pcm="yes")
 AC_ARG_ENABLE(mixer,
   AS_HELP_STRING([--disable-mixer],
 		 [disable mixer interface]),
@@ -66,6 +70,10 @@ AC_ARG_ENABLE(tlv,
   AS_HELP_STRING([--enable-tlv],
 	 	 [enable TLV (dB) support]),
   tlv="$enableval", tlv="no")
+AC_ARG_ENABLE(async,
+  AS_HELP_STRING([--enable-async],
+		 [enable async handler support]),
+  async="$enableval", async="yes")
 
 AC_ARG_ENABLE(libasound,
   AS_HELP_STRING([--enable-libasound],
@@ -78,6 +86,7 @@ AC_ARG_ENABLE(everything,
   everything="$enableval", everything="no")
 
 if test "$everything" = "yes"; then
+  pcm="yes"
   mixer="yes"
   rawmidi="yes"
   hwdep="yes"
@@ -85,15 +94,18 @@ if test "$everything" = "yes"; then
   sndconf="yes"
   sndseq="yes"
   tlv="yes"
+  async="yes"
   libasound="yes"
 fi
 
+AM_CONDITIONAL(BUILD_PCM, test "$pcm" = "yes")
 AM_CONDITIONAL(BUILD_MIXER, test "$mixer" = "yes")
 AM_CONDITIONAL(BUILD_RAWMIDI, test "$rawmidi" = "yes")
 AM_CONDITIONAL(BUILD_HWDEP, test "$hwdep" = "yes")
 AM_CONDITIONAL(BUILD_TIMER, test "$timer" = "yes")
 AM_CONDITIONAL(BUILD_CONF, test "$sndconf" = "yes")
 AM_CONDITIONAL(BUILD_SEQ, test "$sndseq" = "yes")
+AM_CONDITIONAL(BUILD_ASYNC, test "$async" = "yes")
 
 if test "$tlv" = "yes"; then
   SALSA_HAS_TLV_SUPPORT=1
@@ -101,6 +113,13 @@ else
   SALSA_HAS_TLV_SUPPORT=0
 fi
 AC_SUBST(SALSA_HAS_TLV_SUPPORT)
+
+if test "$async" = "yes"; then
+  SALSA_HAS_ASYNC_SUPPORT=1
+else
+  SALSA_HAS_ASYNC_SUPPORT=0
+fi
+AC_SUBST(SALSA_HAS_ASYNC_SUPPORT)
 
 AM_CONDITIONAL(LINK_LIBASOUND, test "$libasound" = "yes")
 

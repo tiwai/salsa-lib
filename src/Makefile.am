@@ -1,8 +1,13 @@
 AM_CFLAGS = -Wall -g
 
 lib_LTLIBRARIES = libsalsa.la
-libsalsa_la_SOURCES = control.c cards.c \
-	pcm.c pcm_params.c pcm_misc.c
+libsalsa_la_SOURCES = control.c cards.c
+if BUILD_PCM
+libsalsa_la_SOURCES += pcm.c pcm_params.c pcm_misc.c
+endif
+if BUILD_ASYNC
+libsalsa_la_SOURCES += async.c
+endif
 if BUILD_MIXER
 libsalsa_la_SOURCES += hcontrol.c mixer.c
 endif

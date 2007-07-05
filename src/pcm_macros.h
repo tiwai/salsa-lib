@@ -64,6 +64,9 @@ struct _snd_pcm {
 
 	snd_pcm_channel_info_t *mmap_channels;
 	snd_pcm_channel_area_t *running_areas;
+#if SALSA_HAS_ASYNC_SUPPORT
+	snd_async_handler_t *async;
+#endif
 };
 
 /*
@@ -2166,6 +2169,16 @@ snd_pcm_sframes_t snd_pcm_mmap_readn(snd_pcm_t *pcm, void **bufs,
 	return -ENXIO;
 }
 
+#if SALSA_HAS_ASYNC_SUPPORT
+
+static inline
+snd_pcm_t *snd_async_handler_get_pcm(snd_async_handler_t *handler)
+{
+	return handler->rec;
+}
+
+#else /* !SALSA_HAS_ASYNC_SUPPORT */
+
 static inline __attribute__ ((deprecated))
 int snd_async_add_pcm_handler(snd_async_handler_t **handler, snd_pcm_t *pcm, 
 			      snd_async_callback_t callback,
@@ -2179,5 +2192,7 @@ snd_pcm_t *snd_async_handler_get_pcm(snd_async_handler_t *handler)
 {
 	return NULL;
 }
+
+#endif /* SALSA_HAS_ASYNC_SUPPORT */
 
 #endif /* __ALSA_PCM_MACROS_H */

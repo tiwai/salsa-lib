@@ -158,6 +158,10 @@ int snd_pcm_close(snd_pcm_t *pcm)
 	}
 	_snd_pcm_munmap(pcm);
 	snd_pcm_hw_munmap_status(pcm);
+#if SALSA_HAS_ASYNC_SUPPORT
+	if (pcm->async)
+		snd_async_del_handler(pcm->async);
+#endif
 	close(pcm->fd);
 	free(pcm);
 	return 0;
@@ -979,6 +983,28 @@ snd_pcm_sframes_t snd_pcm_mmap_commit(snd_pcm_t *pcm,
 	return frames;
 }
 
+
+#if SALSA_HAS_ASYNC_SUPPORT
+/*
+ * async handler
+ */
+int snd_async_add_pcm_handler(snd_async_handler_t **handlerp, snd_pcm_t *pcm, 
+			      snd_async_callback_t callback,
+			      void *private_data)
+{
+	int err;
+
+	if (pcm->async)
+		return -EBUSY;
+	err = snd_async_add_handler(&pcm->async, pcm->fd,
+				    callback, private_data);
+	if (err < 0)
+		return err;
+	pcm->async->rec = pcm;
+	pcm->async->pointer = &pcm->async;
+	return 0;
+}
+#endif /* SALSA_HAS_ASYNC_SUPPORT */
 
 /*
  * HELPERS

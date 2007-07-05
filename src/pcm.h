@@ -104,6 +104,12 @@ int snd_pcm_areas_copy(const snd_pcm_channel_area_t *dst_channels,
 		       unsigned int channels, snd_pcm_uframes_t frames,
 		       snd_pcm_format_t format);
 
+#if SALSA_HAS_ASYNC_SUPPORT
+int snd_async_add_pcm_handler(snd_async_handler_t **handler, snd_pcm_t *pcm, 
+			      snd_async_callback_t callback,
+			      void *private_data);
+#endif
+
 #include "pcm_macros.h"
 
 #define snd_pcm_info_alloca(ptr) do { *ptr = alloca(snd_pcm_info_sizeof()); memset(*ptr, 0, snd_pcm_info_sizeof()); } while (0)

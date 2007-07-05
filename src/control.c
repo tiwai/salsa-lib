@@ -85,6 +85,10 @@ int snd_ctl_open(snd_ctl_t **ctlp, const char *name, int mode)
 
 int snd_ctl_close(snd_ctl_t *ctl)
 {
+#if SALSA_HAS_ASYNC_SUPPORT
+	if (ctl->async)
+		snd_async_del_handler(ctl->async);
+#endif
 	close(ctl->fd);
 	free(ctl);
 	return 0;
@@ -315,3 +319,26 @@ const char *_snd_ctl_elem_iface_names[] = {
 const char *_snd_ctl_event_type_names[] = {
 	EVENT(ELEM),
 };
+
+
+#if SALSA_HAS_ASYNC_SUPPORT
+/*
+ * async helper
+ */
+int snd_async_add_ctl_handler(snd_async_handler_t **handler, snd_ctl_t *ctl, 
+			      snd_async_callback_t callback,
+			      void *private_data)
+{
+	int err;
+
+	if (ctl->async)
+		return -EBUSY;
+	err = snd_async_add_handler(&ctl->async, ctl->fd,
+				    callback, private_data);
+	if (err < 0)
+		return err;
+	ctl->async->rec = ctl;
+	ctl->async->pointer = &ctl->async;
+	return 0;
+}
+#endif /* SALSA_HAS_ASYNC_SUPPORT */

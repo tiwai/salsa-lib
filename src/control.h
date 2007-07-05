@@ -45,6 +45,12 @@ int snd_ctl_elem_tlv_command(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
 			     const unsigned int *tlv);
 #endif
 
+#if SALSA_HAS_ASYNC_SUPPORT
+int snd_async_add_ctl_handler(snd_async_handler_t **handler, snd_ctl_t *ctl, 
+			      snd_async_callback_t callback,
+			      void *private_data);
+#endif
+
 #include "ctl_macros.h"
 
 #define snd_ctl_elem_id_alloca(ptr) do { *ptr = alloca(snd_ctl_elem_id_sizeof()); memset(*ptr, 0, snd_ctl_elem_id_sizeof()); } while (0)

@@ -20,6 +20,9 @@ struct _snd_ctl {
 	int card;
 	int protocol;
 	struct pollfd pollfd;
+#if SALSA_HAS_ASYNC_SUPPORT
+	snd_async_handler_t *async;
+#endif
 };
 
 
@@ -1187,6 +1190,16 @@ char *snd_device_name_get_hint(const void *hint, const char *id)
 	return NULL;
 }
 
+#if SALSA_HAS_ASYNC_SUPPORT
+
+static inline
+snd_ctl_t *snd_async_handler_get_ctl(snd_async_handler_t *handler)
+{
+	return handler->rec;
+}
+
+#else
+
 static inline __attribute__ ((deprecated))
 int snd_async_add_ctl_handler(snd_async_handler_t **handler, snd_ctl_t *ctl, 
 			      snd_async_callback_t callback,
@@ -1200,5 +1213,7 @@ snd_ctl_t *snd_async_handler_get_ctl(snd_async_handler_t *handler)
 {
 	return NULL;
 }
+
+#endif /* SALSA_HAS_ASYNC_SUPPORT */
 
 #endif /* __ALSA_CTL_MACROS_H */

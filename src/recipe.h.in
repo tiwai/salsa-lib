@@ -4,4 +4,7 @@
 /* Build with TLV support */
 #define SALSA_HAS_TLV_SUPPORT	@SALSA_HAS_TLV_SUPPORT@
 
+/* Build with async support */
+#define SALSA_HAS_ASYNC_SUPPORT	@SALSA_HAS_ASYNC_SUPPORT@
+
 #endif /* __ALSA_RECIPE_H */
