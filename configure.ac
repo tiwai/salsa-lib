@@ -135,6 +135,7 @@ AC_OUTPUT([
 
 echo "Creating asoundlib.h..."
 cp "$srcdir"/src/asoundlib-head.h src/asoundlib.h
+test "$pcm" = "yes" && echo "#include \"pcm.h\"" >> src/asoundlib.h
 test "$mixer" = "yes" && echo "#include \"mixer.h\"" >> src/asoundlib.h
 test "$rawmidi" = "yes" && echo "#include \"rawmidi.h\"" >> src/asoundlib.h
 test "$hwdep" = "yes" && echo "#include \"hwdep.h\"" >> src/asoundlib.h

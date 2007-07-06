@@ -45,4 +45,3 @@ extern "C" {
 #include "output.h"
 #include "error.h"
 #include "control.h"
-#include "pcm.h"
