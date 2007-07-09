@@ -32,12 +32,15 @@ PCM
     and "hw:x,y,z"
   o snd_pcm_mmap_read/write*() are declared but not implemented
     (returns -ENXIO)
-  o No async handler (returns -ENXIO)
+  o The support of async handlers can be built in via configure
+    option, --enable-async.  For simplicity, SALSA-lib supports
+    only one async handler per PCM handler.
 
 CONTROL
   o Supports only the hw layer, no plug-in
   o Some H-control functions are not included
-  o No async handler (returns -ENXIO)
+  o The support of async handlers via --enable-async as well as
+    PCM async handlers.
 
 MIXER
   o No sort with weight as default, sorted in the order of numid
