@@ -146,3 +146,14 @@ test "$sndseq" = "yes" && echo "#include \"seq.h\"" >> src/asoundlib.h
 test "$sndseq" = "yes" && echo "#include \"seqmid.h\"" >> src/asoundlib.h
 cat "$srcdir"/src/asoundlib-tail.h >> src/asoundlib.h
 
+echo "SALSA-Lib build configuration:"
+echo "  - PCM interface: $pcm"
+echo "  - Mixer interface: $mixer"
+echo "  - Raw MIDI interface: $rawmidi"
+echo "  - HW-dependent interface: $hwdep"
+echo "  - Timer interface: $timer"
+echo "  - ALSA-config dummy interface: $sndconf"
+echo "  - ALSA-sequencer dummy interface: $sndseq"
+echo "  - TLV (dB) support: $tlv"
+echo "  - Async handler support: $async"
+echo "  - Make libasound.so symlink: $libasound"
