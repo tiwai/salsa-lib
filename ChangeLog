@@ -1,3 +1,9 @@
+Version 0.0.7a:
+	* Fix asoundlib.h without PCM support.
+	* Fix README about async.
+	* Show the determined configurations at the end of configure
+	  script.
+
 Version 0.0.7:
 	* Add optional async handler support.  Disabled as default.
 	* Allow to disable PCM component via configure option.
