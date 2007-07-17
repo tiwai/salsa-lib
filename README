@@ -22,7 +22,11 @@ CONFIG
   o The API functions that are not supported but defined have
     "deprecated" attribute.  You'll get compile warnings when
     compiling the code using such functions.  (The same is true for
-    the all components below.)
+    the all components below.)  They are just warnings that you can
+    usually ignore.  The warnings are given so that you can find the
+    non-functional features easily.  If warnings really matter, remove
+    the deprecated attribute via --disable-deprecated configure
+    option.
   o Disabled as default
 
 PCM
@@ -94,6 +98,10 @@ libasound for linking/checking.
 
 All these options can be enabled via a single option,
 --enable-everything, for your convenience.
+
+For disabling the deprecated attribute for non-working functions (see
+the description of CONFIG in the section "GENERAL"), pass
+--disable-deprecated option.
 
 The alsa-library version to be compatbible can be given explicitly via
 --with-compat-version option.  As default, 1.0.14 is set.
