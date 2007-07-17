@@ -69,11 +69,7 @@ int snd_config_update_free(snd_config_update_t *update)
 	return 0;
 }
 
-static inline
-int snd_config_update_free_global(void)
-{
-	return 0;
-}
+/* snd_config_update_free_global is defined in global.h */
 
 static inline __SALSA_NOT_IMPLEMENTED
 int snd_config_search(snd_config_t *config, const char *key,

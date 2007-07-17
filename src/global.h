@@ -92,4 +92,11 @@ int snd_async_del_handler(snd_async_handler_t *handler)
 /* only for internal use */
 int _snd_set_nonblock(int fd, int nonblock);
 
+/* the global function defined here */
+static inline
+int snd_config_update_free_global(void)
+{
+	return 0;
+}
+
 #endif /* __ALSA_GLOBAL_H */
