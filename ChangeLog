@@ -1,3 +1,12 @@
+Version 0.0.8:
+	* Add --disable-deprecated configure option to turn off the
+	  "deprecated" attribute for non-working functions.
+	* Move snd_config_update_free_global() to global.h to fix
+	  compilation of aplay without conf.h.
+	* Add missing declaration of snd_pcm_format_value().
+	* Output hw_params and sw_params in snd_pcm_dump().
+	* Fix the array size of strings for PCM mask parameters.
+
 Version 0.0.7a:
 	* Fix asoundlib.h without PCM support.
 	* Fix README about async.
