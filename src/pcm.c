@@ -284,7 +284,7 @@ const char *_snd_pcm_state_names[] = {
 	STATE(DISCONNECTED),
 };
 
-const char *_snd_pcm_access_names[] = {
+const char *_snd_pcm_access_names[SND_MASK_MAX + 1] = {
 	ACCESS(MMAP_INTERLEAVED), 
 	ACCESS(MMAP_NONINTERLEAVED),
 	ACCESS(MMAP_COMPLEX),
@@ -292,7 +292,7 @@ const char *_snd_pcm_access_names[] = {
 	ACCESS(RW_NONINTERLEAVED),
 };
 
-const char *_snd_pcm_format_names[] = {
+const char *_snd_pcm_format_names[SND_MASK_MAX + 1] = {
 	FORMAT(S8),
 	FORMAT(U8),
 	FORMAT(S16_LE),
@@ -333,7 +333,7 @@ const char *_snd_pcm_format_names[] = {
 	FORMAT(U18_3BE),
 };
 
-static const char *_snd_pcm_format_aliases[SND_PCM_FORMAT_LAST+1] = {
+static const char *_snd_pcm_format_aliases[SND_MASK_MAX + 1] = {
 	FORMAT(S16),
 	FORMAT(U16),
 	FORMAT(S24),
@@ -345,7 +345,7 @@ static const char *_snd_pcm_format_aliases[SND_PCM_FORMAT_LAST+1] = {
 	FORMAT(IEC958_SUBFRAME),
 };
 
-const char *_snd_pcm_format_descriptions[] = {
+const char *_snd_pcm_format_descriptions[SND_MASK_MAX + 1] = {
 	FORMATD(S8, "Signed 8 bit"), 
 	FORMATD(U8, "Unsigned 8 bit"),
 	FORMATD(S16_LE, "Signed 16 bit Little Endian"),
@@ -418,11 +418,11 @@ const char *_snd_pcm_type_names[] = {
         PCMTYPE(EXTPLUG),
 };
 
-const char *_snd_pcm_subformat_names[] = {
+const char *_snd_pcm_subformat_names[SND_MASK_MAX + 1] = {
 	SUBFORMAT(STD), 
 };
 
-const char *_snd_pcm_subformat_descriptions[] = {
+const char *_snd_pcm_subformat_descriptions[SND_MASK_MAX + 1] = {
 	SUBFORMATD(STD, "Standard"), 
 };
 
