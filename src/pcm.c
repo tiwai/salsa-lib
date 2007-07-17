@@ -533,6 +533,10 @@ int snd_pcm_dump(snd_pcm_t *pcm, snd_output_t *out)
 	snd_output_printf(out,
 			  "Hardware PCM card %d '%s' device %d subdevice %d\n",
 			  pcm->card, name, pcm->device, pcm->subdevice);
+	if (pcm->setup) {
+		snd_output_printf(out, "Its setup is:\n");
+		snd_pcm_dump_setup(pcm, out);
+	}
 	free(name);
 	return 0;
 }
