@@ -243,7 +243,7 @@ snd_hctl_elem_t *snd_hctl_elem_prev(snd_hctl_elem_t *elem)
  * not implemented yet
  */
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_hctl_async(snd_hctl_t *hctl, int sig, pid_t pid)
 {
 	return -ENXIO;

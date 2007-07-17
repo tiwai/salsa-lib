@@ -1128,21 +1128,21 @@ void snd_ctl_elem_value_set_iec958(snd_ctl_elem_value_t *obj,
 /*
  */
 #if !SALSA_HAS_TLV_SUPPORT
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_ctl_elem_tlv_read(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
 			  unsigned int *tlv, unsigned int tlv_size)
 {
 	return -ENXIO;
 }
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_ctl_elem_tlv_write(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
 			   const unsigned int *tlv)
 {
 	return -ENXIO;
 }
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_ctl_elem_tlv_command(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
 			     const unsigned int *tlv)
 {
@@ -1154,37 +1154,37 @@ int snd_ctl_elem_tlv_command(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
  * not implemented yet
  */
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_ctl_open_lconf(snd_ctl_t **ctlp, const char *name,
 		       int mode, snd_config_t *lconf)
 {
 	return -ENXIO;
 }
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_ctl_set_power_state(snd_ctl_t *ctl, unsigned int state)
 {
 	return -ENXIO;
 }
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_ctl_get_power_state(snd_ctl_t *ctl, unsigned int *state)
 {
 	return -ENXIO;
 }
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_device_name_hint(int card, const char *iface, void ***hints)
 {
 	return -ENXIO;
 }
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_device_name_free_hint(void **hints)
 {
 	return 0;
 }
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 char *snd_device_name_get_hint(const void *hint, const char *id)
 {
 	return NULL;
@@ -1200,7 +1200,7 @@ snd_ctl_t *snd_async_handler_get_ctl(snd_async_handler_t *handler)
 
 #else
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_async_add_ctl_handler(snd_async_handler_t **handler, snd_ctl_t *ctl, 
 			      snd_async_callback_t callback,
 			      void *private_data)
@@ -1208,7 +1208,7 @@ int snd_async_add_ctl_handler(snd_async_handler_t **handler, snd_ctl_t *ctl,
 	return -ENXIO;
 }
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 snd_ctl_t *snd_async_handler_get_ctl(snd_async_handler_t *handler)
 {
 	return NULL;

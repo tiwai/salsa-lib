@@ -660,14 +660,14 @@ int snd_mixer_selem_set_capture_dB_all(snd_mixer_elem_t *elem, long value,
 }
 
 #else /* SALSA_HAS_TLV_SUPPORT */
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_mixer_selem_get_playback_dB_range(snd_mixer_elem_t *elem,
 					  long *min, long *max)
 {
 	return -ENXIO;
 }
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_mixer_selem_get_playback_dB(snd_mixer_elem_t *elem,
 				    snd_mixer_selem_channel_id_t channel,
 				    long *value)
@@ -675,7 +675,7 @@ int snd_mixer_selem_get_playback_dB(snd_mixer_elem_t *elem,
 	return -ENXIO;
 }
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_mixer_selem_set_playback_dB(snd_mixer_elem_t *elem,
 				    snd_mixer_selem_channel_id_t channel,
 				    long value, int dir)
@@ -683,21 +683,21 @@ int snd_mixer_selem_set_playback_dB(snd_mixer_elem_t *elem,
 	return -ENXIO;
 }
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_mixer_selem_set_playback_dB_all(snd_mixer_elem_t *elem, long value,
 					int dir)
 {
 	return -ENXIO;
 }
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_mixer_selem_get_capture_dB_range(snd_mixer_elem_t *elem,
 					 long *min, long *max)
 {
 	return -ENXIO;
 }
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_mixer_selem_get_capture_dB(snd_mixer_elem_t *elem,
 				   snd_mixer_selem_channel_id_t channel,
 				   long *value)
@@ -705,7 +705,7 @@ int snd_mixer_selem_get_capture_dB(snd_mixer_elem_t *elem,
 	return -ENXIO;
 }
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_mixer_selem_set_capture_dB(snd_mixer_elem_t *elem,
 				   snd_mixer_selem_channel_id_t channel,
 				   long value, int dir)
@@ -713,7 +713,7 @@ int snd_mixer_selem_set_capture_dB(snd_mixer_elem_t *elem,
 	return -ENXIO;
 }
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_mixer_selem_set_capture_dB_all(snd_mixer_elem_t *elem, long value,
 				       int dir)
 {

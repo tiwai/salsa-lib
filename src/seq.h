@@ -24,13 +24,13 @@ typedef enum _snd_seq_type {
 
 /*
  */
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_seq_open(snd_seq_t **handle, const char *name, int streams, int mode)
 {
 	return -ENXIO;
 }
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_seq_open_lconf(snd_seq_t **handle, const char *name, int streams,
 		       int mode, snd_config_t *lconf)
 {

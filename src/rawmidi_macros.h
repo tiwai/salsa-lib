@@ -31,7 +31,7 @@ struct _snd_rawmidi {
 /*
  */
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_rawmidi_open_lconf(snd_rawmidi_t **in_rmidi, snd_rawmidi_t **out_rmidi,
 			   const char *name, int mode, snd_config_t *lconf)
 {

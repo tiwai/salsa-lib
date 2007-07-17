@@ -42,6 +42,12 @@ typedef struct _snd_seq snd_seq_t;
 #define ATTRIBUTE_UNUSED __attribute__ ((__unused__))
 #endif
 
+#if SALSA_MARK_DEPRECATED
+#define __SALSA_NOT_IMPLEMENTED	__attribute__ ((deprecated))
+#else
+#define __SALSA_NOT_IMPLEMENTED
+#endif
+
 /* async helpers */
 typedef struct _snd_async_handler snd_async_handler_t;
 typedef void (*snd_async_callback_t)(snd_async_handler_t *handler);
@@ -69,13 +75,13 @@ int snd_async_del_handler(snd_async_handler_t *handler);
 #define snd_async_handler_get_signo(h)	-1
 #define snd_async_handler_get_fd(h)	-1
 #define snd_async_handler_get_callback_private(h)	NULL
-static inline __attribute__((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_async_add_handler(snd_async_handler_t **handler, int fd, 
 			  snd_async_callback_t callback, void *private_data)
 {
 	return -ENXIO;
 }
-static inline __attribute__((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_async_del_handler(snd_async_handler_t *handler)
 {
 	return -ENXIO;

@@ -7,4 +7,7 @@
 /* Build with async support */
 #define SALSA_HAS_ASYNC_SUPPORT	@SALSA_HAS_ASYNC_SUPPORT@
 
+/* Enable deprecated attribute for non-working functions */
+#define SALSA_MARK_DEPRECATED	@SALSA_MARK_DEPRECATED@
+
 #endif /* __ALSA_RECIPE_H */

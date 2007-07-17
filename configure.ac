@@ -123,6 +123,18 @@ AC_SUBST(SALSA_HAS_ASYNC_SUPPORT)
 
 AM_CONDITIONAL(LINK_LIBASOUND, test "$libasound" = "yes")
 
+AC_ARG_ENABLE(deprecated,
+  AS_HELP_STRING([--disable-deprecated],
+		 [don't mark deprecated attribute for non-working functions]),
+  markdeprecated="$enableval", markdeprecated="yes")
+
+if test "$markdeprecated" = "yes"; then
+  SALSA_MARK_DEPRECATED=1
+else
+  SALSA_MARK_DEPRECATED=0
+fi
+AC_SUBST(SALSA_MARK_DEPRECATED)
+
 dnl OK, let's output...
 
 AC_OUTPUT([
@@ -157,3 +169,4 @@ echo "  - ALSA-sequencer dummy interface: $sndseq"
 echo "  - TLV (dB) support: $tlv"
 echo "  - Async handler support: $async"
 echo "  - Make libasound.so symlink: $libasound"
+echo "  - Mark deprecated attribute: $markdeprecated"

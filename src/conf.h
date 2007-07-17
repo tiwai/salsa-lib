@@ -26,25 +26,25 @@ typedef struct _snd_config_update snd_config_update_t;
 
 extern snd_config_t *snd_config;
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_config_top(snd_config_t **config)
 {
 	return -ENXIO;
 }
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_config_load(snd_config_t *config, snd_input_t *in)
 {
 	return -ENXIO;
 }
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_config_load_override(snd_config_t *config, snd_input_t *in)
 {
 	return -ENXIO;
 }
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_config_save(snd_config_t *config, snd_output_t *out)
 {
 	return -ENXIO;
@@ -75,21 +75,21 @@ int snd_config_update_free_global(void)
 	return 0;
 }
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_config_search(snd_config_t *config, const char *key,
 		      snd_config_t **result)
 {
 	return -ENXIO;
 }
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_config_searchv(snd_config_t *config, 
 		       snd_config_t **result, ...)
 {
 	return -ENXIO;
 }
 	
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_config_search_definition(snd_config_t *config,
 				 const char *base, const char *key,
 				 snd_config_t **result)
@@ -97,7 +97,7 @@ int snd_config_search_definition(snd_config_t *config,
 	return -ENXIO;
 }
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_config_expand(snd_config_t *config, snd_config_t *root,
 		      const char *args, snd_config_t *private_data,
 		      snd_config_t **result)
@@ -105,32 +105,32 @@ int snd_config_expand(snd_config_t *config, snd_config_t *root,
 	return -ENXIO;
 }
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_config_evaluate(snd_config_t *config, snd_config_t *root,
 			snd_config_t *private_data, snd_config_t **result)
 {
 	return -ENXIO;
 }
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_config_add(snd_config_t *config, snd_config_t *leaf)
 {
 	return -ENXIO;
 }
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_config_delete(snd_config_t *config)
 {
 	return -ENXIO;
 }
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_config_delete_compound_members(const snd_config_t *config)
 {
 	return -ENXIO;
 }
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_config_copy(snd_config_t **dst, snd_config_t *src)
 {
 	return -ENXIO;
@@ -391,13 +391,13 @@ struct snd_devname {
 	snd_devname_t *next;	/**< Next pointer */
 };
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 int snd_names_list(const char *iface, snd_devname_t **list)
 {
 	return -ENXIO;
 }
 
-static inline __attribute__ ((deprecated))
+static inline __SALSA_NOT_IMPLEMENTED
 void snd_names_list_free(snd_devname_t *list)
 {
 }
