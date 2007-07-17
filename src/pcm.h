@@ -84,6 +84,7 @@ uint32_t snd_pcm_format_silence_32(snd_pcm_format_t format);
 uint64_t snd_pcm_format_silence_64(snd_pcm_format_t format);
 int snd_pcm_format_set_silence(snd_pcm_format_t format, void *buf,
 			       unsigned int samples);
+snd_pcm_format_t snd_pcm_format_value(const char* name);
 
 int snd_pcm_area_silence(const snd_pcm_channel_area_t *dst_channel,
 			 snd_pcm_uframes_t dst_offset,
