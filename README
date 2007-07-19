@@ -84,7 +84,7 @@ As default, rawmidi, hwdep, timer, conf and seq components are
 disabled.  They can be enabled via --enable-xxx option, such as
 --enable-rawmidi.
 The PCM and mixer components are enabled as default, and can be
-disabled via --disable-pcm and --disable-mixer option, respecitvely.
+disabled via --disable-pcm and --disable-mixer option, respectively.
 
 The dB range support can be enabled via --enable-tlv option.  It's
 disabled as default.
@@ -103,7 +103,7 @@ For disabling the deprecated attribute for non-working functions (see
 the description of CONFIG in the section "GENERAL"), pass
 --disable-deprecated option.
 
-The alsa-library version to be compatbible can be given explicitly via
+The alsa-library version to be compatible can be given explicitly via
 --with-compat-version option.  As default, 1.0.14 is set.
 
 The library is installed as $LIBDIR/libsalsa.so.*.
@@ -115,7 +115,7 @@ The C header files are installed into $INCLUDEDIR/alsa.  The
 alsa/asoundlib.h should be compatible with the normal alsa-lib's one.
 
 
-CROSS-COMIPLATION
+CROSS-COMPILATION
 -----------------
 
 For compiling the library with a cross compiler, run like the
@@ -141,7 +141,7 @@ KNOWN PROBLEMS
 - SALSA-lib headers can't be included from C++
 
   The codes in *_macros.h contain many conversions to void pointer,
-  which C++ doesn't allow.  I wont'fix this since I don't like C++.
+  which C++ doesn't allow.  I won't fix this since I don't like C++.
 
 - Incomplete MMAP mode
 
