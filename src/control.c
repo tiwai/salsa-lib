@@ -48,7 +48,7 @@ int snd_ctl_open(snd_ctl_t **ctlp, const char *name, int mode)
 		return err;
 
 	snprintf(filename, sizeof(filename), "%s/controlC%d",
-		 DEVPATH, card);
+		 SALSA_DEVPATH, card);
 	if (mode & SND_CTL_READONLY)
 		fmode = O_RDONLY;
 	else

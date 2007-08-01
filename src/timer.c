@@ -49,7 +49,7 @@ int snd_timer_open(snd_timer_t **handle, const char *name, int mode)
 	tmode = O_RDONLY;
 	if (mode & SND_TIMER_OPEN_NONBLOCK)
 		tmode |= O_NONBLOCK;	
-	fd = open(DEVPATH "/timer", tmode);
+	fd = open(SALSA_DEVPATH "/timer", tmode);
 	if (fd < 0)
 		return -errno;
 	if (ioctl(fd, SNDRV_TIMER_IOCTL_PVERSION, &ver) < 0) {

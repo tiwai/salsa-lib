@@ -43,7 +43,8 @@ int snd_hwdep_open(snd_hwdep_t **handlep, const char *name, int mode)
 		return err;
 	if (card < 0 || card >= 32)
 		return -EINVAL;
-	snprintf(filename, sizeof(filename), "%s/hwdepC%d", DEVPATH, card);
+	snprintf(filename, sizeof(filename), "%s/hwdepC%d",
+		 SALSA_DEVPATH, card);
 	fd = open(filename, mode);
 	if (fd < 0)
 		return -errno;

@@ -35,6 +35,17 @@ AC_SUBST(SND_LIB_MINOR)
 AC_SUBST(SND_LIB_SUBMINOR)
 AC_SUBST(SND_LIB_EXTRAVER)
 
+dnl Non-standard device files directory
+AC_MSG_CHECKING([for ALSA device file directory])
+AC_ARG_WITH(alsa-devdir,
+  AS_HELP_STRING([--with-alsa-devdir=dir],
+		 [directory with ALSA device files (default /dev/snd)]),
+  [alsa_dev_dir="$withval"],
+  [alsa_dev_dir="/dev/snd"])
+DEVPATH="$alsa_dev_dir"
+AC_SUBST(DEVPATH)
+AC_MSG_RESULT([$alsa_dev_dir])
+
 dnl Component selections
 
 AC_ARG_ENABLE(pcm,

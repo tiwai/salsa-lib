@@ -87,7 +87,7 @@ int snd_pcm_open(snd_pcm_t **pcmp, const char *name,
 		return err;
 
 	snprintf(filename, sizeof(filename), "%s/pcmC%dD%d%c",
-		 DEVPATH, card, dev,
+		 SALSA_DEVPATH, card, dev,
 		 (stream == SND_PCM_STREAM_PLAYBACK ? 'p' : 'c'));
 	fmode = O_RDWR | O_NONBLOCK;
 	if (mode & SND_PCM_ASYNC)

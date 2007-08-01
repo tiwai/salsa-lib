@@ -104,7 +104,7 @@ int snd_rawmidi_open(snd_rawmidi_t **in_rmidi, snd_rawmidi_t **out_rmidi,
 		return err;
 
 	snprintf(filename, sizeof(filename), "%s/midiC%dD%d",
-		 DEVPATH, card, dev);
+		 SALSA_DEVPATH, card, dev);
 
 	if (!in_rmidi)
 		fmode = O_WRONLY;

@@ -111,6 +111,9 @@ the description of "MISC" in the section "GENERAL"), pass
 The alsa-library version to be compatible can be given explicitly via
 --with-compat-version option.  As default, 1.0.14 is set.
 
+If the ALSA device files are not in /dev/snd, another directory can be
+specified with the --with-alsa-devdir option.
+
 The library is installed as $LIBDIR/libsalsa.so.*.
 This package provides also the compatible alsa.m4 and alsa.pc.  If the
 other packages can be autoreconf'ed, you'll be able to link libsalsa

@@ -10,4 +10,6 @@
 /* Enable deprecated attribute for non-working functions */
 #define SALSA_MARK_DEPRECATED	@SALSA_MARK_DEPRECATED@
 
+#define SALSA_DEVPATH "@DEVPATH@"
+
 #endif /* __ALSA_RECIPE_H */

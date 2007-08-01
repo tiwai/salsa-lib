@@ -44,7 +44,7 @@ int _snd_set_nonblock(int fd, int nonblock)
 	return 0;
 }
 
-#define SND_FILE_CONTROL	DEVPATH "/controlC%i"
+#define SND_FILE_CONTROL	SALSA_DEVPATH "/controlC%i"
 
 int snd_card_load(int card)
 {
