@@ -19,14 +19,6 @@ CONFIG
   o All functions snd_config_*() are replaced with dummy ones since
     SALSA-Lib doesn't support the configuration files.
     The apps accessing config stuff won't work properly as expected.
-  o The API functions that are not supported but defined have
-    "deprecated" attribute.  You'll get compile warnings when
-    compiling the code using such functions.  (The same is true for
-    the all components below.)  They are just warnings that you can
-    usually ignore.  The warnings are given so that you can find the
-    non-functional features easily.  If warnings really matter, remove
-    the deprecated attribute via --disable-deprecated configure
-    option.
   o Disabled as default
 
 PCM
@@ -75,6 +67,19 @@ SEQUENCER
 INSTRUMENT LAYER
   o No APIs are provided
 
+MISC
+  o The last "close" argument in snd_input_stdio_attach() and
+    snd_output_stdio_attach() is ignored and the attached IO is always
+    closed.
+  o The API functions that are not supported but defined have
+    "deprecated" attribute.  You'll get compile warnings when
+    compiling the code using such functions.  (The same is true for
+    the all components below.)  They are just warnings that you can
+    usually ignore.  The warnings are given so that you can find the
+    non-functional features easily.  If warnings really matter, remove
+    the deprecated attribute via --disable-deprecated configure
+    option.
+
 
 INSTALLATION
 ------------
@@ -100,7 +105,7 @@ All these options can be enabled via a single option,
 --enable-everything, for your convenience.
 
 For disabling the deprecated attribute for non-working functions (see
-the description of CONFIG in the section "GENERAL"), pass
+the description of "MISC" in the section "GENERAL"), pass
 --disable-deprecated option.
 
 The alsa-library version to be compatible can be given explicitly via
