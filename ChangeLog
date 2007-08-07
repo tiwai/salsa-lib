@@ -1,3 +1,10 @@
+Version 0.0.10:
+	* Due to popular demands, make salsa-lib compile with C++ now
+	  People tend to like what I don't :)
+	* Rewrite memory allocation, free, copy, etc with helper macros
+	* Fix missing function declarations for snd_ctl_elem_add*()
+	  and snd_mixer_selem_get_enum_item_name()
+	
 Version 0.0.9:
 	* Add --with-alsa-devdir configure option to specify the
 	  non-standard device path (patch by Clemens Ladisch)
