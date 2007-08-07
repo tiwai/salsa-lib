@@ -1,3 +1,8 @@
+Version 0.0.9:
+	* Add --with-alsa-devdir configure option to specify the
+	  non-standard device path (patch by Clemens Ladisch)
+	* Fix some description in README
+
 Version 0.0.8:
 	* Add --disable-deprecated configure option to turn off the
 	  "deprecated" attribute for non-working functions.
