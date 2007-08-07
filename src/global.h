@@ -22,6 +22,8 @@
 #ifndef __ALSA_GLOBAL_H
 #define __ALSA_GLOBAL_H
 
+#include <errno.h>
+
 typedef struct _snd_config snd_config_t;
 
 typedef struct timeval snd_timestamp_t;
