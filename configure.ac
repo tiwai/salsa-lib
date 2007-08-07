@@ -84,7 +84,7 @@ AC_ARG_ENABLE(tlv,
 AC_ARG_ENABLE(async,
   AS_HELP_STRING([--enable-async],
 		 [enable async handler support]),
-  async="$enableval", async="yes")
+  async="$enableval", async="no")
 
 AC_ARG_ENABLE(libasound,
   AS_HELP_STRING([--enable-libasound],
