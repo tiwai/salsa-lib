@@ -60,4 +60,13 @@ int snd_async_add_ctl_handler(snd_async_handler_t **handler, snd_ctl_t *ctl,
 #define snd_ctl_elem_info_alloca(ptr)	__snd_alloca(ptr, snd_ctl_elem_info)
 #define snd_ctl_elem_value_alloca(ptr)	__snd_alloca(ptr, snd_ctl_elem_value)
 
+int snd_ctl_elem_add_integer(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
+			     unsigned int count, long min, long max, long step);
+int snd_ctl_elem_add_integer64(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
+			       unsigned int count, long long min, long long max,
+			       long long step);
+int snd_ctl_elem_add_boolean(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
+			     unsigned int count);
+int snd_ctl_elem_add_iec958(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id);
+
 #endif /* __ALSA_CONTROL_H */

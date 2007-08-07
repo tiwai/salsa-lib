@@ -65,6 +65,9 @@ int snd_mixer_selem_set_capture_volume_range(snd_mixer_elem_t *elem,
 int snd_mixer_selem_set_enum_item(snd_mixer_elem_t *elem,
 				  snd_mixer_selem_channel_id_t channel,
 				  unsigned int idx);
+int snd_mixer_selem_get_enum_item_name(snd_mixer_elem_t *elem,
+				       unsigned int idx,
+				       size_t maxlen, char *str);
 
 #include "mixer_macros.h"
 
