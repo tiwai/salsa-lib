@@ -99,4 +99,53 @@ int snd_config_update_free_global(void)
 	return 0;
 }
 
+/*
+ * helper macros
+ */
+#define __snd_sizeof(type)		 \
+static inline size_t type##_sizeof(void) \
+{					 \
+	return sizeof(type##_t);	 \
+}
+
+#define __snd_malloc(type)			\
+static inline int type##_malloc(type##_t **ptr) \
+{						 \
+	*ptr = (type##_t *)calloc(1, sizeof(**ptr)); \
+	if (!*ptr)				 \
+		return -ENOMEM;			 \
+	return 0;				 \
+}
+
+#define __snd_free(type)			\
+static inline void type##_free(type##_t *obj)	\
+{						\
+	free(obj);				\
+}
+
+#define __snd_clear(type)				\
+static inline void type##_clear(type##_t *obj)		\
+{							\
+	memset(obj, 0, sizeof(type##_t));		\
+}
+
+#define __snd_copy(type)					   \
+static inline void type##_copy(type##_t *dst, const type##_t *src) \
+{								   \
+	*dst = *src;						   \
+}
+
+#define __snd_define_type(type)		\
+__snd_sizeof(type)			\
+__snd_malloc(type)			\
+__snd_free(type)			\
+__snd_clear(type)			\
+__snd_copy(type)
+
+#define __snd_alloca(ptr, type)					\
+	do {							\
+		*ptr = (type##_t*)alloca(type##_sizeof());	\
+		memset(*ptr, 0, snd_ctl_elem_id_sizeof());	\
+	} while (0)
+
 #endif /* __ALSA_GLOBAL_H */

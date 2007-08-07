@@ -161,7 +161,7 @@ static inline
 snd_pcm_state_t snd_pcm_state(snd_pcm_t *pcm)
 {
 	_snd_pcm_sync_ptr(pcm, SNDRV_PCM_SYNC_PTR_APPL);
-	return pcm->mmap_status->state;
+	return (snd_pcm_state_t) pcm->mmap_status->state;
 }
 
 static inline
@@ -583,33 +583,7 @@ int __snd_pcm_hw_param_set_minmax64(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 	_snd_pcm_hw_param_set_last(pcm, params, type, (unsigned int *)(ptr), dir)
 #endif
 
-static inline
-size_t snd_pcm_access_mask_sizeof(void)
-{
-	return sizeof(snd_pcm_access_mask_t);
-}
-
-static inline
-int snd_pcm_access_mask_malloc(snd_pcm_access_mask_t **ptr)
-{
-	*ptr = calloc(1, sizeof(**ptr));
-	if (!*ptr)
-		return -ENOMEM;
-	return 0;
-}
-
-static inline
-void snd_pcm_access_mask_free(snd_pcm_access_mask_t *obj)
-{
-	free(obj);
-}
-
-static inline
-void snd_pcm_access_mask_copy(snd_pcm_access_mask_t *dst,
-			      const snd_pcm_access_mask_t *src)
-{
-	*dst = *src;
-}
+__snd_define_type(snd_pcm_access_mask);
 
 static inline
 void snd_pcm_access_mask_none(snd_pcm_access_mask_t *mask)
@@ -647,32 +621,7 @@ void snd_pcm_access_mask_reset(snd_pcm_access_mask_t *mask, snd_pcm_access_t val
 	_snd_mask_reset((snd_mask_t *) mask, (unsigned long) val);
 }
 
-static inline
-size_t snd_pcm_format_mask_sizeof(void)
-{
-	return sizeof(snd_pcm_format_mask_t);
-}
-
-static inline
-int snd_pcm_format_mask_malloc(snd_pcm_format_mask_t **ptr)
-{
-	*ptr = calloc(1, sizeof(**ptr));
-	if (!*ptr)
-		return -ENOMEM;
-	return 0;
-}
-
-static inline
-void snd_pcm_format_mask_free(snd_pcm_format_mask_t *obj)
-{
-	free(obj);
-}
-
-static inline
-void snd_pcm_format_mask_copy(snd_pcm_format_mask_t *dst, const snd_pcm_format_mask_t *src)
-{
-	*dst = *src;
-}
+__snd_define_type(snd_pcm_format_mask);
 
 static inline
 void snd_pcm_format_mask_none(snd_pcm_format_mask_t *mask)
@@ -711,33 +660,7 @@ void snd_pcm_format_mask_reset(snd_pcm_format_mask_t *mask, snd_pcm_format_t val
 }
 
 
-static inline
-size_t snd_pcm_subformat_mask_sizeof(void)
-{
-	return sizeof(snd_pcm_subformat_mask_t);
-}
-
-static inline
-int snd_pcm_subformat_mask_malloc(snd_pcm_subformat_mask_t **ptr)
-{
-	*ptr = calloc(1, sizeof(**ptr));
-	if (!*ptr)
-		return -ENOMEM;
-	return 0;
-}
-
-static inline
-void snd_pcm_subformat_mask_free(snd_pcm_subformat_mask_t *obj)
-{
-	free(obj);
-}
-
-static inline
-void snd_pcm_subformat_mask_copy(snd_pcm_subformat_mask_t *dst,
-				 const snd_pcm_subformat_mask_t *src)
-{
-	*dst = *src;
-}
+__snd_define_type(snd_pcm_subformat_mask);
 
 static inline
 void snd_pcm_subformat_mask_none(snd_pcm_subformat_mask_t *mask)
@@ -779,32 +702,7 @@ void snd_pcm_subformat_mask_reset(snd_pcm_subformat_mask_t *mask,
 }
 
 
-static inline
-size_t snd_pcm_hw_params_sizeof(void)
-{
-	return sizeof(snd_pcm_hw_params_t);
-}
-
-static inline
-int snd_pcm_hw_params_malloc(snd_pcm_hw_params_t **ptr)
-{
-	*ptr = calloc(1, sizeof(**ptr));
-	if (!*ptr)
-		return -ENOMEM;
-	return 0;
-}
-
-static inline
-void snd_pcm_hw_params_free(snd_pcm_hw_params_t *obj)
-{
-	free(obj);
-}
-
-static inline
-void snd_pcm_hw_params_copy(snd_pcm_hw_params_t *dst, const snd_pcm_hw_params_t *src)
-{
-	*dst = *src;
-}
+__snd_define_type(snd_pcm_hw_params);
 
 static inline
 int snd_pcm_hw_params_get_access(const snd_pcm_hw_params_t *params,
@@ -831,26 +729,32 @@ int snd_pcm_hw_params_set_access(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 }
 
 static inline
-int snd_pcm_hw_params_set_access_first(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
+int snd_pcm_hw_params_set_access_first(snd_pcm_t *pcm,
+				       snd_pcm_hw_params_t *params,
 				       snd_pcm_access_t *access)
 {
-	return _snd_pcm_hw_param_set_first(pcm, params, SNDRV_PCM_HW_PARAM_ACCESS,
-					  access, NULL);
+	return _snd_pcm_hw_param_set_first(pcm, params,
+					   SNDRV_PCM_HW_PARAM_ACCESS,
+					   (unsigned int *)access, NULL);
 }
 
 static inline
-int snd_pcm_hw_params_set_access_last(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
+int snd_pcm_hw_params_set_access_last(snd_pcm_t *pcm,
+				      snd_pcm_hw_params_t *params,
 				      snd_pcm_access_t *access)
 {
-	return _snd_pcm_hw_param_set_last(pcm, params, SNDRV_PCM_HW_PARAM_ACCESS,
-					 access, NULL);
+	return _snd_pcm_hw_param_set_last(pcm, params,
+					  SNDRV_PCM_HW_PARAM_ACCESS,
+					  (unsigned int *)access, NULL);
 }
 
 static inline
-int snd_pcm_hw_params_set_access_mask(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
+int snd_pcm_hw_params_set_access_mask(snd_pcm_t *pcm,
+				      snd_pcm_hw_params_t *params,
 				      snd_pcm_access_mask_t *mask)
 {
-	return _snd_pcm_hw_param_set_mask(pcm, params, SNDRV_PCM_HW_PARAM_ACCESS,
+	return _snd_pcm_hw_param_set_mask(pcm, params,
+					  SNDRV_PCM_HW_PARAM_ACCESS,
 					 (snd_mask_t *) mask);
 }
 
@@ -926,11 +830,12 @@ int snd_pcm_hw_params_get_subformat(const snd_pcm_hw_params_t *params,
 				    snd_pcm_subformat_t *subformat)
 {
 	return _snd_pcm_hw_param_get(params, SNDRV_PCM_HW_PARAM_SUBFORMAT,
-				    subformat, NULL);
+				     (unsigned int *)subformat, NULL);
 }
 
 static inline
-int snd_pcm_hw_params_test_subformat(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
+int snd_pcm_hw_params_test_subformat(snd_pcm_t *pcm,
+				     snd_pcm_hw_params_t *params,
 				     snd_pcm_subformat_t subformat)
 {
 	return _snd_pcm_hw_param_test(pcm, params, SNDRV_PCM_HW_PARAM_SUBFORMAT,
@@ -942,32 +847,36 @@ int snd_pcm_hw_params_set_subformat(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				    snd_pcm_subformat_t subformat)
 {
 	return _snd_pcm_hw_param_set(pcm, params, SNDRV_PCM_HW_PARAM_SUBFORMAT,
-				    subformat, 0);
+				     subformat, 0);
 }
 
 static inline
 int snd_pcm_hw_params_set_subformat_first(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					  snd_pcm_subformat_t *subformat)
 {
-	return _snd_pcm_hw_param_set_first(pcm, params, SNDRV_PCM_HW_PARAM_SUBFORMAT,
-					  subformat, NULL);
+	return _snd_pcm_hw_param_set_first(pcm, params,
+					   SNDRV_PCM_HW_PARAM_SUBFORMAT,
+					   (unsigned int *)subformat, NULL);
 }
 
 static inline
-int snd_pcm_hw_params_set_subformat_last(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
+int snd_pcm_hw_params_set_subformat_last(snd_pcm_t *pcm,
+					 snd_pcm_hw_params_t *params,
 					 snd_pcm_subformat_t *subformat)
 {
-	return _snd_pcm_hw_param_set_last(pcm, params, SNDRV_PCM_HW_PARAM_SUBFORMAT,
-					 subformat, NULL);
+	return _snd_pcm_hw_param_set_last(pcm, params,
+					  SNDRV_PCM_HW_PARAM_SUBFORMAT,
+					  (unsigned int *)subformat, NULL);
 }
 
 static inline
-int snd_pcm_hw_params_set_subformat_mask(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
+int snd_pcm_hw_params_set_subformat_mask(snd_pcm_t *pcm,
+					 snd_pcm_hw_params_t *params,
 					 snd_pcm_subformat_mask_t *mask)
 {
 	return _snd_pcm_hw_param_set_mask(pcm, params,
-					 SNDRV_PCM_HW_PARAM_SUBFORMAT,
-					 (snd_mask_t *) mask);
+					  SNDRV_PCM_HW_PARAM_SUBFORMAT,
+					  (snd_mask_t *) mask);
 }
 
 static inline
@@ -1754,32 +1663,7 @@ int snd_pcm_sw_params_current(snd_pcm_t *pcm, snd_pcm_sw_params_t *params)
 	return 0;
 }
 
-static inline
-size_t snd_pcm_sw_params_sizeof(void)
-{
-	return sizeof(snd_pcm_sw_params_t);
-}
-
-static inline
-int snd_pcm_sw_params_malloc(snd_pcm_sw_params_t **ptr)
-{
-	*ptr = calloc(1, sizeof(**ptr));
-	if (!*ptr)
-		return -ENOMEM;
-	return 0;
-}
-
-static inline
-void snd_pcm_sw_params_free(snd_pcm_sw_params_t *obj)
-{
-	free(obj);
-}
-
-static inline
-void snd_pcm_sw_params_copy(snd_pcm_sw_params_t *dst, const snd_pcm_sw_params_t *src)
-{
-	*dst = *src;
-}
+__snd_define_type(snd_pcm_sw_params);
 
 static inline
 int snd_pcm_sw_params_get_boundary(const snd_pcm_sw_params_t *params,
@@ -1801,7 +1685,7 @@ static inline
 int snd_pcm_sw_params_get_tstamp_mode(const snd_pcm_sw_params_t *params,
 				      snd_pcm_tstamp_t *val)
 {
-	*val = params->tstamp_mode;
+	*val = (snd_pcm_tstamp_t) params->tstamp_mode;
 	return 0;
 }
 
@@ -1924,37 +1808,12 @@ int snd_pcm_sw_params_get_silence_size(const snd_pcm_sw_params_t *params,
 }
 
 
-static inline
-size_t snd_pcm_status_sizeof(void)
-{
-	return sizeof(snd_pcm_status_t);
-}
-
-static inline
-int snd_pcm_status_malloc(snd_pcm_status_t **ptr)
-{
-	*ptr = calloc(1, sizeof(**ptr));
-	if (!*ptr)
-		return -ENOMEM;
-	return 0;
-}
-
-static inline
-void snd_pcm_status_free(snd_pcm_status_t *obj)
-{
-	free(obj);
-}
-
-static inline
-void snd_pcm_status_copy(snd_pcm_status_t *dst, const snd_pcm_status_t *src)
-{
-	*dst = *src;
-}
+__snd_define_type(snd_pcm_status);
 
 static inline
 snd_pcm_state_t snd_pcm_status_get_state(const snd_pcm_status_t *obj)
 {
-	return obj->state;
+	return (snd_pcm_state_t) obj->state;
 }
 
 static inline
@@ -2009,32 +1868,7 @@ snd_pcm_uframes_t snd_pcm_status_get_overrange(const snd_pcm_status_t *obj)
 	return obj->overrange;
 }
 
-static inline
-size_t snd_pcm_info_sizeof(void)
-{
-	return sizeof(snd_pcm_info_t);
-}
-
-static inline
-int snd_pcm_info_malloc(snd_pcm_info_t **ptr)
-{
-	*ptr = calloc(1, sizeof(**ptr));
-	if (!*ptr)
-		return -ENOMEM;
-	return 0;
-}
-
-static inline
-void snd_pcm_info_free(snd_pcm_info_t *obj)
-{
-	free(obj);
-}
-
-static inline
-void snd_pcm_info_copy(snd_pcm_info_t *dst, const snd_pcm_info_t *src)
-{
-	*dst = *src;
-}
+__snd_define_type(snd_pcm_info);
 
 static inline
 unsigned int snd_pcm_info_get_device(const snd_pcm_info_t *obj)
@@ -2051,7 +1885,7 @@ unsigned int snd_pcm_info_get_subdevice(const snd_pcm_info_t *obj)
 static inline
 snd_pcm_stream_t snd_pcm_info_get_stream(const snd_pcm_info_t *obj)
 {
-	return obj->stream;
+	return (snd_pcm_stream_t) obj->stream;
 }
 
 static inline
@@ -2081,13 +1915,13 @@ const char *snd_pcm_info_get_subdevice_name(const snd_pcm_info_t *obj)
 static inline
 snd_pcm_class_t snd_pcm_info_get_class(const snd_pcm_info_t *obj)
 {
-	return obj->dev_class;
+	return (snd_pcm_class_t) obj->dev_class;
 }
 
 static inline
 snd_pcm_subclass_t snd_pcm_info_get_subclass(const snd_pcm_info_t *obj)
 {
-	return obj->dev_subclass;
+	return (snd_pcm_subclass_t) obj->dev_subclass;
 }
 
 static inline
@@ -2174,7 +2008,7 @@ snd_pcm_sframes_t snd_pcm_mmap_readn(snd_pcm_t *pcm, void **bufs,
 static inline
 snd_pcm_t *snd_async_handler_get_pcm(snd_async_handler_t *handler)
 {
-	return handler->rec;
+	return (snd_pcm_t *) handler->rec;
 }
 
 #else /* !SALSA_HAS_ASYNC_SUPPORT */

@@ -32,15 +32,10 @@ int snd_timer_close(snd_timer_t *handle);
 
 #include "timer_macros.h"
 
-#define snd_timer_id_alloca(ptr) do { *ptr = alloca(snd_timer_id_sizeof()); memset(*ptr, 0, snd_timer_id_sizeof()); } while (0)
-
-#define snd_timer_ginfo_alloca(ptr) do { *ptr = alloca(snd_timer_ginfo_sizeof()); memset(*ptr, 0, snd_timer_ginfo_sizeof()); } while (0)
-
-#define snd_timer_info_alloca(ptr) do { *ptr = alloca(snd_timer_info_sizeof()); memset(*ptr, 0, snd_timer_info_sizeof()); } while (0)
-
-#define snd_timer_params_alloca(ptr) do { *ptr = alloca(snd_timer_params_sizeof()); memset(*ptr, 0, snd_timer_params_sizeof()); } while (0)
-
-#define snd_timer_status_alloca(ptr) do { *ptr = alloca(snd_timer_status_sizeof()); memset(*ptr, 0, snd_timer_status_sizeof()); } while (0)
-
+#define snd_timer_id_alloca(ptr)	__snd_alloca(ptr, snd_timer_id)
+#define snd_timer_ginfo_alloca(ptr)	__snd_alloca(ptr, snd_timer_ginfo)
+#define snd_timer_info_alloca(ptr)	__snd_alloca(ptr, snd_timer_info)
+#define snd_timer_params_alloca(ptr)	__snd_alloca(ptr, snd_timer_params)
+#define snd_timer_status_alloca(ptr)	__snd_alloca(ptr, snd_timer_status)
 
 #endif /** __ALSA_TIMER_H */

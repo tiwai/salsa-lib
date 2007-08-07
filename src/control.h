@@ -53,11 +53,11 @@ int snd_async_add_ctl_handler(snd_async_handler_t **handler, snd_ctl_t *ctl,
 
 #include "ctl_macros.h"
 
-#define snd_ctl_elem_id_alloca(ptr) do { *ptr = alloca(snd_ctl_elem_id_sizeof()); memset(*ptr, 0, snd_ctl_elem_id_sizeof()); } while (0)
-#define snd_ctl_card_info_alloca(ptr) do { *ptr = alloca(snd_ctl_card_info_sizeof()); memset(*ptr, 0, snd_ctl_card_info_sizeof()); } while (0)
-#define snd_ctl_event_alloca(ptr) do { *ptr = alloca(snd_ctl_event_sizeof()); memset(*ptr, 0, snd_ctl_event_sizeof()); } while (0)
-#define snd_ctl_elem_list_alloca(ptr) do { *ptr = alloca(snd_ctl_elem_list_sizeof()); memset(*ptr, 0, snd_ctl_elem_list_sizeof()); } while (0)
-#define snd_ctl_elem_info_alloca(ptr) do { *ptr = alloca(snd_ctl_elem_info_sizeof()); memset(*ptr, 0, snd_ctl_elem_info_sizeof()); } while (0)
-#define snd_ctl_elem_value_alloca(ptr) do { *ptr = alloca(snd_ctl_elem_value_sizeof()); memset(*ptr, 0, snd_ctl_elem_value_sizeof()); } while (0)
+#define snd_ctl_elem_id_alloca(ptr)	__snd_alloca(ptr, snd_ctl_elem_id)
+#define snd_ctl_card_info_alloca(ptr)	__snd_alloca(ptr, snd_ctl_card_info)
+#define snd_ctl_event_alloca(ptr)	__snd_alloca(ptr, snd_ctl_event)
+#define snd_ctl_elem_list_alloca(ptr)	__snd_alloca(ptr, snd_ctl_elem_list)
+#define snd_ctl_elem_info_alloca(ptr)	__snd_alloca(ptr, snd_ctl_elem_info)
+#define snd_ctl_elem_value_alloca(ptr)	__snd_alloca(ptr, snd_ctl_elem_value)
 
 #endif /* __ALSA_CONTROL_H */

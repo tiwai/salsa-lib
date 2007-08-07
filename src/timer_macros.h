@@ -115,32 +115,7 @@ ssize_t snd_timer_read(snd_timer_t *handle, void *buffer, size_t size)
 	return result;
 }
 
-static inline
-size_t snd_timer_id_sizeof(void)
-{
-	return sizeof(snd_timer_id_t);
-}
-
-static inline
-int snd_timer_id_malloc(snd_timer_id_t **ptr)
-{
-	*ptr = calloc(1, sizeof(**ptr));
-	if (!*ptr)
-		return -ENOMEM;
-	return 0;
-}
-
-static inline
-void snd_timer_id_free(snd_timer_id_t *obj)
-{
-	free(obj);
-}
-
-static inline
-void snd_timer_id_copy(snd_timer_id_t *dst, const snd_timer_id_t *src)
-{
-	*dst = *src;
-}
+__snd_define_type(snd_timer_id);
 
 static inline
 void snd_timer_id_set_class(snd_timer_id_t *id, int dev_class)
@@ -202,32 +177,7 @@ int snd_timer_id_get_subdevice(snd_timer_id_t *id)
 	return id->subdevice;
 }
 
-static inline
-size_t snd_timer_ginfo_sizeof(void)
-{
-	return sizeof(snd_timer_ginfo_t);
-}
-
-static inline
-int snd_timer_ginfo_malloc(snd_timer_ginfo_t **ptr)
-{
-	*ptr = calloc(1, sizeof(**ptr));
-	if (!*ptr)
-		return -ENOMEM;
-	return 0;
-}
-
-static inline
-void snd_timer_ginfo_free(snd_timer_ginfo_t *obj)
-{
-	free(obj);
-}
-
-static inline
-void snd_timer_ginfo_copy(snd_timer_ginfo_t *dst, const snd_timer_ginfo_t *src)
-{
-	*dst = *src;
-}
+__snd_define_type(snd_timer_ginfo);
 
 static inline
 int snd_timer_ginfo_set_tid(snd_timer_ginfo_t *obj, snd_timer_id_t *tid)
@@ -290,32 +240,7 @@ unsigned int snd_timer_ginfo_get_clients(snd_timer_ginfo_t *obj)
 	return obj->clients;
 }
 
-static inline
-size_t snd_timer_info_sizeof(void)
-{
-	return sizeof(snd_timer_info_t);
-}
-
-static inline
-int snd_timer_info_malloc(snd_timer_info_t **ptr)
-{
-	*ptr = calloc(1, sizeof(**ptr));
-	if (!*ptr)
-		return -ENOMEM;
-	return 0;
-}
-
-static inline
-void snd_timer_info_free(snd_timer_info_t *obj)
-{
-	free(obj);
-}
-
-static inline
-void snd_timer_info_copy(snd_timer_info_t *dst, const snd_timer_info_t *src)
-{
-	*dst = *src;
-}
+__snd_define_type(snd_timer_info);
 
 static inline
 int snd_timer_info_is_slave(snd_timer_info_t * info)
@@ -347,33 +272,7 @@ long snd_timer_info_get_resolution(snd_timer_info_t * info)
 	return info->resolution;
 }
 
-static inline
-size_t snd_timer_params_sizeof(void)
-{
-	return sizeof(snd_timer_params_t);
-}
-
-static inline
-int snd_timer_params_malloc(snd_timer_params_t **ptr)
-{
-	*ptr = calloc(1, sizeof(**ptr));
-	if (!*ptr)
-		return -ENOMEM;
-	return 0;
-}
-
-static inline
-void snd_timer_params_free(snd_timer_params_t *obj)
-{
-	free(obj);
-}
-
-static inline
-void snd_timer_params_copy(snd_timer_params_t *dst,
-			   const snd_timer_params_t *src)
-{
-	*dst = *src;
-}
+__snd_define_type(snd_timer_params);
 
 static inline
 int snd_timer_params_set_auto_start(snd_timer_params_t * params,
@@ -463,33 +362,7 @@ unsigned int snd_timer_params_get_filter(snd_timer_params_t * params)
 	return params->filter;
 }
 
-static inline
-size_t snd_timer_status_sizeof(void)
-{
-	return sizeof(snd_timer_status_t);
-}
-
-static inline
-int snd_timer_status_malloc(snd_timer_status_t **ptr)
-{
-	*ptr = calloc(1, sizeof(**ptr));
-	if (!*ptr)
-		return -ENOMEM;
-	return 0;
-}
-
-static inline
-void snd_timer_status_free(snd_timer_status_t *obj)
-{
-	free(obj);
-}
-
-static inline
-void snd_timer_status_copy(snd_timer_status_t *dst,
-			   const snd_timer_status_t *src)
-{
-	*dst = *src;
-}
+__snd_define_type(snd_timer_status);
 
 static inline
 snd_htimestamp_t snd_timer_status_get_timestamp(snd_timer_status_t * status)

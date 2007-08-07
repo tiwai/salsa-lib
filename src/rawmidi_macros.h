@@ -68,33 +68,7 @@ int snd_rawmidi_poll_descriptors_revents(snd_rawmidi_t *rawmidi,
 	return 0;
 }
 
-static inline
-size_t snd_rawmidi_info_sizeof(void)
-{
-	return sizeof(snd_rawmidi_info_t);
-}
-
-static inline
-int snd_rawmidi_info_malloc(snd_rawmidi_info_t **ptr)
-{
-	*ptr = calloc(1, sizeof(**ptr));
-	if (!ptr)
-		return -ENOMEM;
-	return 0;
-}
-
-static inline
-void snd_rawmidi_info_free(snd_rawmidi_info_t *obj)
-{
-	free(obj);
-}
-
-static inline
-void snd_rawmidi_info_copy(snd_rawmidi_info_t *dst,
-			   const snd_rawmidi_info_t *src)
-{
-	*dst = *src;
-}
+__snd_define_type(snd_rawmidi_info);
 
 static inline
 unsigned int snd_rawmidi_info_get_device(const snd_rawmidi_info_t *obj)
@@ -111,7 +85,7 @@ unsigned int snd_rawmidi_info_get_subdevice(const snd_rawmidi_info_t *obj)
 static inline
 snd_rawmidi_stream_t snd_rawmidi_info_get_stream(const snd_rawmidi_info_t *obj)
 {
-	return obj->stream;
+	return (snd_rawmidi_stream_t) obj->stream;
 }
 
 static inline
@@ -184,33 +158,7 @@ int snd_rawmidi_info(snd_rawmidi_t *rmidi, snd_rawmidi_info_t * info)
 	return 0;
 }
 
-static inline
-size_t snd_rawmidi_params_sizeof(void)
-{
-	return sizeof(snd_rawmidi_params_t);
-}
-
-static inline
-int snd_rawmidi_params_malloc(snd_rawmidi_params_t **ptr)
-{
-	*ptr = calloc(1, sizeof(**ptr));
-	if (!ptr)
-		return -ENOMEM;
-	return 0;
-}
-
-static inline
-void snd_rawmidi_params_free(snd_rawmidi_params_t *obj)
-{
-	free(obj);
-}
-
-static inline
-void snd_rawmidi_params_copy(snd_rawmidi_params_t *dst,
-			     const snd_rawmidi_params_t *src)
-{
-	*dst = *src;
-}
+__snd_define_type(snd_rawmidi_params);
 
 static inline
 int snd_rawmidi_params_set_buffer_size(snd_rawmidi_t *rmidi,
@@ -274,33 +222,7 @@ int snd_rawmidi_params_current(snd_rawmidi_t *rmidi,
 	return 0;
 }
 
-static inline
-size_t snd_rawmidi_status_sizeof(void)
-{
-	return sizeof(snd_rawmidi_status_t);
-}
-
-static inline
-int snd_rawmidi_status_malloc(snd_rawmidi_status_t **ptr)
-{
-	*ptr = calloc(1, sizeof(**ptr));
-	if (!ptr)
-		return -ENOMEM;
-	return 0;
-}
-
-static inline
-void snd_rawmidi_status_free(snd_rawmidi_status_t *obj)
-{
-	free(obj);
-}
-
-static inline
-void snd_rawmidi_status_copy(snd_rawmidi_status_t *dst,
-			     const snd_rawmidi_status_t *src)
-{
-	*dst = *src;
-}
+__snd_define_type(snd_rawmidi_status);
 
 static inline
 void snd_rawmidi_status_get_tstamp(const snd_rawmidi_status_t *obj,

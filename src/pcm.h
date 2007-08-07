@@ -113,19 +113,13 @@ int snd_async_add_pcm_handler(snd_async_handler_t **handler, snd_pcm_t *pcm,
 
 #include "pcm_macros.h"
 
-#define snd_pcm_info_alloca(ptr) do { *ptr = alloca(snd_pcm_info_sizeof()); memset(*ptr, 0, snd_pcm_info_sizeof()); } while (0)
-
-#define snd_pcm_hw_params_alloca(ptr) do { *ptr = alloca(snd_pcm_hw_params_sizeof()); memset(*ptr, 0, snd_pcm_hw_params_sizeof()); } while (0)
-
-#define snd_pcm_sw_params_alloca(ptr) do { *ptr = alloca(snd_pcm_sw_params_sizeof()); memset(*ptr, 0, snd_pcm_sw_params_sizeof()); } while (0)
-
-#define snd_pcm_access_mask_alloca(ptr) do { *ptr = alloca(snd_pcm_access_mask_sizeof()); memset(*ptr, 0, snd_pcm_access_mask_sizeof()); } while (0)
-
-#define snd_pcm_format_mask_alloca(ptr) do { *ptr = alloca(snd_pcm_format_mask_sizeof()); memset(*ptr, 0, snd_pcm_format_mask_sizeof()); } while (0)
-
-#define snd_pcm_subformat_mask_alloca(ptr) do { *ptr = alloca(snd_pcm_subformat_mask_sizeof()); memset(*ptr, 0, snd_pcm_subformat_mask_sizeof()); } while (0)
-
-#define snd_pcm_status_alloca(ptr) do { *ptr = alloca(snd_pcm_status_sizeof()); memset(*ptr, 0, snd_pcm_status_sizeof()); } while (0)
-
+#define snd_pcm_info_alloca(ptr)	__snd_alloca(ptr, snd_pcm_info)
+#define snd_pcm_hw_params_alloca(ptr)	__snd_alloca(ptr, snd_pcm_hw_params)
+#define snd_pcm_sw_params_alloca(ptr)	__snd_alloca(ptr, snd_pcm_sw_params)
+#define snd_pcm_access_mask_alloca(ptr)	__snd_alloca(ptr, snd_pcm_access_mask)
+#define snd_pcm_format_mask_alloca(ptr)	__snd_alloca(ptr, snd_pcm_format_mask)
+#define snd_pcm_subformat_mask_alloca(ptr) \
+	__snd_alloca(ptr, snd_pcm_subformat_mask)
+#define snd_pcm_status_alloca(ptr)	__snd_alloca(ptr, snd_pcm_status)
 
 #endif /* __ALSA_PCM_H_INC */

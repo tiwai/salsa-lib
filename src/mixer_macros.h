@@ -125,7 +125,7 @@ snd_mixer_elem_t *snd_mixer_last_elem(snd_mixer_t *mixer)
 static inline
 snd_mixer_elem_t *snd_mixer_elem_next(snd_mixer_elem_t *elem)
 {
-	if (elem->index == elem->mixer->count - 1)
+	if (elem->index == (unsigned int)elem->mixer->count - 1)
 		return NULL;
 	return elem->mixer->pelems[elem->index + 1];
 }
@@ -285,14 +285,14 @@ static inline
 int snd_mixer_selem_has_playback_channel(snd_mixer_elem_t *elem,
 					 snd_mixer_selem_channel_id_t channel)
 {
-	return channel < elem->channels[SND_PCM_STREAM_PLAYBACK];
+	return (unsigned int)channel < elem->channels[SND_PCM_STREAM_PLAYBACK];
 }
 
 static inline
 int _snd_mixer_selem_get_volume_range(snd_mixer_elem_t *elem, int type,
 				      long *min, long *max)
 {
-	snd_selem_vol_item_t *vol = elem->items[type];
+	snd_selem_vol_item_t *vol = (snd_selem_vol_item_t *)elem->items[type];
 	if (!vol)
 		return -EINVAL;
 	*min = vol->min;
@@ -317,7 +317,7 @@ int snd_mixer_selem_has_playback_volume(snd_mixer_elem_t *elem)
 static inline
 int _snd_mixer_selem_has_joined(snd_mixer_elem_t *elem, int type, int str)
 {
-	snd_selem_item_head_t *head = elem->items[type];
+	snd_selem_item_head_t *head = (snd_selem_item_head_t *)elem->items[type];
 	return head && (head->channels < elem->channels[str]);
 }
 
@@ -351,7 +351,7 @@ static inline
 int snd_mixer_selem_has_capture_channel(snd_mixer_elem_t *elem,
 					snd_mixer_selem_channel_id_t channel)
 {
-	return channel < elem->channels[SND_PCM_STREAM_CAPTURE];
+	return (unsigned int)channel < elem->channels[SND_PCM_STREAM_CAPTURE];
 }
 
 static inline
@@ -406,11 +406,11 @@ int _snd_mixer_selem_get_volume(snd_mixer_elem_t *elem, int type,
 				long *value)
 {
 	snd_selem_vol_item_t *vol;
-	vol = elem->items[type];
+	vol = (snd_selem_vol_item_t *)elem->items[type];
 	if (!vol)
 		return -EINVAL;
-	if (channel >= vol->head.channels)
-		channel = 0;
+	if ((unsigned int)channel >= vol->head.channels)
+		channel = SND_MIXER_SCHN_FRONT_LEFT; /* = 0 */
 	*value = vol->vol[channel << 1]; /* user-volume */
 	return 0;
 }
@@ -430,11 +430,11 @@ int _snd_mixer_selem_get_switch(snd_mixer_elem_t *elem, int type,
 				int *value)
 {
 	snd_selem_sw_item_t *sw;
-	sw = elem->items[type];
+	sw = (snd_selem_sw_item_t *) elem->items[type];
 	if (!sw)
 		return -EINVAL;
-	if (channel >= sw->head.channels)
-		channel = 0;
+	if ((unsigned int)channel >= sw->head.channels)
+		channel = SND_MIXER_SCHN_FRONT_LEFT; /* = 0 */
 	*value = !!(sw->sw & (1 << channel));
 	return 0;
 }
@@ -469,7 +469,8 @@ int snd_mixer_selem_get_capture_switch(snd_mixer_elem_t *elem,
 static inline
 int snd_mixer_selem_is_enumerated(snd_mixer_elem_t *elem)
 {
-	snd_selem_enum_item_t *eitem = elem->items[SND_SELEM_ITEM_ENUM];
+	snd_selem_enum_item_t *eitem =
+		(snd_selem_enum_item_t *) elem->items[SND_SELEM_ITEM_ENUM];
 	return eitem != NULL;
 }
 
@@ -488,7 +489,8 @@ int snd_mixer_selem_is_enum_capture(snd_mixer_elem_t *elem)
 static inline
 int snd_mixer_selem_get_enum_items(snd_mixer_elem_t *elem)
 {
-	snd_selem_enum_item_t *eitem = elem->items[SND_SELEM_ITEM_ENUM];
+	snd_selem_enum_item_t *eitem =
+		(snd_selem_enum_item_t *) elem->items[SND_SELEM_ITEM_ENUM];
 	if (!eitem)
 		return -EINVAL;
 	return eitem->items;
@@ -499,8 +501,9 @@ int snd_mixer_selem_get_enum_item(snd_mixer_elem_t *elem,
 				  snd_mixer_selem_channel_id_t channel,
 				  unsigned int *itemp)
 {
-	snd_selem_enum_item_t *eitem = elem->items[SND_SELEM_ITEM_ENUM];
-	if (!eitem || channel >= eitem->head.channels)
+	snd_selem_enum_item_t *eitem =
+		(snd_selem_enum_item_t *) elem->items[SND_SELEM_ITEM_ENUM];
+	if (!eitem || (unsigned int)channel >= eitem->head.channels)
 		return -EINVAL;
 	*itemp =  eitem->item[channel];
 	return 0;
@@ -510,33 +513,7 @@ int snd_mixer_selem_get_enum_item(snd_mixer_elem_t *elem,
 /*
  */
 
-static inline
-size_t snd_mixer_selem_id_sizeof(void)
-{
-	return sizeof(snd_mixer_selem_id_t);
-}
-
-static inline
-int snd_mixer_selem_id_malloc(snd_mixer_selem_id_t **ptr)
-{
-	*ptr = calloc(1, sizeof(**ptr));
-	if (!*ptr)
-		return -ENOMEM;
-	return 0;
-}
-
-static inline
-void snd_mixer_selem_id_free(snd_mixer_selem_id_t *obj)
-{
-	free(obj);
-}
-
-static inline
-void snd_mixer_selem_id_copy(snd_mixer_selem_id_t *dst,
-			     const snd_mixer_selem_id_t *src)
-{
-	*dst = *src;
-}
+__snd_define_type(snd_mixer_selem_id);
 
 static inline
 const char *snd_mixer_selem_id_get_name(const snd_mixer_selem_id_t *obj)
@@ -579,7 +556,7 @@ static inline
 int snd_mixer_selem_get_playback_dB_range(snd_mixer_elem_t *elem,
 					  long *min, long *max)
 {
-	return _snd_selem_vol_get_dB_range(elem->items[SND_SELEM_ITEM_PVOLUME],
+	return _snd_selem_vol_get_dB_range((snd_selem_vol_item_t *)elem->items[SND_SELEM_ITEM_PVOLUME],
 					   min, max);
 }
 
@@ -588,7 +565,7 @@ int snd_mixer_selem_get_playback_dB(snd_mixer_elem_t *elem,
 				    snd_mixer_selem_channel_id_t channel,
 				    long *value)
 {
-	return _snd_selem_vol_get_dB(elem->items[SND_SELEM_ITEM_PVOLUME],
+	return _snd_selem_vol_get_dB((snd_selem_vol_item_t *)elem->items[SND_SELEM_ITEM_PVOLUME],
 				     channel, value);
 }
 
@@ -597,7 +574,7 @@ int snd_mixer_selem_set_playback_dB(snd_mixer_elem_t *elem,
 				    snd_mixer_selem_channel_id_t channel,
 				    long value, int dir)
 {
-	return _snd_selem_vol_set_dB(elem->items[SND_SELEM_ITEM_PVOLUME],
+	return _snd_selem_vol_set_dB((snd_selem_vol_item_t *)elem->items[SND_SELEM_ITEM_PVOLUME],
 				     channel, value, dir);
 }
 
@@ -605,12 +582,16 @@ static inline
 int snd_mixer_selem_set_playback_dB_all(snd_mixer_elem_t *elem, long value,
 					int dir)
 {
-	int i, err;
-	snd_selem_vol_item_t *vol = elem->items[SND_SELEM_ITEM_PVOLUME];
+	unsigned int i;
+	int err;
+	snd_selem_vol_item_t *vol =
+		(snd_selem_vol_item_t *) elem->items[SND_SELEM_ITEM_PVOLUME];
 	if (!vol)
 		return -EINVAL;
 	for (i = 0; i < vol->head.channels; i++) {
-		err = _snd_selem_vol_set_dB(vol, i, value, dir);
+		err = _snd_selem_vol_set_dB(vol,
+					    (snd_mixer_selem_channel_id_t)i,
+					    value, dir);
 		if (err < 0)
 			return err;
 	}
@@ -621,7 +602,7 @@ static inline
 int snd_mixer_selem_get_capture_dB_range(snd_mixer_elem_t *elem,
 					 long *min, long *max)
 {
-	return _snd_selem_vol_get_dB_range(elem->items[SND_SELEM_ITEM_CVOLUME],
+	return _snd_selem_vol_get_dB_range((snd_selem_vol_item_t *)elem->items[SND_SELEM_ITEM_CVOLUME],
 					   min, max);
 }
 
@@ -630,7 +611,7 @@ int snd_mixer_selem_get_capture_dB(snd_mixer_elem_t *elem,
 				   snd_mixer_selem_channel_id_t channel,
 				   long *value)
 {
-	return _snd_selem_vol_get_dB(elem->items[SND_SELEM_ITEM_CVOLUME],
+	return _snd_selem_vol_get_dB((snd_selem_vol_item_t *)elem->items[SND_SELEM_ITEM_CVOLUME],
 				     channel, value);
 }
 
@@ -639,7 +620,7 @@ int snd_mixer_selem_set_capture_dB(snd_mixer_elem_t *elem,
 				   snd_mixer_selem_channel_id_t channel,
 				   long value, int dir)
 {
-	return _snd_selem_vol_set_dB(elem->items[SND_SELEM_ITEM_CVOLUME],
+	return _snd_selem_vol_set_dB((snd_selem_vol_item_t *)elem->items[SND_SELEM_ITEM_CVOLUME],
 				     channel, value, dir);
 }
 
@@ -647,12 +628,16 @@ static inline
 int snd_mixer_selem_set_capture_dB_all(snd_mixer_elem_t *elem, long value,
 				       int dir)
 {
-	int i, err;
-	snd_selem_vol_item_t *vol = elem->items[SND_SELEM_ITEM_CVOLUME];
+	unsigned int i;
+	int err;
+	snd_selem_vol_item_t *vol =
+		(snd_selem_vol_item_t *) elem->items[SND_SELEM_ITEM_CVOLUME];
 	if (!vol)
 		return -EINVAL;
 	for (i = 0; i < vol->head.channels; i++) {
-		err = _snd_selem_vol_set_dB(vol, i, value, dir);
+		err = _snd_selem_vol_set_dB(vol,
+					    (snd_mixer_selem_channel_id_t)i,
+					    value, dir);
 		if (err < 0)
 			return err;
 	}

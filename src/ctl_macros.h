@@ -233,7 +233,8 @@ int snd_ctl_elem_list_alloc_space(snd_ctl_elem_list_t *obj,
 				  unsigned int entries)
 {
 	free(obj->pids);
-	obj->pids = calloc(entries, sizeof(*obj->pids));
+	obj->pids = (struct sndrv_ctl_elem_id *)
+		calloc(entries, sizeof(*obj->pids));
 	if (!obj->pids) {
 		obj->space = 0;
 		return -ENOMEM;
@@ -272,7 +273,7 @@ unsigned int snd_ctl_event_elem_get_numid(const snd_ctl_event_t *obj)
 static inline
 snd_ctl_elem_iface_t snd_ctl_event_elem_get_interface(const snd_ctl_event_t *obj)
 {
-	return obj->data.elem.id.iface;
+	return (snd_ctl_elem_iface_t)obj->data.elem.id.iface;
 }
 
 static inline
@@ -299,38 +300,7 @@ unsigned int snd_ctl_event_elem_get_index(const snd_ctl_event_t *obj)
 	return obj->data.elem.id.index;
 }
 
-static inline
-size_t snd_ctl_elem_id_sizeof(void)
-{
-	return sizeof(snd_ctl_elem_id_t);
-}
-
-static inline
-int snd_ctl_elem_id_malloc(snd_ctl_elem_id_t **ptr)
-{
-	*ptr = calloc(1, sizeof(**ptr));
-	if (!*ptr)
-		return -ENOMEM;
-	return 0;
-}
-
-static inline
-void snd_ctl_elem_id_free(snd_ctl_elem_id_t *obj)
-{
-	free(obj);
-}
-
-static inline
-void snd_ctl_elem_id_clear(snd_ctl_elem_id_t *obj)
-{
-	memset(obj, 0, sizeof(snd_ctl_elem_id_t));
-}
-
-static inline
-void snd_ctl_elem_id_copy(snd_ctl_elem_id_t *dst, const snd_ctl_elem_id_t *src)
-{
-	*dst = *src;
-}
+__snd_define_type(snd_ctl_elem_id);
 
 static inline
 unsigned int snd_ctl_elem_id_get_numid(const snd_ctl_elem_id_t *obj)
@@ -341,7 +311,7 @@ unsigned int snd_ctl_elem_id_get_numid(const snd_ctl_elem_id_t *obj)
 static inline
 snd_ctl_elem_iface_t snd_ctl_elem_id_get_interface(const snd_ctl_elem_id_t *obj)
 {
-	return obj->iface;
+	return (snd_ctl_elem_iface_t)obj->iface;
 }
 
 static inline
@@ -405,39 +375,7 @@ void snd_ctl_elem_id_set_index(snd_ctl_elem_id_t *obj, unsigned int val)
 	obj->index = val;
 }
 
-static inline
-size_t snd_ctl_card_info_sizeof(void)
-{
-	return sizeof(snd_ctl_card_info_t);
-}
-
-static inline
-int snd_ctl_card_info_malloc(snd_ctl_card_info_t **ptr)
-{
-	*ptr = calloc(1, sizeof(**ptr));
-	if (!*ptr)
-		return -ENOMEM;
-	return 0;
-}
-
-static inline
-void snd_ctl_card_info_free(snd_ctl_card_info_t *obj)
-{
-	free(obj);
-}
-
-static inline
-void snd_ctl_card_info_clear(snd_ctl_card_info_t *obj)
-{
-	memset(obj, 0, sizeof(snd_ctl_card_info_t));
-}
-
-static inline
-void snd_ctl_card_info_copy(snd_ctl_card_info_t *dst,
-			    const snd_ctl_card_info_t *src)
-{
-	*dst = *src;
-}
+__snd_define_type(snd_ctl_card_info);
 
 static inline
 int snd_ctl_card_info_get_card(const snd_ctl_card_info_t *obj)
@@ -481,78 +419,15 @@ const char *snd_ctl_card_info_get_components(const snd_ctl_card_info_t *obj)
 	return (const char *)obj->components;
 }
 
-static inline
-size_t snd_ctl_event_sizeof(void)
-{
-	return sizeof(snd_ctl_event_t);
-}
-
-static inline
-int snd_ctl_event_malloc(snd_ctl_event_t **ptr)
-{
-	*ptr = calloc(1, sizeof(**ptr));
-	if (!*ptr)
-		return -ENOMEM;
-	return 0;
-}
-
-static inline
-void snd_ctl_event_free(snd_ctl_event_t *obj)
-{
-	free(obj);
-}
-
-static inline
-void snd_ctl_event_clear(snd_ctl_event_t *obj)
-{
-	memset(obj, 0, sizeof(snd_ctl_event_t));
-}
-
-static inline
-void snd_ctl_event_copy(snd_ctl_event_t *dst, const snd_ctl_event_t *src)
-{
-	*dst = *src;
-}
+__snd_define_type(snd_ctl_event);
 
 static inline
 snd_ctl_event_type_t snd_ctl_event_get_type(const snd_ctl_event_t *obj)
 {
-	return obj->type;
+	return (snd_ctl_event_type_t) obj->type;
 }
 
-static inline
-size_t snd_ctl_elem_list_sizeof(void)
-{
-	return sizeof(snd_ctl_elem_list_t);
-}
-
-static inline
-int snd_ctl_elem_list_malloc(snd_ctl_elem_list_t **ptr)
-{
-	*ptr = calloc(1, sizeof(**ptr));
-	if (!*ptr)
-		return -ENOMEM;
-	return 0;
-}
-
-static inline
-void snd_ctl_elem_list_free(snd_ctl_elem_list_t *obj)
-{
-	free(obj);
-}
-
-static inline
-void snd_ctl_elem_list_clear(snd_ctl_elem_list_t *obj)
-{
-	memset(obj, 0, sizeof(snd_ctl_elem_list_t));
-}
-
-static inline
-void snd_ctl_elem_list_copy(snd_ctl_elem_list_t *dst,
-			    const snd_ctl_elem_list_t *src)
-{
-	*dst = *src;
-}
+__snd_define_type(snd_ctl_elem_list);
 
 static inline
 void snd_ctl_elem_list_set_offset(snd_ctl_elem_list_t *obj, unsigned int val)
@@ -590,7 +465,7 @@ static inline
 snd_ctl_elem_iface_t snd_ctl_elem_list_get_interface(const snd_ctl_elem_list_t *obj,
 						     unsigned int idx)
 {
-	return obj->pids[idx].iface;
+	return (snd_ctl_elem_iface_t) obj->pids[idx].iface;
 }
 
 static inline
@@ -621,44 +496,12 @@ unsigned int snd_ctl_elem_list_get_index(const snd_ctl_elem_list_t *obj,
 	return obj->pids[idx].index;
 }
 
-static inline
-size_t snd_ctl_elem_info_sizeof(void)
-{
-	return sizeof(snd_ctl_elem_info_t);
-}
-
-static inline
-int snd_ctl_elem_info_malloc(snd_ctl_elem_info_t **ptr)
-{
-	*ptr = calloc(1, sizeof(**ptr));
-	if (!*ptr)
-		return -ENOMEM;
-	return 0;
-}
-
-static inline
-void snd_ctl_elem_info_free(snd_ctl_elem_info_t *obj)
-{
-	free(obj);
-}
-
-static inline
-void snd_ctl_elem_info_clear(snd_ctl_elem_info_t *obj)
-{
-	memset(obj, 0, sizeof(snd_ctl_elem_info_t));
-}
-
-static inline
-void snd_ctl_elem_info_copy(snd_ctl_elem_info_t *dst,
-			    const snd_ctl_elem_info_t *src)
-{
-	*dst = *src;
-}
+__snd_define_type(snd_ctl_elem_info);
 
 static inline
 snd_ctl_elem_type_t snd_ctl_elem_info_get_type(const snd_ctl_elem_info_t *obj)
 {
-	return obj->type;
+	return (snd_ctl_elem_type_t) obj->type;
 }
 
 static inline
@@ -834,7 +677,7 @@ unsigned int snd_ctl_elem_info_get_numid(const snd_ctl_elem_info_t *obj)
 static inline
 snd_ctl_elem_iface_t snd_ctl_elem_info_get_interface(const snd_ctl_elem_info_t *obj)
 {
-	return obj->id.iface;
+	return (snd_ctl_elem_iface_t) obj->id.iface;
 }
 
 static inline
@@ -906,40 +749,7 @@ void snd_ctl_elem_info_set_index(snd_ctl_elem_info_t *obj, unsigned int val)
 	obj->id.index = val;
 }
 
-static inline
-size_t snd_ctl_elem_value_sizeof(void)
-{
-	return sizeof(snd_ctl_elem_value_t);
-}
-
-static inline
-int snd_ctl_elem_value_malloc(snd_ctl_elem_value_t **ptr)
-{
-	*ptr = calloc(1, sizeof(**ptr));
-	if (!*ptr)
-		return -ENOMEM;
-	return 0;
-}
-
-static inline
-void snd_ctl_elem_value_free(snd_ctl_elem_value_t *obj)
-{
-	free(obj);
-}
-
-static inline
-void snd_ctl_elem_value_clear(snd_ctl_elem_value_t *obj)
-{
-	memset(obj, 0, sizeof(snd_ctl_elem_value_t));
-}
-
-static inline
-void snd_ctl_elem_value_copy(snd_ctl_elem_value_t *dst,
-			     const snd_ctl_elem_value_t *src)
-{
-	*dst = *src;
-}
-
+__snd_define_type(snd_ctl_elem_value);
 static inline
 void snd_ctl_elem_value_get_id(const snd_ctl_elem_value_t *obj,
 			       snd_ctl_elem_id_t *ptr)
@@ -956,7 +766,7 @@ unsigned int snd_ctl_elem_value_get_numid(const snd_ctl_elem_value_t *obj)
 static inline
 snd_ctl_elem_iface_t snd_ctl_elem_value_get_interface(const snd_ctl_elem_value_t *obj)
 {
-	return obj->id.iface;
+	return (snd_ctl_elem_iface_t) obj->id.iface;
 }
 
 static inline
@@ -1195,7 +1005,7 @@ char *snd_device_name_get_hint(const void *hint, const char *id)
 static inline
 snd_ctl_t *snd_async_handler_get_ctl(snd_async_handler_t *handler)
 {
-	return handler->rec;
+	return (snd_ctl_t *) handler->rec;
 }
 
 #else

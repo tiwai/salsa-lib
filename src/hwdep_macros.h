@@ -98,32 +98,7 @@ ssize_t snd_hwdep_read(snd_hwdep_t *hwdep, void *buffer, size_t size)
 	return result;
 }
 
-static inline
-size_t snd_hwdep_info_sizeof(void)
-{
-	return sizeof(snd_hwdep_info_t);
-}
-
-static inline
-int snd_hwdep_info_malloc(snd_hwdep_info_t **ptr)
-{
-	*ptr = calloc(1, sizeof(**ptr));
-	if (!*ptr)
-		return -ENOMEM;
-	return 0;
-}
-
-static inline
-void snd_hwdep_info_free(snd_hwdep_info_t *obj)
-{
-	free(obj);
-}
-
-static inline
-void snd_hwdep_info_copy(snd_hwdep_info_t *dst, const snd_hwdep_info_t *src)
-{
-	*dst = *src;
-}
+__snd_define_type(snd_hwdep_info);
 
 static inline
 unsigned int snd_hwdep_info_get_device(const snd_hwdep_info_t *obj)
@@ -152,7 +127,7 @@ const char *snd_hwdep_info_get_name(const snd_hwdep_info_t *obj)
 static inline
 snd_hwdep_iface_t snd_hwdep_info_get_iface(const snd_hwdep_info_t *obj)
 {
-	return obj->iface;
+	return (snd_hwdep_iface_t) obj->iface;
 }
 
 static inline
@@ -161,33 +136,7 @@ void snd_hwdep_info_set_device(snd_hwdep_info_t *obj, unsigned int val)
 	obj->device = val;
 }
 
-static inline
-size_t snd_hwdep_dsp_status_sizeof(void)
-{
-	return sizeof(snd_hwdep_dsp_status_t);
-}
-
-static inline
-int snd_hwdep_dsp_status_malloc(snd_hwdep_dsp_status_t **ptr)
-{
-	*ptr = calloc(1, sizeof(**ptr));
-	if (!*ptr)
-		return -ENOMEM;
-	return 0;
-}
-
-static inline
-void snd_hwdep_dsp_status_free(snd_hwdep_dsp_status_t *obj)
-{
-	free(obj);
-}
-
-static inline
-void snd_hwdep_dsp_status_copy(snd_hwdep_dsp_status_t *dst,
-			       const snd_hwdep_dsp_status_t *src)
-{
-	*dst = *src;
-}
+__snd_define_type(snd_hwdep_dsp_status);
 
 static inline
 unsigned int snd_hwdep_dsp_status_get_version(const snd_hwdep_dsp_status_t *obj)
@@ -219,33 +168,7 @@ unsigned int snd_hwdep_dsp_status_get_chip_ready(const snd_hwdep_dsp_status_t *o
 	return obj->chip_ready;
 }
 
-static inline
-size_t snd_hwdep_dsp_image_sizeof(void)
-{
-	return sizeof(snd_hwdep_dsp_image_t);
-}
-
-static inline
-int snd_hwdep_dsp_image_malloc(snd_hwdep_dsp_image_t **ptr)
-{
-	*ptr = calloc(1, sizeof(**ptr));
-	if (!*ptr)
-		return -ENOMEM;
-	return 0;
-}
-
-static inline
-void snd_hwdep_dsp_image_free(snd_hwdep_dsp_image_t *obj)
-{
-	free(obj);
-}
-
-static inline
-void snd_hwdep_dsp_image_copy(snd_hwdep_dsp_image_t *dst,
-			      const snd_hwdep_dsp_image_t *src)
-{
-	*dst = *src;
-}
+__snd_define_type(snd_hwdep_dsp_image);
 
 static inline
 unsigned int snd_hwdep_dsp_image_get_index(const snd_hwdep_dsp_image_t *obj)
@@ -287,7 +210,7 @@ void snd_hwdep_dsp_image_set_name(snd_hwdep_dsp_image_t *obj, const char *name)
 static inline
 void snd_hwdep_dsp_image_set_image(snd_hwdep_dsp_image_t *obj, void *buffer)
 {
-	obj->image = buffer;
+	obj->image = (unsigned char *) buffer;
 }
 
 static inline

@@ -169,7 +169,7 @@ unsigned int snd_hctl_elem_get_numid(const snd_hctl_elem_t *obj)
 static inline
 snd_ctl_elem_iface_t snd_hctl_elem_get_interface(const snd_hctl_elem_t *obj)
 {
-	return obj->id.iface;
+	return (snd_ctl_elem_iface_t) obj->id.iface;
 }
 
 static inline
