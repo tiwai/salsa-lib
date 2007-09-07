@@ -168,10 +168,11 @@ int _snd_dev_get_device(const char *name, int *cardp, int *devp, int *subdevp)
 	if (card < 0)
 		return card;
 	*cardp = card;
-	if (devp) {
+	if (devp && subdevp) {
+		/* parse the secondary and third arguments (if any) */
 		name = strchr(name, ',');
 		if (name)
-			sscanf(name, "%d,%d",  devp, subdevp);
+			sscanf(name, ",%d,%d",  devp, subdevp);
 	}
 	return 0;
 }
