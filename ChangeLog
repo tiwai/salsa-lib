@@ -1,3 +1,9 @@
+Version 0.0.11:
+	* Fix a typo in fnctl() argument in snd_pcm_open (for blocking
+	  mode)
+	* Fix the parse of secondary and third arguments of the device
+	  name (i.e. PCM device and subdevice numbers)
+
 Version 0.0.10:
 	* Due to popular demands, make salsa-lib compile with C++ now
 	  People tend to like what I don't :)
