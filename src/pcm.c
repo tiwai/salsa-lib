@@ -104,7 +104,7 @@ int snd_pcm_open(snd_pcm_t **pcmp, const char *name,
 	}
 	if (!(mode & SND_PCM_NONBLOCK)) {
 		fmode &= ~O_NONBLOCK;
-		fcntl(fd, F_SETFD, fmode);
+		fcntl(fd, F_SETFL, fmode);
 	}
 
 	if (ioctl(fd, SNDRV_PCM_IOCTL_PVERSION, &ver) < 0) {
