@@ -226,7 +226,7 @@ int snd_pcm_drop(snd_pcm_t *pcm)
 static inline
 int snd_pcm_drain(snd_pcm_t *pcm)
 {
-	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_DROP) < 0)
+	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_DRAIN) < 0)
 		return -errno;
 	return 0;
 }
