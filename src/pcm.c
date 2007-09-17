@@ -129,6 +129,7 @@ int snd_pcm_open(snd_pcm_t **pcmp, const char *name,
 
 	pcm->card = card;
 	pcm->device = dev;
+	pcm->stream = stream;
 	pcm->subdevice = subdev;
 	pcm->protocol = ver;
 	pcm->fd = fd;

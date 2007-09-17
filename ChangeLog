@@ -1,6 +1,8 @@
 Version 0.0.12:
 	* Fix a typo in snd_pcm_drain().  It called DROP instead of
 	  DRAIN.
+	* Fix for capture -- fix the initialization of pcm->stream
+	  field in snd_pcm_open()
 
 Version 0.0.11:
 	* Fix a typo in fnctl() argument in snd_pcm_open (for blocking
