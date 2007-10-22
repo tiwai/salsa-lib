@@ -1,3 +1,7 @@
+Version 0.0.13:
+	* Suppress "deprecated" compile warnings when built without
+	  TLV support (patch by J. Scott Merritt)
+
 Version 0.0.12:
 	* Fix a typo in snd_pcm_drain().  It called DROP instead of
 	  DRAIN.
