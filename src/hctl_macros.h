@@ -129,6 +129,7 @@ int snd_hctl_elem_write(snd_hctl_elem_t *elem, snd_ctl_elem_value_t *value)
 	return snd_ctl_elem_write(elem->hctl->ctl, value);
 }
 
+#if SALSA_HAS_TLV_SUPPORT
 static inline
 int snd_hctl_elem_tlv_read(snd_hctl_elem_t *elem, unsigned int *tlv,
 			   unsigned int tlv_size)
@@ -147,6 +148,28 @@ int snd_hctl_elem_tlv_command(snd_hctl_elem_t *elem, const unsigned int *tlv)
 {
 	return snd_ctl_elem_tlv_command(elem->hctl->ctl, &elem->id, tlv);
 }
+
+#else /* SALSA_HAS_TLV_SUPPORT */
+
+static inline __SALSA_NOT_IMPLEMENTED
+int snd_hctl_elem_tlv_read(snd_hctl_elem_t *elem, unsigned int *tlv,
+			   unsigned int tlv_size)
+{
+	return -ENXIO;
+}
+
+static inline __SALSA_NOT_IMPLEMENTED
+int snd_hctl_elem_tlv_write(snd_hctl_elem_t *elem, const unsigned int *tlv)
+{
+	return -ENXIO;
+}
+
+static inline __SALSA_NOT_IMPLEMENTED
+int snd_hctl_elem_tlv_command(snd_hctl_elem_t *elem, const unsigned int *tlv)
+{
+	return -ENXIO;
+}
+#endif /* SALSA_HAS_TLV_SUPPORT */
 
 static inline
 snd_hctl_t *snd_hctl_elem_get_hctl(snd_hctl_elem_t *elem)
