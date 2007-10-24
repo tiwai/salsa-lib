@@ -147,7 +147,7 @@ __snd_copy(type)
 #define __snd_alloca(ptr, type)					\
 	do {							\
 		*ptr = (type##_t*)alloca(type##_sizeof());	\
-		memset(*ptr, 0, snd_ctl_elem_id_sizeof());	\
+		memset(*ptr, 0, type##_sizeof());		\
 	} while (0)
 
 #endif /* __ALSA_GLOBAL_H */
