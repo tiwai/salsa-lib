@@ -1,3 +1,7 @@
+Version 0.0.14:
+	* Fixed the memset size in snd_*_alloca() macros (more
+	  exactly, __snd_alloca() macro).  What a shame.
+
 Version 0.0.13:
 	* Suppress "deprecated" compile warnings when built without
 	  TLV support (patch by J. Scott Merritt)
