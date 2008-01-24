@@ -475,7 +475,9 @@ int snd_pcm_dump_hw_setup(snd_pcm_t *pcm, snd_output_t *out)
 	snd_output_printf(out, "  buffer_size  : %lu\n", pcm->buffer_size);
 	snd_output_printf(out, "  period_size  : %lu\n", pcm->period_size);
 	snd_output_printf(out, "  period_time  : %u\n", pcm->period_time);
+#if 0 /* deprecated */
 	snd_output_printf(out, "  tick_time    : %u\n", pcm->tick_time);
+#endif
 	return 0;
 }
 
@@ -485,12 +487,16 @@ int snd_pcm_dump_sw_setup(snd_pcm_t *pcm, snd_output_t *out)
 			  snd_pcm_tstamp_mode_name(pcm->sw_params.tstamp_mode));
 	snd_output_printf(out, "  period_step  : %d\n",
 			  pcm->sw_params.period_step);
+#if 0 /* deprecated */
 	snd_output_printf(out, "  sleep_min    : %d\n",
 			  pcm->sw_params.sleep_min);
+#endif
 	snd_output_printf(out, "  avail_min    : %ld\n",
 			  pcm->sw_params.avail_min);
+#if 0 /* deprecated */
 	snd_output_printf(out, "  xfer_align   : %ld\n",
 			  pcm->sw_params.xfer_align);
+#endif
 	snd_output_printf(out, "  start_threshold  : %ld\n",
 			  pcm->sw_params.start_threshold);
 	snd_output_printf(out, "  stop_threshold   : %ld\n",
