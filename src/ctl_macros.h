@@ -958,6 +958,55 @@ int snd_ctl_elem_tlv_command(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
 {
 	return -ENXIO;
 }
+
+static inline __SALSA_NOT_IMPLEMENTED
+int snd_tlv_parse_dB_info(unsigned int *tlv, unsigned int tlv_size,
+			  unsigned int **db_tlvp)
+{
+	return -ENXIO;
+}
+
+static inline __SALSA_NOT_IMPLEMENTED
+int snd_tlv_get_dB_range(unsigned int *tlv, long rangemin, long rangemax,
+			 long *min, long *max)
+{
+	return -ENXIO;
+}
+
+static inline __SALSA_NOT_IMPLEMENTED
+int snd_tlv_convert_to_dB(unsigned int *tlv, long rangemin, long rangemax,
+			  long volume, long *db_gain)
+{
+	return -ENXIO;
+}
+
+static inline __SALSA_NOT_IMPLEMENTED
+int snd_tlv_convert_from_dB(unsigned int *tlv, long rangemin, long rangemax,
+			    long db_gain, long *value, int xdir)
+{
+	return -ENXIO;
+}
+
+static inline __SALSA_NOT_IMPLEMENTED
+int snd_ctl_get_dB_range(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
+			 long *min, long *max)
+{
+	return -ENXIO;
+}
+
+static inline __SALSA_NOT_IMPLEMENTED
+int snd_ctl_convert_to_dB(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
+			  long volume, long *db_gain)
+{
+	return -ENXIO;
+}
+
+static inline __SALSA_NOT_IMPLEMENTED
+int snd_ctl_convert_from_dB(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
+			    long db_gain, long *value, int xdir)
+{
+	return -ENXIO;
+}
 #endif /* !SALSA_HAS_TLV_SUPPORT */
 
 /*

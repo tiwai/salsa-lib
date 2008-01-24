@@ -342,3 +342,150 @@ int snd_async_add_ctl_handler(snd_async_handler_t **handler, snd_ctl_t *ctl,
 	return 0;
 }
 #endif /* SALSA_HAS_ASYNC_SUPPORT */
+
+
+#if SALSA_HAS_TLV_SUPPORT
+
+/* convert to index of integer array */
+#define int_index(size)	(((size) + sizeof(int) - 1) / sizeof(int))
+
+/* max size of a TLV entry for dB information (including compound one) */
+#define MAX_TLV_RANGE_SIZE	256
+
+/* convert the given raw volume value to a dB gain
+ */
+int snd_tlv_convert_to_dB(unsigned int *tlv, long rangemin, long rangemax,
+			  long volume, long *db_gain)
+{
+	switch (tlv[0]) {
+	case SND_CTL_TLVT_DB_RANGE: {
+		unsigned int pos, len;
+		len = int_index(tlv[1]);
+		if (len > MAX_TLV_RANGE_SIZE)
+			return -EINVAL;
+		pos = 2;
+		while (pos + 4 <= len) {
+			rangemin = (int)tlv[pos];
+			rangemax = (int)tlv[pos + 1];
+			if (volume >= rangemin && volume <= rangemax)
+				return snd_tlv_convert_to_dB(tlv + pos + 2,
+						     rangemin, rangemax,
+						     volume, db_gain);
+			pos += int_index(tlv[pos + 3]) + 4;
+		}
+		return -EINVAL;
+	}
+	case SND_CTL_TLVT_DB_SCALE: {
+		int min, step, mute;
+		min = tlv[2];
+		step = (tlv[3] & 0xffff);
+		mute = (tlv[3] >> 16) & 1;
+		if (mute && volume == rangemin)
+			*db_gain = SND_CTL_TLV_DB_GAIN_MUTE;
+		else
+			*db_gain = (volume - rangemin) * step + min;
+		return 0;
+	}
+	}
+	return -EINVAL;
+}
+
+/* Get the dB min/max values
+ */
+int snd_tlv_get_dB_range(unsigned int *tlv, long rangemin, long rangemax,
+			 long *min, long *max)
+{
+	switch (tlv[0]) {
+	case SND_CTL_TLVT_DB_RANGE: {
+		unsigned int pos, len;
+		len = int_index(tlv[1]);
+		if (len > MAX_TLV_RANGE_SIZE)
+			return -EINVAL;
+		pos = 2;
+		while (pos + 4 <= len) {
+			long rmin, rmax;
+			rangemin = (int)tlv[pos];
+			rangemax = (int)tlv[pos + 1];
+			snd_tlv_get_dB_range(tlv + pos + 2, rangemin, rangemax,
+					     &rmin, &rmax);
+			if (pos > 2) {
+				if (rmin < *min)
+					*min = rmin;
+				if (rmax > *max)
+					*max = rmax;
+			} else {
+				*min = rmin;
+				*max = rmax;
+			}
+			pos += int_index(tlv[pos + 3]) + 4;
+		}
+		return 0;
+	}
+	case SND_CTL_TLVT_DB_SCALE: {
+		int step;
+		*min = (int)tlv[2];
+		step = (tlv[3] & 0xffff);
+		*max = *min + (long)(step * (rangemax - rangemin));
+		return 0;
+	}
+	case SND_CTL_TLVT_DB_LINEAR:
+		*min = (int)tlv[2];
+		*max = (int)tlv[3];
+		return 0;
+	}
+	return -EINVAL;
+}
+
+/* Convert from dB gain to the corresponding raw value.
+ * The value is round up when xdir > 0.
+ */
+int snd_tlv_convert_from_dB(unsigned int *tlv, long rangemin, long rangemax,
+			    long db_gain, long *value, int xdir)
+{
+	switch (tlv[0]) {
+	case SND_CTL_TLVT_DB_RANGE: {
+		unsigned int pos, len;
+		len = int_index(tlv[1]);
+		if (len > MAX_TLV_RANGE_SIZE)
+			return -EINVAL;
+		pos = 2;
+		while (pos + 4 <= len) {
+			long dbmin, dbmax;
+			rangemin = (int)tlv[pos];
+			rangemax = (int)tlv[pos + 1];
+			if (!snd_tlv_get_dB_range(tlv + pos + 2,
+						  rangemin, rangemax,
+						  &dbmin, &dbmax) &&
+			    db_gain >= dbmin && db_gain <= dbmax)
+				return snd_tlv_convert_from_dB(tlv + pos + 2,
+						       rangemin, rangemax,
+						       db_gain, value, xdir);
+			pos += int_index(tlv[pos + 3]) + 4;
+		}
+		return -EINVAL;
+	}
+	case SND_CTL_TLVT_DB_SCALE: {
+		int min, step, max;
+		min = tlv[2];
+		step = (tlv[3] & 0xffff);
+		max = min + (int)(step * (rangemax - rangemin));
+		if (db_gain <= min)
+			*value = rangemin;
+		else if (db_gain >= max)
+			*value = rangemax;
+		else {
+			long v = (db_gain - min) * (rangemax - rangemin);
+			if (xdir > 0)
+				v += (max - min) - 1;
+			v = v / (max - min) + rangemin;
+			*value = v;
+		}
+		return 0;
+	}
+	default:
+		break;
+	}
+	return -EINVAL;
+}
+
+#endif /* TLV */
