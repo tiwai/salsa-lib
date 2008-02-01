@@ -1976,6 +1976,30 @@ void snd_pcm_info_set_stream(snd_pcm_info_t *obj, snd_pcm_stream_t val)
 	obj->stream = val;
 }
 
+static inline
+int snd_hw_htimestamp(snd_pcm_t *pcm, snd_pcm_uframes_t *avail,
+		      snd_htimestamp_t *tstamp)
+{
+	*avail = snd_pcm_avail_update(pcm);
+	*tstamp = pcm->mmap_status->tstamp;
+	return 0;
+}
+
+
+/*
+ * helper functions
+ */
+static inline
+int snd_pcm_get_params(snd_pcm_t *pcm,
+                       snd_pcm_uframes_t *buffer_size,
+                       snd_pcm_uframes_t *period_size)
+{
+	if (!pcm->setup)
+		return -EBADFD;
+	*buffer_size = pcm->buffer_size;
+	*period_size = pcm->period_size;
+	return 0;
+}
 
 /*
  * not implemented yet
@@ -2013,6 +2037,18 @@ snd_pcm_sframes_t snd_pcm_mmap_readi(snd_pcm_t *pcm, void *buffer,
 static inline __SALSA_NOT_IMPLEMENTED
 snd_pcm_sframes_t snd_pcm_mmap_readn(snd_pcm_t *pcm, void **bufs,
 				     snd_pcm_uframes_t size)
+{
+	return -ENXIO;
+}
+
+static inline __SALSA_NOT_IMPLEMENTED
+int snd_pcm_set_params(snd_pcm_t *pcm,
+                       snd_pcm_format_t format,
+                       snd_pcm_access_t access,
+                       unsigned int channels,
+                       unsigned int rate,
+                       int soft_resample,
+                       unsigned int latency)
 {
 	return -ENXIO;
 }
