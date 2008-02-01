@@ -1,3 +1,10 @@
+version 0.0.15:
+	* Add the missing snd_pcm_get_params().  snd_pcm_set_params()
+	  isn't implemented (returns -ENXIO), though.
+	* Add snd_pcm_htimestamp() from alsa-lib 1.0.16.
+	  Also added some new PCM open bit flags.
+	* Make the default alsa-lib compat-version to 1.0.16.
+
 Version 0.0.14:
 	* Fixed the memset size in snd_*_alloca() macros (more
 	  exactly, __snd_alloca() macro).  What a shame.
