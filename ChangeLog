@@ -1,3 +1,6 @@
+Version 0.0.16:
+	* Fix memory leaks in error paths of PCM
+
 version 0.0.15:
 	* Add the missing snd_pcm_get_params().  snd_pcm_set_params()
 	  isn't implemented (returns -ENXIO), though.
