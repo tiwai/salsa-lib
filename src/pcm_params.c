@@ -989,8 +989,10 @@ static int _snd_pcm_hw_params(snd_pcm_t *pcm, snd_pcm_hw_params_t *params)
 	    pcm->access == SND_PCM_ACCESS_MMAP_NONINTERLEAVED ||
 	    pcm->access == SND_PCM_ACCESS_MMAP_COMPLEX) {
 		err = _snd_pcm_mmap(pcm);
-		if (err < 0)
+		if (err < 0) {
+			_snd_pcm_munmap(pcm);
 			return err;
+		}
 	}
 
 	_snd_pcm_sync_ptr(pcm, 0);

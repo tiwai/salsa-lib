@@ -78,7 +78,7 @@ int snd_pcm_open(snd_pcm_t **pcmp, const char *name,
 	char filename[32];
 	int card, dev, subdev;
 	int fd, err, fmode, ver;
-	snd_pcm_t *pcm;
+	snd_pcm_t *pcm = NULL;
 
 	*pcmp = NULL;
 
@@ -115,7 +115,7 @@ int snd_pcm_open(snd_pcm_t **pcmp, const char *name,
 		snd_pcm_info_t info;
 		memset(&info, 0, sizeof(info));
 		if (ioctl(fd, SNDRV_PCM_IOCTL_INFO, &info) < 0) {
-			return -errno;
+			err = -errno;
 			goto error;
 		}
 		subdev = info.subdevice;
@@ -146,6 +146,7 @@ int snd_pcm_open(snd_pcm_t **pcmp, const char *name,
 	return 0;
 
  error:
+	free(pcm);
 	if (fd >= 0)
 		close(fd);
 	return err;
@@ -749,6 +750,9 @@ static size_t page_align(size_t size)
 int _snd_pcm_mmap(snd_pcm_t *pcm)
 {
 	unsigned int c;
+
+	/* clear first */
+	_snd_pcm_munmap(pcm);
 
 	pcm->mmap_channels = calloc(pcm->channels, sizeof(*pcm->mmap_channels));
 	if (!pcm->mmap_channels)
