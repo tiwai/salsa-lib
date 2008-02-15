@@ -1,3 +1,6 @@
+Version 0.0.17:
+	* Fix snd_pcm_link() calling a wrong ioctl
+
 Version 0.0.16:
 	* Fix memory leaks in error paths of PCM
 
