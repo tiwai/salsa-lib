@@ -263,7 +263,7 @@ snd_pcm_sframes_t snd_pcm_forward(snd_pcm_t *pcm, snd_pcm_uframes_t frames)
 static inline
 int snd_pcm_link(snd_pcm_t *pcm1, snd_pcm_t *pcm2)
 {
-	if (ioctl(pcm1->fd, SNDRV_PCM_IOCTL_UNLINK, pcm2->fd) < 0)
+	if (ioctl(pcm1->fd, SNDRV_PCM_IOCTL_LINK, pcm2->fd) < 0)
 		return -errno;
 	return 0;
 }
