@@ -1,3 +1,6 @@
+Version 0.0.18:
+	* Fix unclosable snd_rawmidi_open() (fix by Sam O'Connor)
+
 Version 0.0.17:
 	* Fix snd_pcm_link() calling a wrong ioctl
 
