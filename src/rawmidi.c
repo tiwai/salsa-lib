@@ -133,7 +133,7 @@ int snd_rawmidi_open(snd_rawmidi_t **in_rmidi, snd_rawmidi_t **out_rmidi,
 		goto error;
 	}
 
-	hw = malloc(sizeof(*hw));
+	hw = calloc(1, sizeof(*hw));
 	if (!hw) {
 		err = -ENOMEM;
 		goto error;
