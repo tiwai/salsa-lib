@@ -71,7 +71,7 @@ int snd_ctl_subscribe_events(snd_ctl_t *ctl, int subscribe)
 {
 	if (ioctl(ctl->fd, SNDRV_CTL_IOCTL_SUBSCRIBE_EVENTS, &subscribe) < 0)
 		return -errno;
-	return subscribe;
+	return 0;
 }
 
 static inline
