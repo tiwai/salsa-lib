@@ -961,6 +961,23 @@ snd_pcm_sframes_t snd_pcm_avail_update(snd_pcm_t *pcm)
 	return avail;
 }
 
+int snd_pcm_avail_delay(snd_pcm_t *pcm,
+			snd_pcm_sframes_t *availp,
+			snd_pcm_sframes_t *delayp)
+{
+	int err;
+	snd_pcm_sframes_t val;
+
+	err = snd_pcm_delay(pcm, delayp);
+	if (err < 0)
+		return err;
+	val = snd_pcm_avail_update(pcm);
+	if (val < 0)
+		return (int)val;
+	*availp = val;
+	return 0;
+}
+
 int snd_pcm_mmap_begin(snd_pcm_t *pcm,
 		       const snd_pcm_channel_area_t **areas,
 		       snd_pcm_uframes_t *offset,

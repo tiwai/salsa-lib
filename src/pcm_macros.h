@@ -163,14 +163,32 @@ snd_pcm_state_t snd_pcm_state(snd_pcm_t *pcm)
 	return (snd_pcm_state_t) pcm->mmap_status->state;
 }
 
+/* for internal use only */
 static inline
-int snd_pcm_hwsync(snd_pcm_t *pcm)
+int _snd_pcm_hwsync(snd_pcm_t *pcm)
 {
 	if (pcm->sync_ptr)
 		return _snd_pcm_sync_ptr(pcm, SNDRV_PCM_SYNC_PTR_HWSYNC);
 	else if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_HWSYNC) < 0)
 		return -errno;
 	return 0;
+}
+
+/* exported: snd_pcm_hwsync() is now deprecated */
+static inline
+__attribute__ ((deprecated))
+int snd_pcm_hwsync(snd_pcm_t *pcm)
+{
+	return _snd_pcm_hwsync(pcm);
+}
+
+static inline
+snd_pcm_sframes_t snd_pcm_avail(snd_pcm_t *pcm)
+{
+	int err = _snd_pcm_hwsync(pcm);
+	if (err < 0)
+		return err;
+	return snd_pcm_avail_update(pcm);
 }
 
 static inline
