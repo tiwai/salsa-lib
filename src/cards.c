@@ -99,10 +99,7 @@ int snd_card_get_index(const char *string)
 
 	if (!string || *string == '\0')
 		return -EINVAL;
-	if ((isdigit(*string) && *(string + 1) == 0) ||
-	    (isdigit(*string) && isdigit(*(string + 1)) && *(string + 2) == 0)) {
-		if (sscanf(string, "%i", &card) != 1)
-			return -EINVAL;
+	if (sscanf(string, "%i", &card) == 1) {
 		if (card < 0 || card > 31)
 			return -EINVAL;
 		if (snd_card_load(card))
