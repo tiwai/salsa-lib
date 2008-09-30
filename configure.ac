@@ -1,6 +1,6 @@
 AC_PREREQ(2.59)
 AC_INIT(src/control.c)
-AM_INIT_AUTOMAKE(salsa-lib, 0.0.18)
+AM_INIT_AUTOMAKE(salsa-lib, 0.0.19)
 AC_PREFIX_DEFAULT(/usr)
 
 dnl AC_CONFIG_HEADERS(src/config.h)
@@ -14,13 +14,13 @@ AC_HEADER_STDC
 dnl Compatible version
 AC_ARG_WITH(compat-version,
   AS_HELP_STRING([--with-compat-version=VERSION],
-		 [specify the compatible version with ALSA-lib (default=1.0.16)]),
-  compatver="$withval", compatver="1.0.16")
+		 [specify the compatible version with ALSA-lib (default=1.0.18)]),
+  compatver="$withval", compatver="1.0.18")
 
 SND_LIB_VERSION="$compatver"
 SND_LIB_MAJOR=1
 SND_LIB_MINOR=0
-SND_LIB_SUBMINOR=14
+SND_LIB_SUBMINOR=18
 SND_LIB_EXTRAVER=1000000
 case "$compatver" in
 *.*.*)

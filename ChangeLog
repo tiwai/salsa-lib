@@ -1,3 +1,10 @@
+Version 0.0.19:
+	* Fix return value of snd_ctl_subscribe_events()
+	* Fix snd_card_get_index() to parse the string "x,y" correctly
+	* Add snd_pcm_avail() and snd_pcm_avail_delay() to be compatible
+	  with alsa-lib 1.0.18
+	* Mark snd_pcm_hwsync() as deprecated, as of alsa-lib 1.0.18
+
 Version 0.0.18:
 	* Fix unclosable snd_rawmidi_open() (fix by Sam O'Connor)
 
