@@ -754,6 +754,15 @@ int _snd_pcm_hw_param_set(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 	return err;
 }
 
+int _snd_pcm_hw_param_test(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
+			   int var, unsigned int val, int *dir)
+{
+	snd_pcm_hw_params_t save = *params;
+	int err = _snd_pcm_hw_param_set(pcm, params, var, val, dir ? *dir : 0);
+	*params = save;
+	return err;
+}
+
 int _snd_pcm_hw_param_set_integer(snd_pcm_t *pcm, 
 				  snd_pcm_hw_params_t *params,
 				  int var)
