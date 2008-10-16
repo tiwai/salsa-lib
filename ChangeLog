@@ -1,3 +1,7 @@
+Version 0.0.20:
+	* Add missing _snd_pcm_hw_param_test() called by
+	  snd_pcm_hw_params_test_*() API functions.
+	
 Version 0.0.19:
 	* Fix return value of snd_ctl_subscribe_events()
 	* Fix snd_card_get_index() to parse the string "x,y" correctly
