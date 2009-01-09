@@ -1,3 +1,8 @@
+Version 0.0.21:
+	* Make snd_config non-NULL when snd_config_update() is called
+	  so that apps can check the value.  Reset in
+	  snd_config_free_global()
+	* Correct hwdep path, and fix the device number handling of hwdep
 Version 0.0.20:
 	* Add missing _snd_pcm_hw_param_test() called by
 	  snd_pcm_hw_params_test_*() API functions.
