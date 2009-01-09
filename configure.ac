@@ -132,6 +132,13 @@ else
 fi
 AC_SUBST(SALSA_HAS_ASYNC_SUPPORT)
 
+if test "$sndconf" = "yes"; then
+  SALSA_HAS_DUMMY_CONF=1
+else
+  SALSA_HAS_DUMMY_CONF=0
+fi
+AC_SUBST(SALSA_HAS_DUMMY_CONF)
+
 AM_CONDITIONAL(LINK_LIBASOUND, test "$libasound" = "yes")
 
 AC_ARG_ENABLE(deprecated,

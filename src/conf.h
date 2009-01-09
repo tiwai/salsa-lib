@@ -53,6 +53,8 @@ int snd_config_save(snd_config_t *config, snd_output_t *out)
 static inline
 int snd_config_update(void)
 {
+	/* an invalid address, but just mark to be non-NULL */
+	snd_config = (snd_config_t*)1;
 	return 0;
 }
 
@@ -69,7 +71,14 @@ int snd_config_update_free(snd_config_update_t *update)
 	return 0;
 }
 
-/* snd_config_update_free_global is defined in global.h */
+#if SALSA_HAS_DUMMY_CONF
+static inline
+int snd_config_update_free_global(void)
+{
+	snd_config = NULL;
+	return 0;
+}
+#endif
 
 static inline __SALSA_NOT_IMPLEMENTED
 int snd_config_search(snd_config_t *config, const char *key,
