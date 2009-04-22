@@ -115,7 +115,7 @@ int snd_async_del_handler(snd_async_handler_t *handler)
 			if (prev)
 				prev->next = h->next;
 			else
-				async_list = h;
+				async_list = h->next;
 			snd_set_async(h, -1);
 			if (h->pointer)
 				*h->pointer = NULL;
