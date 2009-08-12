@@ -200,6 +200,9 @@ snd_pcm_sframes_t snd_pcm_writei(snd_pcm_t *pcm, const void *buffer,
 {
 	struct sndrv_xferi xferi;
 
+#ifdef DELIGHT_VALGRIND
+	xferi.result = 0;
+#endif
 	xferi.buf = (char*) buffer;
 	xferi.frames = size;
 	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_WRITEI_FRAMES, &xferi) < 0)
@@ -213,6 +216,9 @@ snd_pcm_sframes_t snd_pcm_writen(snd_pcm_t *pcm, void **bufs,
 {
 	struct sndrv_xfern xfern;
 
+#ifdef DELIGHT_VALGRIND
+	xfern.result = 0;
+#endif
 	xfern.bufs = bufs;
 	xfern.frames = size;
 	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_WRITEN_FRAMES, &xfern) < 0)
@@ -226,6 +232,9 @@ snd_pcm_sframes_t snd_pcm_readi(snd_pcm_t *pcm, void *buffer,
 {
 	struct sndrv_xferi xferi;
 
+#ifdef DELIGHT_VALGRIND
+	xferi.result = 0;
+#endif
 	xferi.buf = buffer;
 	xferi.frames = size;
 	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_READI_FRAMES, &xferi) < 0)
@@ -239,6 +248,9 @@ snd_pcm_sframes_t snd_pcm_readn(snd_pcm_t *pcm, void **bufs,
 {
 	struct sndrv_xfern xfern;
 
+#ifdef DELIGHT_VALGRIND
+	xfern.result = 0;
+#endif
 	xfern.bufs = bufs;
 	xfern.frames = size;
 	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_READN_FRAMES, &xfern) < 0)

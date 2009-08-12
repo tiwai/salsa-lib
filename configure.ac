@@ -153,6 +153,14 @@ else
 fi
 AC_SUBST(SALSA_MARK_DEPRECATED)
 
+AC_ARG_ENABLE(libasound,
+  AS_HELP_STRING([--disable-delight-valgrind],
+		 [do not initialize unnecessary fields for ioctls]),
+  delight_valgrind="$enableval", delight_valgrind="yes")
+if test "$delight_valgrind" = "yes"; then
+  AC_DEFINE(DELIGHT_VALGRIND)
+fi
+
 dnl OK, let's output...
 
 AC_OUTPUT([
