@@ -1,3 +1,12 @@
+Version 0.0.23:
+	* Fix a typo of snd_pcm_htimestamp()
+	* Add features/fixes recently added as of alsa-lib 1.0.21a
+	  - Fix up the low limit of snd_pcm_sw_set_avail_min()
+	  - Set no_active_sending=1 as default for rawmidi
+	  - Reorder the PCM hw_params setup to give larger buffer sizes
+	  - Add support of TLV_MINMAX* types
+	  - Add the device path support to snd_card_get_index()
+
 Version 0.0.22:
 	* Fix a bug of list handling in snd_async_del_handler()
 	  (thanks to maarten van es).
