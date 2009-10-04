@@ -92,6 +92,23 @@ static int get_card_info(int card, snd_ctl_card_info_t *info)
 	return err;
 }
 
+static int snd_card_load2(const char *control)
+{
+	int open_dev;
+	snd_ctl_card_info_t info;
+
+	open_dev = open(control, O_RDONLY);
+	if (open_dev < 0)
+		return -errno;
+	if (ioctl(open_dev, SNDRV_CTL_IOCTL_CARD_INFO, &info) < 0) {
+		int err = -errno;
+		close(open_dev);
+		return err;
+	}
+	close(open_dev);
+	return info.card;
+}
+
 int snd_card_get_index(const char *string)
 {
 	int card;
@@ -99,6 +116,8 @@ int snd_card_get_index(const char *string)
 
 	if (!string || *string == '\0')
 		return -EINVAL;
+	if (*string == '/') /* device name */
+		return snd_card_load2(string);
 	if (sscanf(string, "%i", &card) == 1) {
 		if (card < 0 || card > 31)
 			return -EINVAL;
