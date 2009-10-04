@@ -940,9 +940,9 @@ static int snd_pcm_hw_params_choose(snd_pcm_t *pcm, snd_pcm_hw_params_t *params)
 		{ SNDRV_PCM_HW_PARAM_SUBFORMAT, 0 },
 		{ SNDRV_PCM_HW_PARAM_CHANNELS, 0 },
 		{ SNDRV_PCM_HW_PARAM_RATE, 0 },
-		{ SNDRV_PCM_HW_PARAM_PERIOD_TIME, 0 },
-		{ SNDRV_PCM_HW_PARAM_PERIOD_SIZE, 0 },
 		{ SNDRV_PCM_HW_PARAM_BUFFER_SIZE, 1 },
+		{ SNDRV_PCM_HW_PARAM_PERIOD_SIZE, 0 },
+		{ SNDRV_PCM_HW_PARAM_PERIOD_TIME, 0 },
 		{ SNDRV_PCM_HW_PARAM_TICK_TIME, 0 },
 	};
 	int i, err;
