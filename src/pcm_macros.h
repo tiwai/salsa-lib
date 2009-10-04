@@ -2001,8 +2001,8 @@ void snd_pcm_info_set_stream(snd_pcm_info_t *obj, snd_pcm_stream_t val)
 }
 
 static inline
-int snd_hw_htimestamp(snd_pcm_t *pcm, snd_pcm_uframes_t *avail,
-		      snd_htimestamp_t *tstamp)
+int snd_pcm_htimestamp(snd_pcm_t *pcm, snd_pcm_uframes_t *avail,
+		       snd_htimestamp_t *tstamp)
 {
 	*avail = snd_pcm_avail_update(pcm);
 	*tstamp = pcm->mmap_status->tstamp;
