@@ -1,3 +1,6 @@
+Version 0.0.24:
+	* Add missing definition of SND_PCM_TSTAMP_ENABLE
+
 Version 0.0.23:
 	* Fix a typo of snd_pcm_htimestamp()
 	* Add features/fixes recently added as of alsa-lib 1.0.21a
