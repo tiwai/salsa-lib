@@ -82,7 +82,7 @@ static snd_rawmidi_t *new_rmidi(snd_rawmidi_hw_t *hw, int stream, int mode)
 
 	rmidi->params.buffer_size = 4096;
 	rmidi->params.avail_min = 1;
-	rmidi->no_active_sending = 1;
+	rmidi->params.no_active_sensing = 1;
 	snd_rawmidi_params(rmidi, &rmidi->params);
 
 	return rmidi;

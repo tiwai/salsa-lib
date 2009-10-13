@@ -403,6 +403,7 @@ int snd_tlv_convert_to_dB(unsigned int *tlv, long rangemin, long rangemax,
 				(rangemax - rangemin) + mindb;
 		return 0;
 	}
+	}
 	return -EINVAL;
 }
 
