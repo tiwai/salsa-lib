@@ -1,3 +1,6 @@
+Version 0.0.25:
+	* Fixed build errors of rmidi.c and control.c
+
 Version 0.0.24:
 	* Add missing definition of SND_PCM_TSTAMP_ENABLE
 
