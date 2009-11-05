@@ -205,10 +205,14 @@ static int hctl_elem_event_handler(snd_hctl_elem_t *helem,
 				   unsigned int mask)
 {
 	snd_mixer_elem_t *elem = helem->private_data;
-	snd_mixer_t *mixer = elem->mixer;
+	snd_mixer_t *mixer;
 	int err;
 
 	if (!elem)
+		return 0;
+
+	mixer = elem->mixer;
+	if (!mixer)
 		return 0;
 
 	if (mask == SND_CTL_EVENT_MASK_REMOVE) {
