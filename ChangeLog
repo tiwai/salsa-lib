@@ -1,3 +1,7 @@
+Version 0.0.26:
+	* Fix segfault in hctl_elem_event_handler (thanks to Mogens
+	  Lindholdt Lauridsen)
+
 Version 0.0.25:
 	* Fixed build errors of rmidi.c and control.c
 
