@@ -33,7 +33,7 @@ typedef enum _snd_input_type {
 	SND_INPUT_STDIO,
 } snd_input_type_t;
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_input_stdio_open(snd_input_t **inputp, const char *file, const char *mode)
 {
 	if ((*inputp = fopen(file, mode)) == NULL)
@@ -41,7 +41,7 @@ int snd_input_stdio_open(snd_input_t **inputp, const char *file, const char *mod
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_input_stdio_attach(snd_input_t **inputp, FILE *fp, int _close)
 {
 	*inputp = fp;
@@ -54,7 +54,7 @@ int snd_input_stdio_attach(snd_input_t **inputp, FILE *fp, int _close)
 #define snd_input_getc(input)		getc(input)
 #define snd_input_ungetc(input,c)	ungetc(c, input)
 
-static inline __SALSA_NOT_IMPLEMENTED
+__SALSA_EXPORT_FUNC __SALSA_NOT_IMPLEMENTED
 int snd_input_buffer_open(snd_input_t **inputp, const char *buffer,
 			  ssize_t size)
 {

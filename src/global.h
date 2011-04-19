@@ -39,6 +39,10 @@ typedef struct _snd_rawmidi snd_rawmidi_t;
 typedef struct _snd_hwdep snd_hwdep_t;
 typedef struct _snd_seq snd_seq_t;
 
+#ifndef __SALSA_EXPORT_FUNC
+#define __SALSA_EXPORT_FUNC	static inline
+#endif
+
 #ifndef ATTRIBUTE_UNUSED
 /** do not print warning (gcc) when function parameter is not used */
 #define ATTRIBUTE_UNUSED __attribute__ ((__unused__))
@@ -77,13 +81,13 @@ int snd_async_del_handler(snd_async_handler_t *handler);
 #define snd_async_handler_get_signo(h)	-1
 #define snd_async_handler_get_fd(h)	-1
 #define snd_async_handler_get_callback_private(h)	NULL
-static inline __SALSA_NOT_IMPLEMENTED
+__SALSA_EXPORT_FUNC __SALSA_NOT_IMPLEMENTED
 int snd_async_add_handler(snd_async_handler_t **handler, int fd, 
 			  snd_async_callback_t callback, void *private_data)
 {
 	return -ENXIO;
 }
-static inline __SALSA_NOT_IMPLEMENTED
+__SALSA_EXPORT_FUNC __SALSA_NOT_IMPLEMENTED
 int snd_async_del_handler(snd_async_handler_t *handler)
 {
 	return -ENXIO;
@@ -96,7 +100,7 @@ int _snd_set_nonblock(int fd, int nonblock);
 
 #if !SALSA_HAS_DUMMY_CONF
 /* the global function defined here */
-static inline
+__SALSA_EXPORT_FUNC
 int snd_config_update_free_global(void)
 {
 	return 0;
@@ -107,13 +111,13 @@ int snd_config_update_free_global(void)
  * helper macros
  */
 #define __snd_sizeof(type)		 \
-static inline size_t type##_sizeof(void) \
+__SALSA_EXPORT_FUNC size_t type##_sizeof(void) \
 {					 \
 	return sizeof(type##_t);	 \
 }
 
 #define __snd_malloc(type)			\
-static inline int type##_malloc(type##_t **ptr) \
+__SALSA_EXPORT_FUNC int type##_malloc(type##_t **ptr) \
 {						 \
 	*ptr = (type##_t *)calloc(1, sizeof(**ptr)); \
 	if (!*ptr)				 \
@@ -122,19 +126,19 @@ static inline int type##_malloc(type##_t **ptr) \
 }
 
 #define __snd_free(type)			\
-static inline void type##_free(type##_t *obj)	\
+__SALSA_EXPORT_FUNC void type##_free(type##_t *obj)	\
 {						\
 	free(obj);				\
 }
 
 #define __snd_clear(type)				\
-static inline void type##_clear(type##_t *obj)		\
+__SALSA_EXPORT_FUNC void type##_clear(type##_t *obj)		\
 {							\
 	memset(obj, 0, sizeof(type##_t));		\
 }
 
 #define __snd_copy(type)					   \
-static inline void type##_copy(type##_t *dst, const type##_t *src) \
+__SALSA_EXPORT_FUNC void type##_copy(type##_t *dst, const type##_t *src) \
 {								   \
 	*dst = *src;						   \
 }

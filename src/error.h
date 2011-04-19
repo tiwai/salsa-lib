@@ -24,7 +24,7 @@
 
 typedef void (*snd_lib_error_handler_t)(const char *file, int line, const char *function, int err, const char *fmt, ...) /* __attribute__ ((format (printf, 5, 6))) */;
 
-static inline
+__SALSA_EXPORT_FUNC
 const char *snd_strerror(int errnum)
 {
 	if (errnum < 0)
@@ -32,7 +32,7 @@ const char *snd_strerror(int errnum)
 	return (const char *) strerror(errnum);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_lib_error_set_handler(snd_lib_error_handler_t handler)
 {
 	return 0;

@@ -22,13 +22,7 @@
 #ifndef __ALSA_TIMER_H
 #define __ALSA_TIMER_H
 
-#include "recipe.h"
-#include "global.h"
-#include "timer_types.h"
-
-
-int snd_timer_open(snd_timer_t **handle, const char *name, int mode);
-int snd_timer_close(snd_timer_t *handle);
+#include "timer_func.h"
 
 #include "timer_macros.h"
 

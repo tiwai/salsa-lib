@@ -72,37 +72,37 @@ struct _snd_pcm {
  * Macros
  */
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_nonblock(snd_pcm_t *pcm, int nonblock)
 {
 	return _snd_set_nonblock(pcm->fd, nonblock);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 const char *snd_pcm_name(snd_pcm_t *pcm)
 {
 	return pcm->name;
 }
 	
-static inline
+__SALSA_EXPORT_FUNC
 snd_pcm_type_t snd_pcm_type(snd_pcm_t *pcm)
 {
 	return pcm->type;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 snd_pcm_stream_t snd_pcm_stream(snd_pcm_t *pcm)
 {
 	return pcm->stream;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_poll_descriptors_count(snd_pcm_t *pcm)
 {
 	return 1;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_poll_descriptors(snd_pcm_t *pcm, struct pollfd *pfds,
 			     unsigned int space)
 {
@@ -110,7 +110,7 @@ int snd_pcm_poll_descriptors(snd_pcm_t *pcm, struct pollfd *pfds,
 	return 1;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_poll_descriptors_revents(snd_pcm_t *pcm, struct pollfd *pfds,
 				     unsigned int nfds,
 				     unsigned short *revents)
@@ -119,7 +119,7 @@ int snd_pcm_poll_descriptors_revents(snd_pcm_t *pcm, struct pollfd *pfds,
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_info(snd_pcm_t *pcm, snd_pcm_info_t *info)
 {
 	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_INFO, info) < 0)
@@ -127,7 +127,7 @@ int snd_pcm_info(snd_pcm_t *pcm, snd_pcm_info_t *info)
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_current(snd_pcm_t *pcm, snd_pcm_hw_params_t *params)
 {
 	if (!pcm->setup)
@@ -136,7 +136,7 @@ int snd_pcm_hw_params_current(snd_pcm_t *pcm, snd_pcm_hw_params_t *params)
 	return 0;
 } 
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_status(snd_pcm_t *pcm, snd_pcm_status_t *status)
 {
 	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_STATUS, status) < 0)
@@ -144,7 +144,7 @@ int snd_pcm_status(snd_pcm_t *pcm, snd_pcm_status_t *status)
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int _snd_pcm_sync_ptr(snd_pcm_t *pcm, int flags)
 {
 	if (pcm->sync_ptr) {
@@ -156,7 +156,7 @@ int _snd_pcm_sync_ptr(snd_pcm_t *pcm, int flags)
 }
 
 
-static inline
+__SALSA_EXPORT_FUNC
 snd_pcm_state_t snd_pcm_state(snd_pcm_t *pcm)
 {
 	_snd_pcm_sync_ptr(pcm, SNDRV_PCM_SYNC_PTR_APPL);
@@ -164,7 +164,7 @@ snd_pcm_state_t snd_pcm_state(snd_pcm_t *pcm)
 }
 
 /* for internal use only */
-static inline
+__SALSA_EXPORT_FUNC
 int _snd_pcm_hwsync(snd_pcm_t *pcm)
 {
 	if (pcm->sync_ptr)
@@ -175,14 +175,14 @@ int _snd_pcm_hwsync(snd_pcm_t *pcm)
 }
 
 /* exported: snd_pcm_hwsync() is now deprecated */
-static inline
+__SALSA_EXPORT_FUNC
 __attribute__ ((deprecated))
 int snd_pcm_hwsync(snd_pcm_t *pcm)
 {
 	return _snd_pcm_hwsync(pcm);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 snd_pcm_sframes_t snd_pcm_avail(snd_pcm_t *pcm)
 {
 	int err = _snd_pcm_hwsync(pcm);
@@ -191,7 +191,7 @@ snd_pcm_sframes_t snd_pcm_avail(snd_pcm_t *pcm)
 	return snd_pcm_avail_update(pcm);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_delay(snd_pcm_t *pcm, snd_pcm_sframes_t *delayp)
 {
 	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_DELAY, delayp) < 0)
@@ -199,7 +199,7 @@ int snd_pcm_delay(snd_pcm_t *pcm, snd_pcm_sframes_t *delayp)
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_resume(snd_pcm_t *pcm)
 {
 	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_RESUME) < 0)
@@ -207,7 +207,7 @@ int snd_pcm_resume(snd_pcm_t *pcm)
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_prepare(snd_pcm_t *pcm)
 {
 	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_PREPARE) < 0)
@@ -215,7 +215,7 @@ int snd_pcm_prepare(snd_pcm_t *pcm)
 	return _snd_pcm_sync_ptr(pcm, SNDRV_PCM_SYNC_PTR_APPL);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_reset(snd_pcm_t *pcm)
 {
 	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_RESET) < 0)
@@ -223,7 +223,7 @@ int snd_pcm_reset(snd_pcm_t *pcm)
 	return _snd_pcm_sync_ptr(pcm, SNDRV_PCM_SYNC_PTR_APPL);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_start(snd_pcm_t *pcm)
 {
 	_snd_pcm_sync_ptr(pcm, 0);
@@ -232,7 +232,7 @@ int snd_pcm_start(snd_pcm_t *pcm)
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_drop(snd_pcm_t *pcm)
 {
 	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_DROP) < 0)
@@ -240,7 +240,7 @@ int snd_pcm_drop(snd_pcm_t *pcm)
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_drain(snd_pcm_t *pcm)
 {
 	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_DRAIN) < 0)
@@ -248,7 +248,7 @@ int snd_pcm_drain(snd_pcm_t *pcm)
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_pause(snd_pcm_t *pcm, int enable)
 {
 	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_PAUSE, enable) < 0)
@@ -256,7 +256,7 @@ int snd_pcm_pause(snd_pcm_t *pcm, int enable)
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 snd_pcm_sframes_t snd_pcm_rewind(snd_pcm_t *pcm, snd_pcm_uframes_t frames)
 {
 	if (frames == 0)
@@ -267,7 +267,7 @@ snd_pcm_sframes_t snd_pcm_rewind(snd_pcm_t *pcm, snd_pcm_uframes_t frames)
 	return frames;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 snd_pcm_sframes_t snd_pcm_forward(snd_pcm_t *pcm, snd_pcm_uframes_t frames)
 {
 	if (frames == 0)
@@ -278,7 +278,7 @@ snd_pcm_sframes_t snd_pcm_forward(snd_pcm_t *pcm, snd_pcm_uframes_t frames)
 	return frames;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_link(snd_pcm_t *pcm1, snd_pcm_t *pcm2)
 {
 	if (ioctl(pcm1->fd, SNDRV_PCM_IOCTL_LINK, pcm2->fd) < 0)
@@ -286,7 +286,7 @@ int snd_pcm_link(snd_pcm_t *pcm1, snd_pcm_t *pcm2)
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_unlink(snd_pcm_t *pcm)
 {
 	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_UNLINK) < 0)
@@ -305,102 +305,145 @@ extern const char *_snd_pcm_subformat_names[] ;
 extern const char *_snd_pcm_subformat_descriptions[];
 extern const char *_snd_pcm_tstamp_mode_names[];
 
-#define snd_pcm_stream_name(stream)	_snd_pcm_stream_names[stream]
-#define snd_pcm_access_name(acc)	_snd_pcm_access_names[acc]
-#define snd_pcm_format_name(format)	_snd_pcm_format_names[format]
-#define snd_pcm_format_description(format) _snd_pcm_format_descriptions[format]
-#define snd_pcm_subformat_name(subformat) _snd_pcm_subformat_names[subformat]
-#define snd_pcm_subformat_description(subformat) \
-	_snd_pcm_subformat_descriptions[subformat]
-#define snd_pcm_tstamp_mode_name(mode)	_snd_pcm_tstamp_mode_names[mode]
-#define snd_pcm_state_name(state)	_snd_pcm_state_names[state]
-#define snd_pcm_type_name(type)		_snd_pcm_type_names[type]
+__SALSA_EXPORT_FUNC
+const char *snd_pcm_stream_name(snd_pcm_stream_t stream)
+{
+	return _snd_pcm_stream_names[stream];
+}
 
-static inline
+__SALSA_EXPORT_FUNC
+const char *snd_pcm_access_name(snd_pcm_access_t acc)
+{
+	return _snd_pcm_access_names[acc];
+}
+
+__SALSA_EXPORT_FUNC
+const char *snd_pcm_format_name(snd_pcm_format_t format)
+{
+	return _snd_pcm_format_names[format];
+}
+
+__SALSA_EXPORT_FUNC
+const char * snd_pcm_format_description(snd_pcm_format_t format)
+{
+	return _snd_pcm_format_descriptions[format];
+}
+
+__SALSA_EXPORT_FUNC
+const char *snd_pcm_subformat_name(snd_pcm_subformat_t subformat)
+{
+	return _snd_pcm_subformat_names[subformat];
+}
+
+__SALSA_EXPORT_FUNC
+const char *snd_pcm_subformat_description(snd_pcm_subformat_t subformat)
+{
+	return _snd_pcm_subformat_descriptions[subformat];
+}
+
+__SALSA_EXPORT_FUNC
+const char *snd_pcm_tstamp_mode_name(snd_pcm_tstamp_t mode)
+{
+	return _snd_pcm_tstamp_mode_names[mode];
+}
+
+__SALSA_EXPORT_FUNC
+const char *snd_pcm_state_name(snd_pcm_state_t state)
+{
+	return _snd_pcm_state_names[state];
+}
+
+__SALSA_EXPORT_FUNC
+const char *snd_pcm_type_name(snd_pcm_type_t type)
+{
+	return _snd_pcm_type_names[type];
+}
+
+__SALSA_EXPORT_FUNC
 snd_pcm_sframes_t snd_pcm_bytes_to_frames(snd_pcm_t *pcm, ssize_t bytes)
 {
 	return bytes * 8 / pcm->frame_bits;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 ssize_t snd_pcm_frames_to_bytes(snd_pcm_t *pcm, snd_pcm_sframes_t frames)
 {
 	return frames * pcm->frame_bits / 8;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 long snd_pcm_bytes_to_samples(snd_pcm_t *pcm, ssize_t bytes)
 {
 	return bytes * 8 / pcm->sample_bits;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 ssize_t snd_pcm_samples_to_bytes(snd_pcm_t *pcm, long samples)
 {
 	return samples * pcm->sample_bits / 8;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_can_mmap_sample_resolution(const snd_pcm_hw_params_t *params)
 {
 	return !!(params->info & SNDRV_PCM_INFO_MMAP_VALID);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_is_double(const snd_pcm_hw_params_t *params)
 {
 	return !!(params->info & SNDRV_PCM_INFO_DOUBLE);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_is_batch(const snd_pcm_hw_params_t *params)
 {
 	return !!(params->info & SNDRV_PCM_INFO_BATCH);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_is_block_transfer(const snd_pcm_hw_params_t *params)
 {
 	return !!(params->info & SNDRV_PCM_INFO_BLOCK_TRANSFER);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_can_overrange(const snd_pcm_hw_params_t *params)
 {
 	return !!(params->info & SNDRV_PCM_INFO_OVERRANGE);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_can_pause(const snd_pcm_hw_params_t *params)
 {
 	return !!(params->info & SNDRV_PCM_INFO_PAUSE);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_can_resume(const snd_pcm_hw_params_t *params)
 {
 	return !!(params->info & SNDRV_PCM_INFO_RESUME);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_is_half_duplex(const snd_pcm_hw_params_t *params)
 {
 	return !!(params->info & SNDRV_PCM_INFO_HALF_DUPLEX);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_is_joint_duplex(const snd_pcm_hw_params_t *params)
 {
 	return !!(params->info & SNDRV_PCM_INFO_JOINT_DUPLEX);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_can_sync_start(const snd_pcm_hw_params_t *params)
 {
 	return !!(params->info & SNDRV_PCM_INFO_SYNC_START);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_rate_numden(const snd_pcm_hw_params_t *params,
 				      unsigned int *rate_num,
 				      unsigned int *rate_den)
@@ -410,13 +453,13 @@ int snd_pcm_hw_params_get_rate_numden(const snd_pcm_hw_params_t *params,
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_sbits(const snd_pcm_hw_params_t *params)
 {
 	return params->msbits;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_fifo_size(const snd_pcm_hw_params_t *params)
 {
 	return params->fifo_size;
@@ -459,31 +502,31 @@ extern int _snd_pcm_hw_param_set_last(snd_pcm_t *pcm, snd_pcm_hw_params_t *param
 #define MASK_OFS(i)	((i) >> 5)
 #define MASK_BIT(i)	(1U << ((i) & 31))
 
-static inline
+__SALSA_EXPORT_FUNC
 void _snd_mask_none(snd_mask_t *mask)
 {
 	memset(mask, 0, sizeof(*mask));
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 void _snd_mask_any(snd_mask_t *mask)
 {
 	memset(mask, 0xff, sizeof(*mask));
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 void _snd_mask_set(snd_mask_t *mask, unsigned int val)
 {
 	mask->bits[MASK_OFS(val)] |= MASK_BIT(val);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 void _snd_mask_reset(snd_mask_t *mask, unsigned int val)
 {
 	mask->bits[MASK_OFS(val)] &= ~MASK_BIT(val);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int _snd_mask_test(const snd_mask_t *mask, unsigned int val)
 {
 	return mask->bits[MASK_OFS(val)] & MASK_BIT(val);
@@ -491,7 +534,7 @@ int _snd_mask_test(const snd_mask_t *mask, unsigned int val)
 
 #define SND_MASK_MAX	SNDRV_MASK_MAX
 
-static inline
+__SALSA_EXPORT_FUNC
 int _snd_mask_empty(const snd_mask_t *mask)
 {
 	int i;
@@ -508,7 +551,7 @@ int _snd_mask_empty(const snd_mask_t *mask)
 #if __WORDSIZE == 64
 
 #define DEFINE_GET64(name) \
-static inline \
+__SALSA_EXPORT_FUNC \
 int __snd_pcm_hw_param_ ## name ##64\
 (const snd_pcm_hw_params_t *params, int type, unsigned long *val, int *dir)\
 {\
@@ -529,7 +572,7 @@ DEFINE_GET64(get_max);
 	__snd_pcm_hw_param_get_max64(params, type, (unsigned long *)(ptr), dir)
 
 #define DEFINE_SET64(name) \
-static inline \
+__SALSA_EXPORT_FUNC \
 int __snd_pcm_hw_param_ ## name ## 64(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,\
 				    int type, unsigned long *val, int *dir)\
 {\
@@ -554,7 +597,7 @@ DEFINE_SET64(set_last);
 #define _snd_pcm_hw_param_set_last64(pcm, params, type, ptr, dir) \
 	__snd_pcm_hw_param_set_last64(pcm, params, type, (unsigned long *)(ptr), dir)
 
-static inline
+__SALSA_EXPORT_FUNC
 int __snd_pcm_hw_param_set_minmax64(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				   int type,
 				   unsigned long *minval, int *mindir,
@@ -602,37 +645,37 @@ int __snd_pcm_hw_param_set_minmax64(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 
 __snd_define_type(snd_pcm_access_mask);
 
-static inline
+__SALSA_EXPORT_FUNC
 void snd_pcm_access_mask_none(snd_pcm_access_mask_t *mask)
 {
 	_snd_mask_none((snd_mask_t *) mask);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 void snd_pcm_access_mask_any(snd_pcm_access_mask_t *mask)
 {
 	_snd_mask_any((snd_mask_t *) mask);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_access_mask_test(const snd_pcm_access_mask_t *mask, snd_pcm_access_t val)
 {
 	return _snd_mask_test((const snd_mask_t *) mask, (unsigned long) val);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_access_mask_empty(const snd_pcm_access_mask_t *mask)
 {
 	return _snd_mask_empty((const snd_mask_t *) mask);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 void snd_pcm_access_mask_set(snd_pcm_access_mask_t *mask, snd_pcm_access_t val)
 {
 	_snd_mask_set((snd_mask_t *) mask, (unsigned long) val);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 void snd_pcm_access_mask_reset(snd_pcm_access_mask_t *mask, snd_pcm_access_t val)
 {
 	_snd_mask_reset((snd_mask_t *) mask, (unsigned long) val);
@@ -640,37 +683,37 @@ void snd_pcm_access_mask_reset(snd_pcm_access_mask_t *mask, snd_pcm_access_t val
 
 __snd_define_type(snd_pcm_format_mask);
 
-static inline
+__SALSA_EXPORT_FUNC
 void snd_pcm_format_mask_none(snd_pcm_format_mask_t *mask)
 {
 	_snd_mask_none((snd_mask_t *) mask);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 void snd_pcm_format_mask_any(snd_pcm_format_mask_t *mask)
 {
 	_snd_mask_any((snd_mask_t *) mask);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_format_mask_test(const snd_pcm_format_mask_t *mask, snd_pcm_format_t val)
 {
 	return _snd_mask_test((const snd_mask_t *) mask, (unsigned long) val);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_format_mask_empty(const snd_pcm_format_mask_t *mask)
 {
 	return _snd_mask_empty((const snd_mask_t *) mask);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 void snd_pcm_format_mask_set(snd_pcm_format_mask_t *mask, snd_pcm_format_t val)
 {
 	_snd_mask_set((snd_mask_t *) mask, (unsigned long) val);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 void snd_pcm_format_mask_reset(snd_pcm_format_mask_t *mask, snd_pcm_format_t val)
 {
 	_snd_mask_reset((snd_mask_t *) mask, (unsigned long) val);
@@ -679,39 +722,39 @@ void snd_pcm_format_mask_reset(snd_pcm_format_mask_t *mask, snd_pcm_format_t val
 
 __snd_define_type(snd_pcm_subformat_mask);
 
-static inline
+__SALSA_EXPORT_FUNC
 void snd_pcm_subformat_mask_none(snd_pcm_subformat_mask_t *mask)
 {
 	_snd_mask_none((snd_mask_t *) mask);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 void snd_pcm_subformat_mask_any(snd_pcm_subformat_mask_t *mask)
 {
 	_snd_mask_any((snd_mask_t *) mask);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_subformat_mask_test(const snd_pcm_subformat_mask_t *mask,
 				snd_pcm_subformat_t val)
 {
 	return _snd_mask_test((const snd_mask_t *) mask, (unsigned long) val);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_subformat_mask_empty(const snd_pcm_subformat_mask_t *mask)
 {
 	return _snd_mask_empty((const snd_mask_t *) mask);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 void snd_pcm_subformat_mask_set(snd_pcm_subformat_mask_t *mask,
 				snd_pcm_subformat_t val)
 {
 	_snd_mask_set((snd_mask_t *) mask, (unsigned long) val);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 void snd_pcm_subformat_mask_reset(snd_pcm_subformat_mask_t *mask,
 				  snd_pcm_subformat_t val)
 {
@@ -721,7 +764,7 @@ void snd_pcm_subformat_mask_reset(snd_pcm_subformat_mask_t *mask,
 
 __snd_define_type(snd_pcm_hw_params);
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_access(const snd_pcm_hw_params_t *params,
 				 snd_pcm_access_t *access)
 {
@@ -729,7 +772,7 @@ int snd_pcm_hw_params_get_access(const snd_pcm_hw_params_t *params,
 				    (unsigned int *)access, NULL);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_test_access(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				  snd_pcm_access_t access)
 {
@@ -737,7 +780,7 @@ int snd_pcm_hw_params_test_access(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				      access, NULL);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_access(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				 snd_pcm_access_t access)
 {
@@ -745,7 +788,7 @@ int snd_pcm_hw_params_set_access(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				    access, 0);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_access_first(snd_pcm_t *pcm,
 				       snd_pcm_hw_params_t *params,
 				       snd_pcm_access_t *access)
@@ -755,7 +798,7 @@ int snd_pcm_hw_params_set_access_first(snd_pcm_t *pcm,
 					   (unsigned int *)access, NULL);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_access_last(snd_pcm_t *pcm,
 				      snd_pcm_hw_params_t *params,
 				      snd_pcm_access_t *access)
@@ -765,7 +808,7 @@ int snd_pcm_hw_params_set_access_last(snd_pcm_t *pcm,
 					  (unsigned int *)access, NULL);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_access_mask(snd_pcm_t *pcm,
 				      snd_pcm_hw_params_t *params,
 				      snd_pcm_access_mask_t *mask)
@@ -775,7 +818,7 @@ int snd_pcm_hw_params_set_access_mask(snd_pcm_t *pcm,
 					 (snd_mask_t *) mask);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_access_mask(snd_pcm_hw_params_t *params,
 				      snd_pcm_access_mask_t *mask)
 {
@@ -786,7 +829,7 @@ int snd_pcm_hw_params_get_access_mask(snd_pcm_hw_params_t *params,
 }
 
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_format(const snd_pcm_hw_params_t *params,
 				 snd_pcm_format_t *format)
 {
@@ -794,7 +837,7 @@ int snd_pcm_hw_params_get_format(const snd_pcm_hw_params_t *params,
 				    (unsigned int *)format, NULL);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_test_format(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				  snd_pcm_format_t format)
 {
@@ -802,7 +845,7 @@ int snd_pcm_hw_params_test_format(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				      format, NULL);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_format(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				 snd_pcm_format_t format)
 {
@@ -810,7 +853,7 @@ int snd_pcm_hw_params_set_format(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				    format, 0);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_format_first(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				       snd_pcm_format_t *format)
 {
@@ -818,7 +861,7 @@ int snd_pcm_hw_params_set_format_first(snd_pcm_t *pcm, snd_pcm_hw_params_t *para
 					  (unsigned int *)format, NULL);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_format_last(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				      snd_pcm_format_t *format)
 {
@@ -826,7 +869,7 @@ int snd_pcm_hw_params_set_format_last(snd_pcm_t *pcm, snd_pcm_hw_params_t *param
 					 (unsigned int *)format, NULL);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_format_mask(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				      snd_pcm_format_mask_t *mask)
 {
@@ -834,7 +877,7 @@ int snd_pcm_hw_params_set_format_mask(snd_pcm_t *pcm, snd_pcm_hw_params_t *param
 					 (snd_mask_t *) mask);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 void snd_pcm_hw_params_get_format_mask(snd_pcm_hw_params_t *params,
 				       snd_pcm_format_mask_t *mask)
 {
@@ -842,7 +885,7 @@ void snd_pcm_hw_params_get_format_mask(snd_pcm_hw_params_t *params,
 }
 
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_subformat(const snd_pcm_hw_params_t *params,
 				    snd_pcm_subformat_t *subformat)
 {
@@ -850,7 +893,7 @@ int snd_pcm_hw_params_get_subformat(const snd_pcm_hw_params_t *params,
 				     (unsigned int *)subformat, NULL);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_test_subformat(snd_pcm_t *pcm,
 				     snd_pcm_hw_params_t *params,
 				     snd_pcm_subformat_t subformat)
@@ -859,7 +902,7 @@ int snd_pcm_hw_params_test_subformat(snd_pcm_t *pcm,
 				      subformat, NULL);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_subformat(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				    snd_pcm_subformat_t subformat)
 {
@@ -867,7 +910,7 @@ int snd_pcm_hw_params_set_subformat(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				     subformat, 0);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_subformat_first(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					  snd_pcm_subformat_t *subformat)
 {
@@ -876,7 +919,7 @@ int snd_pcm_hw_params_set_subformat_first(snd_pcm_t *pcm, snd_pcm_hw_params_t *p
 					   (unsigned int *)subformat, NULL);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_subformat_last(snd_pcm_t *pcm,
 					 snd_pcm_hw_params_t *params,
 					 snd_pcm_subformat_t *subformat)
@@ -886,7 +929,7 @@ int snd_pcm_hw_params_set_subformat_last(snd_pcm_t *pcm,
 					  (unsigned int *)subformat, NULL);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_subformat_mask(snd_pcm_t *pcm,
 					 snd_pcm_hw_params_t *params,
 					 snd_pcm_subformat_mask_t *mask)
@@ -896,7 +939,7 @@ int snd_pcm_hw_params_set_subformat_mask(snd_pcm_t *pcm,
 					  (snd_mask_t *) mask);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 void snd_pcm_hw_params_get_subformat_mask(snd_pcm_hw_params_t *params,
 					  snd_pcm_subformat_mask_t *mask)
 {
@@ -904,28 +947,28 @@ void snd_pcm_hw_params_get_subformat_mask(snd_pcm_hw_params_t *params,
 }
 
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_channels(const snd_pcm_hw_params_t *params,
 				   unsigned int *val)
 {
 	return _snd_pcm_hw_param_get(params, SNDRV_PCM_HW_PARAM_CHANNELS, val, NULL);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_channels_min(const snd_pcm_hw_params_t *params,
 				       unsigned int *val)
 {
 	return _snd_pcm_hw_param_get_min(params, SNDRV_PCM_HW_PARAM_CHANNELS, val, NULL);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_channels_max(const snd_pcm_hw_params_t *params,
 				       unsigned int *val)
 {
 	return _snd_pcm_hw_param_get_max(params, SNDRV_PCM_HW_PARAM_CHANNELS, val, NULL);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_test_channels(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				    unsigned int val)
 {
@@ -933,7 +976,7 @@ int snd_pcm_hw_params_test_channels(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				      SNDRV_PCM_HW_PARAM_CHANNELS, val, NULL);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_channels(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				   unsigned int val)
 {
@@ -941,7 +984,7 @@ int snd_pcm_hw_params_set_channels(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				    SNDRV_PCM_HW_PARAM_CHANNELS, val, 0);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_channels_min(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				       unsigned int *val)
 {
@@ -949,7 +992,7 @@ int snd_pcm_hw_params_set_channels_min(snd_pcm_t *pcm, snd_pcm_hw_params_t *para
 					val, NULL);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_channels_max(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				       unsigned int *val)
 {
@@ -957,7 +1000,7 @@ int snd_pcm_hw_params_set_channels_max(snd_pcm_t *pcm, snd_pcm_hw_params_t *para
 					val, NULL);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_channels_minmax(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					  unsigned int *min, unsigned int *max)
 {
@@ -965,7 +1008,7 @@ int snd_pcm_hw_params_set_channels_minmax(snd_pcm_t *pcm, snd_pcm_hw_params_t *p
 					   min, NULL, max, NULL);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_channels_near(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					unsigned int *val)
 {
@@ -973,7 +1016,7 @@ int snd_pcm_hw_params_set_channels_near(snd_pcm_t *pcm, snd_pcm_hw_params_t *par
 					 val, NULL);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_channels_first(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					 unsigned int *val)
 {
@@ -981,7 +1024,7 @@ int snd_pcm_hw_params_set_channels_first(snd_pcm_t *pcm, snd_pcm_hw_params_t *pa
 					  val, NULL);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_channels_last(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					unsigned int *val)
 {
@@ -990,28 +1033,28 @@ int snd_pcm_hw_params_set_channels_last(snd_pcm_t *pcm, snd_pcm_hw_params_t *par
 }
 
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_rate(const snd_pcm_hw_params_t *params, unsigned int *val,
 			       int *dir)
 {
 	return _snd_pcm_hw_param_get(params, SNDRV_PCM_HW_PARAM_RATE, val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_rate_min(const snd_pcm_hw_params_t *params,
 				   unsigned int *val, int *dir)
 {
 	return _snd_pcm_hw_param_get_min(params, SNDRV_PCM_HW_PARAM_RATE, val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_rate_max(const snd_pcm_hw_params_t *params,
 				   unsigned int *val, int *dir)
 {
 	return _snd_pcm_hw_param_get_max(params, SNDRV_PCM_HW_PARAM_RATE, val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_test_rate(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				unsigned int val, int dir)
 {
@@ -1019,7 +1062,7 @@ int snd_pcm_hw_params_test_rate(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				      val, &dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_rate(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 			       unsigned int val, int dir)
 {
@@ -1027,7 +1070,7 @@ int snd_pcm_hw_params_set_rate(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				    val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_rate_min(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				   unsigned int *val, int *dir)
 {
@@ -1035,7 +1078,7 @@ int snd_pcm_hw_params_set_rate_min(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_rate_max(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				   unsigned int *val, int *dir)
 {
@@ -1043,7 +1086,7 @@ int snd_pcm_hw_params_set_rate_max(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_rate_minmax(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				      unsigned int *min, int *mindir,
 				      unsigned int *max, int *maxdir)
@@ -1052,14 +1095,14 @@ int snd_pcm_hw_params_set_rate_minmax(snd_pcm_t *pcm, snd_pcm_hw_params_t *param
 					   min, mindir, max, maxdir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_rate_near(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				    unsigned int *val, int *dir)
 {
 	return _snd_pcm_hw_param_set_near(pcm, params, SNDRV_PCM_HW_PARAM_RATE, val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_rate_first(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				     unsigned int *val, int *dir)
 {
@@ -1067,49 +1110,49 @@ int snd_pcm_hw_params_set_rate_first(snd_pcm_t *pcm, snd_pcm_hw_params_t *params
 					  val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_rate_last(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				    unsigned int *val, int *dir)
 {
 	return _snd_pcm_hw_param_set_last(pcm, params, SNDRV_PCM_HW_PARAM_RATE, val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_rate_resample(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					unsigned int val)
 {
 	return val ? -EINVAL : 0;  /* don't support plug layer */
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_rate_resample(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					unsigned int *val)
 {
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_export_buffer(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					unsigned int val)
 {
 	return -EINVAL;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_export_buffer(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					unsigned int *val)
 {
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_period_time(const snd_pcm_hw_params_t *params,
 				      unsigned int *val, int *dir)
 {
 	return _snd_pcm_hw_param_get(params, SNDRV_PCM_HW_PARAM_PERIOD_TIME, val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_period_time_min(const snd_pcm_hw_params_t *params,
 					  unsigned int *val, int *dir)
 {
@@ -1117,7 +1160,7 @@ int snd_pcm_hw_params_get_period_time_min(const snd_pcm_hw_params_t *params,
 					val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_period_time_max(const snd_pcm_hw_params_t *params,
 					  unsigned int *val, int *dir)
 {
@@ -1125,7 +1168,7 @@ int snd_pcm_hw_params_get_period_time_max(const snd_pcm_hw_params_t *params,
 					val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_test_period_time(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				       unsigned int val, int dir)
 {
@@ -1133,7 +1176,7 @@ int snd_pcm_hw_params_test_period_time(snd_pcm_t *pcm, snd_pcm_hw_params_t *para
 				      SNDRV_PCM_HW_PARAM_PERIOD_TIME, val, &dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_period_time(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				      unsigned int val, int dir)
 {
@@ -1142,7 +1185,7 @@ int snd_pcm_hw_params_set_period_time(snd_pcm_t *pcm, snd_pcm_hw_params_t *param
 }
 
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_period_time_min(snd_pcm_t *pcm,
 					  snd_pcm_hw_params_t *params,
 					  unsigned int *val, int *dir)
@@ -1151,7 +1194,7 @@ int snd_pcm_hw_params_set_period_time_min(snd_pcm_t *pcm,
 					val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_period_time_max(snd_pcm_t *pcm,
 					  snd_pcm_hw_params_t *params,
 					  unsigned int *val, int *dir)
@@ -1160,7 +1203,7 @@ int snd_pcm_hw_params_set_period_time_max(snd_pcm_t *pcm,
 					val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_period_time_minmax(snd_pcm_t *pcm,
 					     snd_pcm_hw_params_t *params,
 					     unsigned int *min, int *mindir,
@@ -1170,7 +1213,7 @@ int snd_pcm_hw_params_set_period_time_minmax(snd_pcm_t *pcm,
 					   min, mindir, max, maxdir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_period_time_near(snd_pcm_t *pcm,
 					   snd_pcm_hw_params_t *params,
 					   unsigned int *val, int *dir)
@@ -1179,7 +1222,7 @@ int snd_pcm_hw_params_set_period_time_near(snd_pcm_t *pcm,
 					 val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_period_time_first(snd_pcm_t *pcm,
 					    snd_pcm_hw_params_t *params,
 					    unsigned int *val, int *dir)
@@ -1188,7 +1231,7 @@ int snd_pcm_hw_params_set_period_time_first(snd_pcm_t *pcm,
 					  val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_period_time_last(snd_pcm_t *pcm,
 					   snd_pcm_hw_params_t *params,
 					   unsigned int *val, int *dir)
@@ -1198,7 +1241,7 @@ int snd_pcm_hw_params_set_period_time_last(snd_pcm_t *pcm,
 }
 
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_period_size(const snd_pcm_hw_params_t *params,
 				      snd_pcm_uframes_t *val, int *dir)
 {
@@ -1206,7 +1249,7 @@ int snd_pcm_hw_params_get_period_size(const snd_pcm_hw_params_t *params,
 				      val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_period_size_min(const snd_pcm_hw_params_t *params,
 					  snd_pcm_uframes_t *val, int *dir)
 {
@@ -1214,7 +1257,7 @@ int snd_pcm_hw_params_get_period_size_min(const snd_pcm_hw_params_t *params,
 					  val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_period_size_max(const snd_pcm_hw_params_t *params,
 					  snd_pcm_uframes_t *val, int *dir)
 {
@@ -1222,7 +1265,7 @@ int snd_pcm_hw_params_get_period_size_max(const snd_pcm_hw_params_t *params,
 					   val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_test_period_size(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				       snd_pcm_uframes_t val, int dir)
 {
@@ -1230,7 +1273,7 @@ int snd_pcm_hw_params_test_period_size(snd_pcm_t *pcm, snd_pcm_hw_params_t *para
 				      SNDRV_PCM_HW_PARAM_PERIOD_SIZE, val, &dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_period_size(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				      snd_pcm_uframes_t val, int dir)
 {
@@ -1238,7 +1281,7 @@ int snd_pcm_hw_params_set_period_size(snd_pcm_t *pcm, snd_pcm_hw_params_t *param
 				    SNDRV_PCM_HW_PARAM_PERIOD_SIZE, val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_period_size_min(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					  snd_pcm_uframes_t *val, int *dir)
 {
@@ -1246,7 +1289,7 @@ int snd_pcm_hw_params_set_period_size_min(snd_pcm_t *pcm, snd_pcm_hw_params_t *p
 					  val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_period_size_max(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					  snd_pcm_uframes_t *val, int *dir)
 {
@@ -1254,7 +1297,7 @@ int snd_pcm_hw_params_set_period_size_max(snd_pcm_t *pcm, snd_pcm_hw_params_t *p
 					val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_period_size_minmax(snd_pcm_t *pcm,
 					     snd_pcm_hw_params_t *params,
 					     snd_pcm_uframes_t *min, int *mindir,
@@ -1264,7 +1307,7 @@ int snd_pcm_hw_params_set_period_size_minmax(snd_pcm_t *pcm,
 					     min, mindir, max, maxdir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_period_size_near(snd_pcm_t *pcm,
 					   snd_pcm_hw_params_t *params,
 					   snd_pcm_uframes_t *val, int *dir)
@@ -1273,7 +1316,7 @@ int snd_pcm_hw_params_set_period_size_near(snd_pcm_t *pcm,
 					   val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_period_size_first(snd_pcm_t *pcm,
 					    snd_pcm_hw_params_t *params,
 					    snd_pcm_uframes_t *val, int *dir)
@@ -1282,7 +1325,7 @@ int snd_pcm_hw_params_set_period_size_first(snd_pcm_t *pcm,
 					    val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_period_size_last(snd_pcm_t *pcm,
 					   snd_pcm_hw_params_t *params,
 					   snd_pcm_uframes_t *val, int *dir)
@@ -1291,7 +1334,7 @@ int snd_pcm_hw_params_set_period_size_last(snd_pcm_t *pcm,
 					   val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_period_size_integer(snd_pcm_t *pcm,
 					      snd_pcm_hw_params_t *params)
 {
@@ -1300,28 +1343,28 @@ int snd_pcm_hw_params_set_period_size_integer(snd_pcm_t *pcm,
 }
 
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_periods(const snd_pcm_hw_params_t *params,
 				  unsigned int *val, int *dir)
 {
 	return _snd_pcm_hw_param_get(params, SNDRV_PCM_HW_PARAM_PERIODS, val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_periods_min(const snd_pcm_hw_params_t *params,
 				      unsigned int *val, int *dir)
 {
 	return _snd_pcm_hw_param_get_min(params, SNDRV_PCM_HW_PARAM_PERIODS, val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_periods_max(const snd_pcm_hw_params_t *params,
 				      unsigned int *val, int *dir)
 {
 	return _snd_pcm_hw_param_get_max(params, SNDRV_PCM_HW_PARAM_PERIODS, val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_test_periods(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				   unsigned int val, int dir)
 {
@@ -1329,7 +1372,7 @@ int snd_pcm_hw_params_test_periods(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				      SNDRV_PCM_HW_PARAM_PERIODS, val, &dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_periods(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				  unsigned int val, int dir)
 {
@@ -1337,7 +1380,7 @@ int snd_pcm_hw_params_set_periods(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				    SNDRV_PCM_HW_PARAM_PERIODS, val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_periods_min(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				      unsigned int *val, int *dir)
 {
@@ -1345,7 +1388,7 @@ int snd_pcm_hw_params_set_periods_min(snd_pcm_t *pcm, snd_pcm_hw_params_t *param
 					SNDRV_PCM_HW_PARAM_PERIODS, val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_periods_max(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				      unsigned int *val, int *dir)
 {
@@ -1354,7 +1397,7 @@ int snd_pcm_hw_params_set_periods_max(snd_pcm_t *pcm, snd_pcm_hw_params_t *param
 }
 
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_periods_minmax(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					 unsigned int *min, int *mindir,
 					 unsigned int *max, int *maxdir)
@@ -1364,7 +1407,7 @@ int snd_pcm_hw_params_set_periods_minmax(snd_pcm_t *pcm, snd_pcm_hw_params_t *pa
 					   min, mindir, max, maxdir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_periods_near(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				       unsigned int *val, int *dir)
 {
@@ -1372,7 +1415,7 @@ int snd_pcm_hw_params_set_periods_near(snd_pcm_t *pcm, snd_pcm_hw_params_t *para
 					 val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_periods_first(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					unsigned int *val, int *dir)
 {
@@ -1380,7 +1423,7 @@ int snd_pcm_hw_params_set_periods_first(snd_pcm_t *pcm, snd_pcm_hw_params_t *par
 					  val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_periods_last(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				       unsigned int *val, int *dir)
 {
@@ -1388,7 +1431,7 @@ int snd_pcm_hw_params_set_periods_last(snd_pcm_t *pcm, snd_pcm_hw_params_t *para
 					 val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_periods_integer(snd_pcm_t *pcm, snd_pcm_hw_params_t *params)
 {
 	return _snd_pcm_hw_param_set_integer(pcm, params,
@@ -1396,14 +1439,14 @@ int snd_pcm_hw_params_set_periods_integer(snd_pcm_t *pcm, snd_pcm_hw_params_t *p
 }
 
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_buffer_time(const snd_pcm_hw_params_t *params,
 				      unsigned int *val, int *dir)
 {
 	return _snd_pcm_hw_param_get(params, SNDRV_PCM_HW_PARAM_BUFFER_TIME, val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_buffer_time_min(const snd_pcm_hw_params_t *params,
 					  unsigned int *val, int *dir)
 {
@@ -1411,7 +1454,7 @@ int snd_pcm_hw_params_get_buffer_time_min(const snd_pcm_hw_params_t *params,
 					val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_buffer_time_max(const snd_pcm_hw_params_t *params,
 					  unsigned int *val, int *dir)
 {
@@ -1419,7 +1462,7 @@ int snd_pcm_hw_params_get_buffer_time_max(const snd_pcm_hw_params_t *params,
 					val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_test_buffer_time(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				       unsigned int val, int dir)
 {
@@ -1427,7 +1470,7 @@ int snd_pcm_hw_params_test_buffer_time(snd_pcm_t *pcm, snd_pcm_hw_params_t *para
 				      SNDRV_PCM_HW_PARAM_BUFFER_TIME, val, &dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_buffer_time(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				      unsigned int val, int dir)
 {
@@ -1435,7 +1478,7 @@ int snd_pcm_hw_params_set_buffer_time(snd_pcm_t *pcm, snd_pcm_hw_params_t *param
 				    SNDRV_PCM_HW_PARAM_BUFFER_TIME, val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_buffer_time_min(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					  unsigned int *val, int *dir)
 {
@@ -1443,7 +1486,7 @@ int snd_pcm_hw_params_set_buffer_time_min(snd_pcm_t *pcm, snd_pcm_hw_params_t *p
 					SNDRV_PCM_HW_PARAM_BUFFER_TIME, val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_buffer_time_max(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					  unsigned int *val, int *dir)
 {
@@ -1451,7 +1494,7 @@ int snd_pcm_hw_params_set_buffer_time_max(snd_pcm_t *pcm, snd_pcm_hw_params_t *p
 					SNDRV_PCM_HW_PARAM_BUFFER_TIME, val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_buffer_time_minmax(snd_pcm_t *pcm,
 					     snd_pcm_hw_params_t *params,
 					     unsigned int *min, int *mindir,
@@ -1462,7 +1505,7 @@ int snd_pcm_hw_params_set_buffer_time_minmax(snd_pcm_t *pcm,
 					   min, mindir, max, maxdir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_buffer_time_near(snd_pcm_t *pcm,
 					   snd_pcm_hw_params_t *params,
 					   unsigned int *val, int *dir)
@@ -1471,7 +1514,7 @@ int snd_pcm_hw_params_set_buffer_time_near(snd_pcm_t *pcm,
 					 val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_buffer_time_first(snd_pcm_t *pcm,
 					    snd_pcm_hw_params_t *params,
 					    unsigned int *val, int *dir)
@@ -1480,7 +1523,7 @@ int snd_pcm_hw_params_set_buffer_time_first(snd_pcm_t *pcm,
 					  val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_buffer_time_last(snd_pcm_t *pcm,
 					   snd_pcm_hw_params_t *params,
 					   unsigned int *val, int *dir)
@@ -1490,7 +1533,7 @@ int snd_pcm_hw_params_set_buffer_time_last(snd_pcm_t *pcm,
 }
 
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_buffer_size(const snd_pcm_hw_params_t *params,
 				      snd_pcm_uframes_t *val)
 {
@@ -1498,7 +1541,7 @@ int snd_pcm_hw_params_get_buffer_size(const snd_pcm_hw_params_t *params,
 				      val, NULL);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_buffer_size_min(const snd_pcm_hw_params_t *params,
 					  snd_pcm_uframes_t *val)
 {
@@ -1506,7 +1549,7 @@ int snd_pcm_hw_params_get_buffer_size_min(const snd_pcm_hw_params_t *params,
 					  val, NULL);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_buffer_size_max(const snd_pcm_hw_params_t *params,
 					  snd_pcm_uframes_t *val)
 {
@@ -1514,7 +1557,7 @@ int snd_pcm_hw_params_get_buffer_size_max(const snd_pcm_hw_params_t *params,
 					  val, NULL);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_test_buffer_size(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				       snd_pcm_uframes_t val)
 {
@@ -1522,7 +1565,7 @@ int snd_pcm_hw_params_test_buffer_size(snd_pcm_t *pcm, snd_pcm_hw_params_t *para
 				      SNDRV_PCM_HW_PARAM_BUFFER_SIZE, val, 0);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_buffer_size(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				      snd_pcm_uframes_t val)
 {
@@ -1530,7 +1573,7 @@ int snd_pcm_hw_params_set_buffer_size(snd_pcm_t *pcm, snd_pcm_hw_params_t *param
 				    SNDRV_PCM_HW_PARAM_BUFFER_SIZE, val, 0);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_buffer_size_min(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					  snd_pcm_uframes_t *val)
 {
@@ -1538,7 +1581,7 @@ int snd_pcm_hw_params_set_buffer_size_min(snd_pcm_t *pcm, snd_pcm_hw_params_t *p
 					  val, NULL);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_buffer_size_max(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					  snd_pcm_uframes_t *val)
 {
@@ -1546,7 +1589,7 @@ int snd_pcm_hw_params_set_buffer_size_max(snd_pcm_t *pcm, snd_pcm_hw_params_t *p
 					  val, NULL);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_buffer_size_minmax64(snd_pcm_t *pcm,
 					       snd_pcm_hw_params_t *params,
 					       snd_pcm_uframes_t *min,
@@ -1557,7 +1600,7 @@ int snd_pcm_hw_params_set_buffer_size_minmax64(snd_pcm_t *pcm,
 					     min, NULL, max, NULL);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_buffer_size_near(snd_pcm_t *pcm,
 					   snd_pcm_hw_params_t *params,
 					   snd_pcm_uframes_t *val)
@@ -1566,7 +1609,7 @@ int snd_pcm_hw_params_set_buffer_size_near(snd_pcm_t *pcm,
 					   val, NULL);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_buffer_size_first(snd_pcm_t *pcm,
 					    snd_pcm_hw_params_t *params,
 					    snd_pcm_uframes_t *val)
@@ -1575,7 +1618,7 @@ int snd_pcm_hw_params_set_buffer_size_first(snd_pcm_t *pcm,
 					    val, NULL);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_buffer_size_last(snd_pcm_t *pcm,
 					   snd_pcm_hw_params_t *params,
 					   snd_pcm_uframes_t *val)
@@ -1585,7 +1628,7 @@ int snd_pcm_hw_params_set_buffer_size_last(snd_pcm_t *pcm,
 }
 
 
-static inline
+__SALSA_EXPORT_FUNC
 __attribute__ ((deprecated))
 int snd_pcm_hw_params_get_tick_time(const snd_pcm_hw_params_t *params,
 				    unsigned int *val, int *dir)
@@ -1593,7 +1636,7 @@ int snd_pcm_hw_params_get_tick_time(const snd_pcm_hw_params_t *params,
 	return _snd_pcm_hw_param_get(params, SNDRV_PCM_HW_PARAM_TICK_TIME, val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 __attribute__ ((deprecated))
 int snd_pcm_hw_params_get_tick_time_min(const snd_pcm_hw_params_t *params,
 					unsigned int *val, int *dir)
@@ -1601,7 +1644,7 @@ int snd_pcm_hw_params_get_tick_time_min(const snd_pcm_hw_params_t *params,
 	return _snd_pcm_hw_param_get_min(params, SNDRV_PCM_HW_PARAM_TICK_TIME, val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 __attribute__ ((deprecated))
 int snd_pcm_hw_params_get_tick_time_max(const snd_pcm_hw_params_t *params,
 					unsigned int *val, int *dir)
@@ -1609,7 +1652,7 @@ int snd_pcm_hw_params_get_tick_time_max(const snd_pcm_hw_params_t *params,
 	return _snd_pcm_hw_param_get_max(params, SNDRV_PCM_HW_PARAM_TICK_TIME, val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 __attribute__ ((deprecated))
 int snd_pcm_hw_params_test_tick_time(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				     unsigned int val, int dir)
@@ -1618,7 +1661,7 @@ int snd_pcm_hw_params_test_tick_time(snd_pcm_t *pcm, snd_pcm_hw_params_t *params
 				      val, &dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 __attribute__ ((deprecated))
 int snd_pcm_hw_params_set_tick_time(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				    unsigned int val, int dir)
@@ -1627,7 +1670,7 @@ int snd_pcm_hw_params_set_tick_time(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 				    val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 __attribute__ ((deprecated))
 int snd_pcm_hw_params_set_tick_time_min(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					unsigned int *val, int *dir)
@@ -1636,7 +1679,7 @@ int snd_pcm_hw_params_set_tick_time_min(snd_pcm_t *pcm, snd_pcm_hw_params_t *par
 					val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 __attribute__ ((deprecated))
 int snd_pcm_hw_params_set_tick_time_max(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					unsigned int *val, int *dir)
@@ -1645,7 +1688,7 @@ int snd_pcm_hw_params_set_tick_time_max(snd_pcm_t *pcm, snd_pcm_hw_params_t *par
 					val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 __attribute__ ((deprecated))
 int snd_pcm_hw_params_set_tick_time_minmax(snd_pcm_t *pcm,
 					   snd_pcm_hw_params_t *params,
@@ -1656,7 +1699,7 @@ int snd_pcm_hw_params_set_tick_time_minmax(snd_pcm_t *pcm,
 					   min, mindir, max, maxdir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 __attribute__ ((deprecated))
 int snd_pcm_hw_params_set_tick_time_near(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					 unsigned int *val, int *dir)
@@ -1665,7 +1708,7 @@ int snd_pcm_hw_params_set_tick_time_near(snd_pcm_t *pcm, snd_pcm_hw_params_t *pa
 					 val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 __attribute__ ((deprecated))
 int snd_pcm_hw_params_set_tick_time_first(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					  unsigned int *val, int *dir)
@@ -1674,7 +1717,7 @@ int snd_pcm_hw_params_set_tick_time_first(snd_pcm_t *pcm, snd_pcm_hw_params_t *p
 					  val, dir);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 __attribute__ ((deprecated))
 int snd_pcm_hw_params_set_tick_time_last(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					 unsigned int *val, int *dir)
@@ -1684,7 +1727,7 @@ int snd_pcm_hw_params_set_tick_time_last(snd_pcm_t *pcm, snd_pcm_hw_params_t *pa
 }
 
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_sw_params_current(snd_pcm_t *pcm, snd_pcm_sw_params_t *params)
 {
 	*params = pcm->sw_params;
@@ -1693,7 +1736,7 @@ int snd_pcm_sw_params_current(snd_pcm_t *pcm, snd_pcm_sw_params_t *params)
 
 __snd_define_type(snd_pcm_sw_params);
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_sw_params_get_boundary(const snd_pcm_sw_params_t *params,
 				   snd_pcm_uframes_t *val)
 {
@@ -1701,7 +1744,7 @@ int snd_pcm_sw_params_get_boundary(const snd_pcm_sw_params_t *params,
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_sw_params_set_tstamp_mode(snd_pcm_t *pcm, snd_pcm_sw_params_t *params,
 				      snd_pcm_tstamp_t val)
 {
@@ -1709,7 +1752,7 @@ int snd_pcm_sw_params_set_tstamp_mode(snd_pcm_t *pcm, snd_pcm_sw_params_t *param
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_sw_params_get_tstamp_mode(const snd_pcm_sw_params_t *params,
 				      snd_pcm_tstamp_t *val)
 {
@@ -1717,7 +1760,7 @@ int snd_pcm_sw_params_get_tstamp_mode(const snd_pcm_sw_params_t *params,
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 __attribute__ ((deprecated))
 int snd_pcm_sw_params_set_sleep_min(snd_pcm_t *pcm, snd_pcm_sw_params_t *params,
 				    unsigned int val)
@@ -1726,7 +1769,7 @@ int snd_pcm_sw_params_set_sleep_min(snd_pcm_t *pcm, snd_pcm_sw_params_t *params,
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 __attribute__ ((deprecated))
 int snd_pcm_sw_params_get_sleep_min(const snd_pcm_sw_params_t *params,
 				    unsigned int *val)
@@ -1735,7 +1778,7 @@ int snd_pcm_sw_params_get_sleep_min(const snd_pcm_sw_params_t *params,
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_sw_params_set_avail_min(snd_pcm_t *pcm, snd_pcm_sw_params_t *params,
 				    snd_pcm_uframes_t val)
 {
@@ -1749,7 +1792,7 @@ int snd_pcm_sw_params_set_avail_min(snd_pcm_t *pcm, snd_pcm_sw_params_t *params,
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_sw_params_get_avail_min(const snd_pcm_sw_params_t *params,
 				    snd_pcm_uframes_t *val)
 {
@@ -1758,7 +1801,7 @@ int snd_pcm_sw_params_get_avail_min(const snd_pcm_sw_params_t *params,
 }
 
 
-static inline
+__SALSA_EXPORT_FUNC
 __attribute__ ((deprecated))
 int snd_pcm_sw_params_set_xfer_align(snd_pcm_t *pcm, snd_pcm_sw_params_t *params,
 				     snd_pcm_uframes_t val)
@@ -1767,7 +1810,7 @@ int snd_pcm_sw_params_set_xfer_align(snd_pcm_t *pcm, snd_pcm_sw_params_t *params
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 __attribute__ ((deprecated))
 int snd_pcm_sw_params_get_xfer_align(const snd_pcm_sw_params_t *params,
 				     snd_pcm_uframes_t *val)
@@ -1777,7 +1820,7 @@ int snd_pcm_sw_params_get_xfer_align(const snd_pcm_sw_params_t *params,
 }
 
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_sw_params_set_start_threshold(snd_pcm_t *pcm, snd_pcm_sw_params_t *params,
 					  snd_pcm_uframes_t val)
 {
@@ -1785,7 +1828,7 @@ int snd_pcm_sw_params_set_start_threshold(snd_pcm_t *pcm, snd_pcm_sw_params_t *p
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_sw_params_get_start_threshold(const snd_pcm_sw_params_t *params,
 					  snd_pcm_uframes_t *val)
 {
@@ -1794,7 +1837,7 @@ int snd_pcm_sw_params_get_start_threshold(const snd_pcm_sw_params_t *params,
 }
 
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_sw_params_set_stop_threshold(snd_pcm_t *pcm, snd_pcm_sw_params_t *params,
 					 snd_pcm_uframes_t val)
 {
@@ -1802,7 +1845,7 @@ int snd_pcm_sw_params_set_stop_threshold(snd_pcm_t *pcm, snd_pcm_sw_params_t *pa
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_sw_params_get_stop_threshold(const snd_pcm_sw_params_t *params,
 					 snd_pcm_uframes_t *val)
 {
@@ -1811,7 +1854,7 @@ int snd_pcm_sw_params_get_stop_threshold(const snd_pcm_sw_params_t *params,
 }
 
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_sw_params_set_silence_threshold(snd_pcm_t *pcm,
 					    snd_pcm_sw_params_t *params,
 					    snd_pcm_uframes_t val)
@@ -1820,7 +1863,7 @@ int snd_pcm_sw_params_set_silence_threshold(snd_pcm_t *pcm,
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_sw_params_get_silence_threshold(const snd_pcm_sw_params_t *params,
 					    snd_pcm_uframes_t *val)
 {
@@ -1829,7 +1872,7 @@ int snd_pcm_sw_params_get_silence_threshold(const snd_pcm_sw_params_t *params,
 }
 
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_sw_params_set_silence_size(snd_pcm_t *pcm, snd_pcm_sw_params_t *params,
 				       snd_pcm_uframes_t val)
 {
@@ -1837,7 +1880,7 @@ int snd_pcm_sw_params_set_silence_size(snd_pcm_t *pcm, snd_pcm_sw_params_t *para
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_sw_params_get_silence_size(const snd_pcm_sw_params_t *params,
 				       snd_pcm_uframes_t *val)
 {
@@ -1848,13 +1891,13 @@ int snd_pcm_sw_params_get_silence_size(const snd_pcm_sw_params_t *params,
 
 __snd_define_type(snd_pcm_status);
 
-static inline
+__SALSA_EXPORT_FUNC
 snd_pcm_state_t snd_pcm_status_get_state(const snd_pcm_status_t *obj)
 {
 	return (snd_pcm_state_t) obj->state;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 void snd_pcm_status_get_trigger_tstamp(const snd_pcm_status_t *obj,
 				       snd_timestamp_t *ptr)
 {
@@ -1862,45 +1905,45 @@ void snd_pcm_status_get_trigger_tstamp(const snd_pcm_status_t *obj,
 	ptr->tv_usec = obj->trigger_tstamp.tv_nsec / 1000L;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 void snd_pcm_status_get_trigger_htstamp(const snd_pcm_status_t *obj,
 					snd_htimestamp_t *ptr)
 {
 	*ptr = obj->trigger_tstamp;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 void snd_pcm_status_get_tstamp(const snd_pcm_status_t *obj, snd_timestamp_t *ptr)
 {
 	ptr->tv_sec = obj->tstamp.tv_sec;
 	ptr->tv_usec = obj->tstamp.tv_nsec / 1000L;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 void snd_pcm_status_get_htstamp(const snd_pcm_status_t *obj, snd_htimestamp_t *ptr)
 {
 	*ptr = obj->tstamp;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 snd_pcm_sframes_t snd_pcm_status_get_delay(const snd_pcm_status_t *obj)
 {
 	return obj->delay;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 snd_pcm_uframes_t snd_pcm_status_get_avail(const snd_pcm_status_t *obj)
 {
 	return obj->avail;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 snd_pcm_uframes_t snd_pcm_status_get_avail_max(const snd_pcm_status_t *obj)
 {
 	return obj->avail_max;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 snd_pcm_uframes_t snd_pcm_status_get_overrange(const snd_pcm_status_t *obj)
 {
 	return obj->overrange;
@@ -1908,73 +1951,73 @@ snd_pcm_uframes_t snd_pcm_status_get_overrange(const snd_pcm_status_t *obj)
 
 __snd_define_type(snd_pcm_info);
 
-static inline
+__SALSA_EXPORT_FUNC
 unsigned int snd_pcm_info_get_device(const snd_pcm_info_t *obj)
 {
 	return obj->device;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 unsigned int snd_pcm_info_get_subdevice(const snd_pcm_info_t *obj)
 {
 	return obj->subdevice;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 snd_pcm_stream_t snd_pcm_info_get_stream(const snd_pcm_info_t *obj)
 {
 	return (snd_pcm_stream_t) obj->stream;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_info_get_card(const snd_pcm_info_t *obj)
 {
 	return obj->card;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 const char *snd_pcm_info_get_id(const snd_pcm_info_t *obj)
 {
 	return (const char *)obj->id;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 const char *snd_pcm_info_get_name(const snd_pcm_info_t *obj)
 {
 	return (const char *)obj->name;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 const char *snd_pcm_info_get_subdevice_name(const snd_pcm_info_t *obj)
 {
 	return (const char *)obj->subname;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 snd_pcm_class_t snd_pcm_info_get_class(const snd_pcm_info_t *obj)
 {
 	return (snd_pcm_class_t) obj->dev_class;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 snd_pcm_subclass_t snd_pcm_info_get_subclass(const snd_pcm_info_t *obj)
 {
 	return (snd_pcm_subclass_t) obj->dev_subclass;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 unsigned int snd_pcm_info_get_subdevices_count(const snd_pcm_info_t *obj)
 {
 	return obj->subdevices_count;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 unsigned int snd_pcm_info_get_subdevices_avail(const snd_pcm_info_t *obj)
 {
 	return obj->subdevices_avail;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 snd_pcm_sync_id_t snd_pcm_info_get_sync(const snd_pcm_info_t *obj)
 {
 	snd_pcm_sync_id_t res;
@@ -1982,25 +2025,25 @@ snd_pcm_sync_id_t snd_pcm_info_get_sync(const snd_pcm_info_t *obj)
 	return res;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 void snd_pcm_info_set_device(snd_pcm_info_t *obj, unsigned int val)
 {
 	obj->device = val;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 void snd_pcm_info_set_subdevice(snd_pcm_info_t *obj, unsigned int val)
 {
 	obj->subdevice = val;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 void snd_pcm_info_set_stream(snd_pcm_info_t *obj, snd_pcm_stream_t val)
 {
 	obj->stream = val;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_htimestamp(snd_pcm_t *pcm, snd_pcm_uframes_t *avail,
 		       snd_htimestamp_t *tstamp)
 {
@@ -2013,7 +2056,7 @@ int snd_pcm_htimestamp(snd_pcm_t *pcm, snd_pcm_uframes_t *avail,
 /*
  * helper functions
  */
-static inline
+__SALSA_EXPORT_FUNC
 int snd_pcm_get_params(snd_pcm_t *pcm,
                        snd_pcm_uframes_t *buffer_size,
                        snd_pcm_uframes_t *period_size)
@@ -2029,7 +2072,7 @@ int snd_pcm_get_params(snd_pcm_t *pcm,
  * not implemented yet
  */
 
-static inline __SALSA_NOT_IMPLEMENTED
+__SALSA_EXPORT_FUNC __SALSA_NOT_IMPLEMENTED
 int snd_pcm_open_lconf(snd_pcm_t **pcm, const char *name, 
 		       snd_pcm_stream_t stream, int mode,
 		       snd_config_t *lconf)
@@ -2037,35 +2080,35 @@ int snd_pcm_open_lconf(snd_pcm_t **pcm, const char *name,
 	return -ENXIO;
 }
 
-static inline __SALSA_NOT_IMPLEMENTED
+__SALSA_EXPORT_FUNC __SALSA_NOT_IMPLEMENTED
 snd_pcm_sframes_t snd_pcm_mmap_writei(snd_pcm_t *pcm, const void *buffer,
 				      snd_pcm_uframes_t size)
 {
 	return -ENXIO;
 }
 
-static inline __SALSA_NOT_IMPLEMENTED
+__SALSA_EXPORT_FUNC __SALSA_NOT_IMPLEMENTED
 snd_pcm_sframes_t snd_pcm_mmap_writen(snd_pcm_t *pcm, void **bufs,
 				      snd_pcm_uframes_t size)
 {
 	return -ENXIO;
 }
 
-static inline __SALSA_NOT_IMPLEMENTED
+__SALSA_EXPORT_FUNC __SALSA_NOT_IMPLEMENTED
 snd_pcm_sframes_t snd_pcm_mmap_readi(snd_pcm_t *pcm, void *buffer,
 				     snd_pcm_uframes_t size)
 {
 	return -ENXIO;
 }
 
-static inline __SALSA_NOT_IMPLEMENTED
+__SALSA_EXPORT_FUNC __SALSA_NOT_IMPLEMENTED
 snd_pcm_sframes_t snd_pcm_mmap_readn(snd_pcm_t *pcm, void **bufs,
 				     snd_pcm_uframes_t size)
 {
 	return -ENXIO;
 }
 
-static inline __SALSA_NOT_IMPLEMENTED
+__SALSA_EXPORT_FUNC __SALSA_NOT_IMPLEMENTED
 int snd_pcm_set_params(snd_pcm_t *pcm,
                        snd_pcm_format_t format,
                        snd_pcm_access_t access,
@@ -2079,7 +2122,7 @@ int snd_pcm_set_params(snd_pcm_t *pcm,
 
 #if SALSA_HAS_ASYNC_SUPPORT
 
-static inline
+__SALSA_EXPORT_FUNC
 snd_pcm_t *snd_async_handler_get_pcm(snd_async_handler_t *handler)
 {
 	return (snd_pcm_t *) handler->rec;
@@ -2087,7 +2130,7 @@ snd_pcm_t *snd_async_handler_get_pcm(snd_async_handler_t *handler)
 
 #else /* !SALSA_HAS_ASYNC_SUPPORT */
 
-static inline __SALSA_NOT_IMPLEMENTED
+__SALSA_EXPORT_FUNC __SALSA_NOT_IMPLEMENTED
 int snd_async_add_pcm_handler(snd_async_handler_t **handler, snd_pcm_t *pcm, 
 			      snd_async_callback_t callback,
 			      void *private_data)
@@ -2095,7 +2138,7 @@ int snd_async_add_pcm_handler(snd_async_handler_t **handler, snd_pcm_t *pcm,
 	return -ENXIO;
 }
 
-static inline __SALSA_NOT_IMPLEMENTED
+__SALSA_EXPORT_FUNC __SALSA_NOT_IMPLEMENTED
 snd_pcm_t *snd_async_handler_get_pcm(snd_async_handler_t *handler)
 {
 	return NULL;

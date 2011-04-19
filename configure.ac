@@ -88,7 +88,7 @@ AC_ARG_ENABLE(async,
 
 AC_ARG_ENABLE(libasound,
   AS_HELP_STRING([--enable-libasound],
-		 [build a symlink to libasound.so]),
+		 [build a ABI-compatible libasound.so]),
   libasound="$enableval", libasound="no")
 
 AC_ARG_ENABLE(everything,
@@ -139,7 +139,7 @@ else
 fi
 AC_SUBST(SALSA_HAS_DUMMY_CONF)
 
-AM_CONDITIONAL(LINK_LIBASOUND, test "$libasound" = "yes")
+AM_CONDITIONAL(COMPAT_ABI, test "$libasound" = "yes")
 
 AC_ARG_ENABLE(deprecated,
   AS_HELP_STRING([--disable-deprecated],
@@ -194,5 +194,5 @@ echo "  - ALSA-config dummy interface: $sndconf"
 echo "  - ALSA-sequencer dummy interface: $sndseq"
 echo "  - TLV (dB) support: $tlv"
 echo "  - Async handler support: $async"
-echo "  - Make libasound.so symlink: $libasound"
+echo "  - Make ABI-compatible libasound.so: $libasound"
 echo "  - Mark deprecated attribute: $markdeprecated"

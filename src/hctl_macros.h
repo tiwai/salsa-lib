@@ -32,7 +32,7 @@ struct _snd_hctl_elem {
 };
 
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_hctl_wait(snd_hctl_t *hctl, int timeout)
 {
 	int err;
@@ -42,87 +42,87 @@ int snd_hctl_wait(snd_hctl_t *hctl, int timeout)
 	return err;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 const char *snd_hctl_name(snd_hctl_t *hctl)
 {
 	return snd_ctl_name(hctl->ctl);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_hctl_nonblock(snd_hctl_t *hctl, int nonblock)
 {
 	return snd_ctl_nonblock(hctl->ctl, nonblock);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_hctl_set_compare(snd_hctl_t *hctl, snd_hctl_compare_t compare)
 {
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_hctl_poll_descriptors_count(snd_hctl_t *hctl)
 {
 	return snd_ctl_poll_descriptors_count(hctl->ctl);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_hctl_poll_descriptors(snd_hctl_t *hctl, struct pollfd *pfds, unsigned int space)
 {
 	return snd_ctl_poll_descriptors(hctl->ctl, pfds, space);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_hctl_poll_descriptors_revents(snd_hctl_t *hctl, struct pollfd *pfds, unsigned int nfds, unsigned short *revents)
 {
 	return snd_ctl_poll_descriptors_revents(hctl->ctl, pfds, nfds, revents);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 void snd_hctl_set_callback(snd_hctl_t *hctl, snd_hctl_callback_t callback)
 {
 	hctl->callback = callback;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 void snd_hctl_set_callback_private(snd_hctl_t *hctl, void *callback_private)
 {
 	hctl->callback_private = callback_private;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 void *snd_hctl_get_callback_private(snd_hctl_t *hctl)
 {
 	return hctl->callback_private;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 unsigned int snd_hctl_get_count(snd_hctl_t *hctl)
 {
 	return hctl->count;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 snd_ctl_t *snd_hctl_ctl(snd_hctl_t *hctl)
 {
 	return hctl->ctl;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_hctl_elem_info(snd_hctl_elem_t *elem, snd_ctl_elem_info_t *info)
 {
 	info->id = elem->id;
 	return snd_ctl_elem_info(elem->hctl->ctl, info);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_hctl_elem_read(snd_hctl_elem_t *elem, snd_ctl_elem_value_t *value)
 {
 	value->id = elem->id;
 	return snd_ctl_elem_read(elem->hctl->ctl, value);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_hctl_elem_write(snd_hctl_elem_t *elem, snd_ctl_elem_value_t *value)
 {
 	value->id = elem->id;
@@ -130,20 +130,20 @@ int snd_hctl_elem_write(snd_hctl_elem_t *elem, snd_ctl_elem_value_t *value)
 }
 
 #if SALSA_HAS_TLV_SUPPORT
-static inline
+__SALSA_EXPORT_FUNC
 int snd_hctl_elem_tlv_read(snd_hctl_elem_t *elem, unsigned int *tlv,
 			   unsigned int tlv_size)
 {
 	return snd_ctl_elem_tlv_read(elem->hctl->ctl, &elem->id, tlv, tlv_size);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_hctl_elem_tlv_write(snd_hctl_elem_t *elem, const unsigned int *tlv)
 {
 	return snd_ctl_elem_tlv_write(elem->hctl->ctl, &elem->id, tlv);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_hctl_elem_tlv_command(snd_hctl_elem_t *elem, const unsigned int *tlv)
 {
 	return snd_ctl_elem_tlv_command(elem->hctl->ctl, &elem->id, tlv);
@@ -151,111 +151,111 @@ int snd_hctl_elem_tlv_command(snd_hctl_elem_t *elem, const unsigned int *tlv)
 
 #else /* SALSA_HAS_TLV_SUPPORT */
 
-static inline __SALSA_NOT_IMPLEMENTED
+__SALSA_EXPORT_FUNC __SALSA_NOT_IMPLEMENTED
 int snd_hctl_elem_tlv_read(snd_hctl_elem_t *elem, unsigned int *tlv,
 			   unsigned int tlv_size)
 {
 	return -ENXIO;
 }
 
-static inline __SALSA_NOT_IMPLEMENTED
+__SALSA_EXPORT_FUNC __SALSA_NOT_IMPLEMENTED
 int snd_hctl_elem_tlv_write(snd_hctl_elem_t *elem, const unsigned int *tlv)
 {
 	return -ENXIO;
 }
 
-static inline __SALSA_NOT_IMPLEMENTED
+__SALSA_EXPORT_FUNC __SALSA_NOT_IMPLEMENTED
 int snd_hctl_elem_tlv_command(snd_hctl_elem_t *elem, const unsigned int *tlv)
 {
 	return -ENXIO;
 }
 #endif /* SALSA_HAS_TLV_SUPPORT */
 
-static inline
+__SALSA_EXPORT_FUNC
 snd_hctl_t *snd_hctl_elem_get_hctl(snd_hctl_elem_t *elem)
 {
 	return elem->hctl;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 void snd_hctl_elem_get_id(const snd_hctl_elem_t *obj, snd_ctl_elem_id_t *ptr)
 {
 	*ptr = obj->id;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 unsigned int snd_hctl_elem_get_numid(const snd_hctl_elem_t *obj)
 {
 	return obj->id.numid;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 snd_ctl_elem_iface_t snd_hctl_elem_get_interface(const snd_hctl_elem_t *obj)
 {
 	return (snd_ctl_elem_iface_t) obj->id.iface;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 unsigned int snd_hctl_elem_get_device(const snd_hctl_elem_t *obj)
 {
 	return obj->id.device;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 unsigned int snd_hctl_elem_get_subdevice(const snd_hctl_elem_t *obj)
 {
 	return obj->id.subdevice;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 const char *snd_hctl_elem_get_name(const snd_hctl_elem_t *obj)
 {
 	return (const char *)obj->id.name;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 unsigned int snd_hctl_elem_get_index(const snd_hctl_elem_t *obj)
 {
 	return obj->id.index;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 void snd_hctl_elem_set_callback(snd_hctl_elem_t *obj,
 				snd_hctl_elem_callback_t val)
 {
 	obj->callback = val;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 void snd_hctl_elem_set_callback_private(snd_hctl_elem_t *obj, void * val)
 {
 	obj->callback_private = val;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 void *snd_hctl_elem_get_callback_private(const snd_hctl_elem_t *obj)
 {
 	return obj->callback_private;
 }
-static inline
+__SALSA_EXPORT_FUNC
 snd_hctl_elem_t *snd_hctl_first_elem(snd_hctl_t *hctl)
 {
 	return hctl->first_elem;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 snd_hctl_elem_t *snd_hctl_last_elem(snd_hctl_t *hctl)
 {
 	return hctl->last_elem;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 snd_hctl_elem_t *snd_hctl_elem_next(snd_hctl_elem_t *elem)
 {
 	return elem->next;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 snd_hctl_elem_t *snd_hctl_elem_prev(snd_hctl_elem_t *elem)
 {
 	return elem->prev;
@@ -266,7 +266,7 @@ snd_hctl_elem_t *snd_hctl_elem_prev(snd_hctl_elem_t *elem)
  * not implemented yet
  */
 
-static inline __SALSA_NOT_IMPLEMENTED
+__SALSA_EXPORT_FUNC __SALSA_NOT_IMPLEMENTED
 int snd_hctl_async(snd_hctl_t *hctl, int sig, pid_t pid)
 {
 	return -ENXIO;

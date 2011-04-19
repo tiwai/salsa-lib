@@ -22,7 +22,7 @@
 #define snd_seq_ev_set_queue_pos_real(ev, q, rtime)
 #define snd_seq_ev_set_queue_pos_tick(ev, q, ttime)
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_seq_control_queue(snd_seq_t *seq, int q, int type, int value,
 			  snd_seq_event_t *ev)
 {
@@ -37,86 +37,86 @@ int snd_seq_control_queue(snd_seq_t *seq, int q, int type, int value,
 #define snd_seq_change_queue_tempo(seq, q, tempo, ev) \
 	snd_seq_control_queue(seq, q, SND_SEQ_EVENT_TEMPO, tempo, ev)
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_seq_create_simple_port(snd_seq_t *seq, const char *name,
 			       unsigned int caps, unsigned int type)
 {
 	return -ENXIO;
 }
-static inline
+__SALSA_EXPORT_FUNC
 int snd_seq_delete_simple_port(snd_seq_t *seq, int port)
 {
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_seq_connect_from(snd_seq_t *seq, int my_port, int src_client,
 			 int src_port)
 {
 	return -ENXIO;
 }
-static inline
+__SALSA_EXPORT_FUNC
 int snd_seq_connect_to(snd_seq_t *seq, int my_port, int dest_client,
 		       int dest_port)
 {
 	return -ENXIO;
 }
-static inline
+__SALSA_EXPORT_FUNC
 int snd_seq_disconnect_from(snd_seq_t *seq, int my_port, int src_client,
 			    int src_port)
 {
 	return -ENXIO;
 }
-static inline
+__SALSA_EXPORT_FUNC
 int snd_seq_disconnect_to(snd_seq_t *seq, int my_port, int dest_client,
 			  int dest_port)
 {
 	return -ENXIO;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_seq_set_client_name(snd_seq_t *seq, const char *name)
 {
 	return -ENXIO;
 }
-static inline
+__SALSA_EXPORT_FUNC
 int snd_seq_set_client_event_filter(snd_seq_t *seq, int event_type)
 {
 	return -ENXIO;
 }
-static inline
+__SALSA_EXPORT_FUNC
 int snd_seq_set_client_pool_output(snd_seq_t *seq, size_t size)
 {
 	return -ENXIO;
 }
-static inline
+__SALSA_EXPORT_FUNC
 int snd_seq_set_client_pool_output_room(snd_seq_t *seq, size_t size)
 {
 	return -ENXIO;
 }
-static inline
+__SALSA_EXPORT_FUNC
 int snd_seq_set_client_pool_input(snd_seq_t *seq, size_t size)
 {
 	return -ENXIO;
 }
-static inline
+__SALSA_EXPORT_FUNC
 int snd_seq_sync_output_queue(snd_seq_t *seq)
 {
 	return -ENXIO;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_seq_parse_address(snd_seq_t *seq, snd_seq_addr_t *addr, const char *str)
 {
 	return -ENXIO;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_seq_reset_pool_output(snd_seq_t *seq)
 {
 	return -ENXIO;
 }
-static inline
+__SALSA_EXPORT_FUNC
 int snd_seq_reset_pool_input(snd_seq_t *seq)
 {
 	return -ENXIO;

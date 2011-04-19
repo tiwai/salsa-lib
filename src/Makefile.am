@@ -21,7 +21,13 @@ if BUILD_TIMER
 libsalsa_la_SOURCES += timer.c
 endif
 
-libsalsa_la_LDFLAGS = -version-info 0:1:0
+if COMPAT_ABI
+VSYMS = -Wl,--version-script=Versions
+else
+VSYMS =
+endif
+
+libsalsa_la_LDFLAGS = -version-info 0:1:0 $(VSYMS) -Wl,-Bsymbolic-functions
 
 alsaincludedir = $(includedir)/alsa
 
@@ -58,12 +64,34 @@ endif
 
 noinst_HEADERS = local.h 
 
-EXTRA_DIST = asoundlib-head.h asoundlib-tail.h recipe.h.in version.h.in
+EXTRA_DIST = asoundlib-head.h asoundlib-tail.h recipe.h.in version.h.in Versions
 
 DISTCLEANFILES = asoundlib.h recipe.h version.h
 
-if LINK_LIBASOUND
-install-exec-hook: libsalsa.la
-	rm -f $(DESTDIR)$(libdir)/libasound.so
-	$(LN_S) libsalsa.so $(DESTDIR)$(libdir)/libasound.so
+if COMPAT_ABI
+lib_LTLIBRARIES += libasound.la
+libasound_la_SOURCES = ctl_abi.c input_abi.c output_abi.c global_abi.c error_abi.c
+if BUILD_PCM
+libasound_la_SOURCES += pcm_abi.c
+endif
+if BUILD_MIXER
+libasound_la_SOURCES += hctl_abi.c mixer_abi.c
+endif
+if BUILD_RAWMIDI
+libasound_la_SOURCES += rawmidi_abi.c
+endif
+if BUILD_HWDEP
+libasound_la_SOURCES += hwdep_abi.c
+endif
+if BUILD_TIMER
+libasound_la_SOURCES += timer_abi.c
+endif
+if BUILD_CONF
+libasound_la_SOURCES += conf_abi.c
+endif
+
+libasound_la_SOURCES += $(libsalsa_la_SOURCES)
+
+libasound_la_LDFLAGS = -version-info 2:0:0 $(VSYMS) -Wl,-Bsymbolic-functions
+
 endif

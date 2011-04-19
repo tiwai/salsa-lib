@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <unistd.h>
 #include <sys/ioctl.h>
 #include <sys/poll.h>
 
@@ -31,26 +32,26 @@ struct _snd_rawmidi {
 /*
  */
 
-static inline __SALSA_NOT_IMPLEMENTED
+__SALSA_EXPORT_FUNC __SALSA_NOT_IMPLEMENTED
 int snd_rawmidi_open_lconf(snd_rawmidi_t **in_rmidi, snd_rawmidi_t **out_rmidi,
 			   const char *name, int mode, snd_config_t *lconf)
 {
 	return -ENXIO;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_rawmidi_nonblock(snd_rawmidi_t *rmidi, int nonblock)
 {
 	return _snd_set_nonblock(rmidi->fd, nonblock);
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_rawmidi_poll_descriptors_count(snd_rawmidi_t *rmidi)
 {
 	return 1;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_rawmidi_poll_descriptors(snd_rawmidi_t *rmidi, struct pollfd *pfds,
 				 unsigned int space)
 {
@@ -58,7 +59,7 @@ int snd_rawmidi_poll_descriptors(snd_rawmidi_t *rmidi, struct pollfd *pfds,
 	return 1;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_rawmidi_poll_descriptors_revents(snd_rawmidi_t *rawmidi,
 					 struct pollfd *pfds,
 					 unsigned int nfds,
@@ -70,86 +71,86 @@ int snd_rawmidi_poll_descriptors_revents(snd_rawmidi_t *rawmidi,
 
 __snd_define_type(snd_rawmidi_info);
 
-static inline
+__SALSA_EXPORT_FUNC
 unsigned int snd_rawmidi_info_get_device(const snd_rawmidi_info_t *obj)
 {
 	return obj->device;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 unsigned int snd_rawmidi_info_get_subdevice(const snd_rawmidi_info_t *obj)
 {
 	return obj->subdevice;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 snd_rawmidi_stream_t snd_rawmidi_info_get_stream(const snd_rawmidi_info_t *obj)
 {
 	return (snd_rawmidi_stream_t) obj->stream;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_rawmidi_info_get_card(const snd_rawmidi_info_t *obj)
 {
 	return obj->card;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 unsigned int snd_rawmidi_info_get_flags(const snd_rawmidi_info_t *obj)
 {
 	return obj->flags;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 const char *snd_rawmidi_info_get_id(const snd_rawmidi_info_t *obj)
 {
 	return (const char *)obj->id;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 const char *snd_rawmidi_info_get_name(const snd_rawmidi_info_t *obj)
 {
 	return (const char *)obj->name;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 const char *snd_rawmidi_info_get_subdevice_name(const snd_rawmidi_info_t *obj)
 {
 	return (const char *)obj->subname;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 unsigned int snd_rawmidi_info_get_subdevices_count(const snd_rawmidi_info_t *obj)
 {
 	return obj->subdevices_count;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 unsigned int snd_rawmidi_info_get_subdevices_avail(const snd_rawmidi_info_t *obj)
 {
 	return obj->subdevices_avail;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 void snd_rawmidi_info_set_device(snd_rawmidi_info_t *obj, unsigned int val)
 {
 	obj->device = val;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 void snd_rawmidi_info_set_subdevice(snd_rawmidi_info_t *obj, unsigned int val)
 {
 	obj->subdevice = val;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 void snd_rawmidi_info_set_stream(snd_rawmidi_info_t *obj,
 				 snd_rawmidi_stream_t val)
 {
 	obj->stream = val;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_rawmidi_info(snd_rawmidi_t *rmidi, snd_rawmidi_info_t * info)
 {
 	info->stream = rmidi->stream;
@@ -160,7 +161,7 @@ int snd_rawmidi_info(snd_rawmidi_t *rmidi, snd_rawmidi_info_t * info)
 
 __snd_define_type(snd_rawmidi_params);
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_rawmidi_params_set_buffer_size(snd_rawmidi_t *rmidi,
 				       snd_rawmidi_params_t *params,
 				       size_t val)
@@ -169,13 +170,13 @@ int snd_rawmidi_params_set_buffer_size(snd_rawmidi_t *rmidi,
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 size_t snd_rawmidi_params_get_buffer_size(const snd_rawmidi_params_t *params)
 {
 	return params->buffer_size;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_rawmidi_params_set_avail_min(snd_rawmidi_t *rmidi,
 				     snd_rawmidi_params_t *params, size_t val)
 {
@@ -183,13 +184,13 @@ int snd_rawmidi_params_set_avail_min(snd_rawmidi_t *rmidi,
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 size_t snd_rawmidi_params_get_avail_min(const snd_rawmidi_params_t *params)
 {
 	return params->avail_min;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_rawmidi_params_set_no_active_sensing(snd_rawmidi_t *rmidi,
 					     snd_rawmidi_params_t *params,
 					     int val)
@@ -198,13 +199,13 @@ int snd_rawmidi_params_set_no_active_sensing(snd_rawmidi_t *rmidi,
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_rawmidi_params_get_no_active_sensing(const snd_rawmidi_params_t *params)
 {
 	return params->no_active_sensing;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_rawmidi_params(snd_rawmidi_t *rmidi, snd_rawmidi_params_t * params)
 {
 	params->stream = rmidi->stream;
@@ -214,7 +215,7 @@ int snd_rawmidi_params(snd_rawmidi_t *rmidi, snd_rawmidi_params_t * params)
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_rawmidi_params_current(snd_rawmidi_t *rmidi,
 			       snd_rawmidi_params_t *params)
 {
@@ -224,26 +225,26 @@ int snd_rawmidi_params_current(snd_rawmidi_t *rmidi,
 
 __snd_define_type(snd_rawmidi_status);
 
-static inline
+__SALSA_EXPORT_FUNC
 void snd_rawmidi_status_get_tstamp(const snd_rawmidi_status_t *obj,
 				   snd_htimestamp_t *ptr)
 {
 	*ptr = obj->tstamp;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 size_t snd_rawmidi_status_get_avail(const snd_rawmidi_status_t *obj)
 {
 	return obj->avail;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 size_t snd_rawmidi_status_get_xruns(const snd_rawmidi_status_t *obj)
 {
 	return obj->xruns;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_rawmidi_status(snd_rawmidi_t *rmidi, snd_rawmidi_status_t * status)
 {
 	status->stream = rmidi->stream;
@@ -252,7 +253,7 @@ int snd_rawmidi_status(snd_rawmidi_t *rmidi, snd_rawmidi_status_t * status)
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_rawmidi_drain(snd_rawmidi_t *rmidi)
 {
 	int str = rmidi->stream;
@@ -261,7 +262,7 @@ int snd_rawmidi_drain(snd_rawmidi_t *rmidi)
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 int snd_rawmidi_drop(snd_rawmidi_t *rmidi)
 {
 	int str = rmidi->stream;
@@ -270,7 +271,7 @@ int snd_rawmidi_drop(snd_rawmidi_t *rmidi)
 	return 0;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 ssize_t snd_rawmidi_write(snd_rawmidi_t *rmidi, const void *buffer,
 			  size_t size)
 {
@@ -281,7 +282,7 @@ ssize_t snd_rawmidi_write(snd_rawmidi_t *rmidi, const void *buffer,
 	return result;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 ssize_t snd_rawmidi_read(snd_rawmidi_t *rmidi, void *buffer, size_t size)
 {
 	ssize_t result;
@@ -291,19 +292,19 @@ ssize_t snd_rawmidi_read(snd_rawmidi_t *rmidi, void *buffer, size_t size)
 	return result;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 const char *snd_rawmidi_name(snd_rawmidi_t *rmidi)
 {
 	return rmidi->hw->name;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 snd_rawmidi_type_t snd_rawmidi_type(snd_rawmidi_t *rmidi)
 {
 	return rmidi->hw->type;
 }
 
-static inline
+__SALSA_EXPORT_FUNC
 snd_rawmidi_stream_t snd_rawmidi_stream(snd_rawmidi_t *rmidi)
 {
 	return rmidi->stream;
