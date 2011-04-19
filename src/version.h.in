@@ -12,7 +12,7 @@
 /** library version (string) */
 #define SND_LIB_VERSION_STR	"@SND_LIB_VERSION@"
 
-static inline
+__SALSA_EXPORT_FUNC
 const char *snd_asoundlib_version(void)
 {
 	return SND_LIB_VERSION_STR;

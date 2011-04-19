@@ -974,7 +974,10 @@ static int _snd_pcm_hw_params(snd_pcm_t *pcm, snd_pcm_hw_params_t *params)
 	snd_pcm_hw_free(pcm);
 	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_HW_PARAMS, params) < 0)
 		return -errno;
-
+#if 0
+	params->info &= ~0xf0000000;
+	params->info |= (pcm->monotonic ? SND_PCM_INFO_MONOTONIC : 0);
+#endif
 	pcm->setup = 1;
 	pcm->hw_params = *params;
 	

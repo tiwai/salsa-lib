@@ -23,7 +23,8 @@ struct _snd_pcm {
 	snd_pcm_type_t type;
 	snd_pcm_stream_t stream;
 	int mode;
-	int setup;
+	unsigned int setup:1;
+	unsigned int monotonic:1;
 
 	int card;
 	int device;
@@ -463,6 +464,20 @@ __SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_fifo_size(const snd_pcm_hw_params_t *params)
 {
 	return params->fifo_size;
+}
+
+__SALSA_EXPORT_FUNC
+int snd_pcm_hw_params_can_disable_period_wakeup(const snd_pcm_hw_params_t *params)
+{
+	return !!(params->info & SNDRV_PCM_INFO_NO_PERIOD_WAKEUP);
+}
+
+#define SND_PCM_INFO_MONOTONIC	0x80000000
+
+__SALSA_EXPORT_FUNC
+int snd_pcm_hw_params_is_monotonic(const snd_pcm_hw_params_t *params)
+{
+	return !!(params->info & SND_PCM_INFO_MONOTONIC);
 }
 
 /*
@@ -1888,6 +1903,19 @@ int snd_pcm_sw_params_get_silence_size(const snd_pcm_sw_params_t *params,
 	return 0;
 }
 
+__SALSA_EXPORT_FUNC
+int snd_pcm_sw_params_set_period_event(snd_pcm_t *pcm, snd_pcm_sw_params_t *params, int val)
+{
+	params->period_event = val;
+	return 0;
+}
+
+__SALSA_EXPORT_FUNC
+int snd_pcm_sw_params_get_period_event(const snd_pcm_sw_params_t *params, int *val)
+{
+	*val = params->period_event;
+	return 0;
+}
 
 __snd_define_type(snd_pcm_status);
 
