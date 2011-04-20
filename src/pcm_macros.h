@@ -1642,7 +1642,6 @@ int snd_pcm_hw_params_set_buffer_size_last(snd_pcm_t *pcm,
 					    val, NULL);
 }
 
-
 __SALSA_EXPORT_FUNC
 __SALSA_DEPRECATED
 int snd_pcm_hw_params_get_tick_time(const snd_pcm_hw_params_t *params,

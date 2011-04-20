@@ -948,6 +948,9 @@ static snd_pcm_uframes_t snd_pcm_mmap_avail(snd_pcm_t *pcm)
 		return snd_pcm_mmap_capture_avail(pcm);
 }
 
+snd_pcm_sframes_t snd_pcm_hw_forwardable(struct snd_pcm_t *pcm)
+	__attribute__ ((alias("snd_pcm_mmap_avail")));
+
 snd_pcm_sframes_t snd_pcm_avail_update(snd_pcm_t *pcm)
 {
 	snd_pcm_uframes_t avail;
