@@ -1,4 +1,7 @@
 /*
+ * SALSA-Lib - PCM Interface
+ *
+ * PCM declarations
  */
 
 #include "global.h"

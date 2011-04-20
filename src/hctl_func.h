@@ -1,4 +1,7 @@
 /*
+ * SALSA-Lib - High-level Control Interface
+ *
+ * H-control declarations
  */
 
 #include "control.h"

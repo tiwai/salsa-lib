@@ -1,6 +1,6 @@
 AC_PREREQ(2.59)
 AC_INIT(src/control.c)
-AM_INIT_AUTOMAKE(salsa-lib, 0.0.26)
+AM_INIT_AUTOMAKE(salsa-lib, 0.1.0)
 AC_PREFIX_DEFAULT(/usr)
 
 dnl AC_CONFIG_HEADERS(src/config.h)
@@ -14,8 +14,8 @@ AC_HEADER_STDC
 dnl Compatible version
 AC_ARG_WITH(compat-version,
   AS_HELP_STRING([--with-compat-version=VERSION],
-		 [specify the compatible version with ALSA-lib (default=1.0.18)]),
-  compatver="$withval", compatver="1.0.18")
+		 [specify the compatible version with ALSA-lib (default=1.0.24)]),
+  compatver="$withval", compatver="1.0.24")
 
 SND_LIB_VERSION="$compatver"
 SND_LIB_MAJOR=1
@@ -172,6 +172,23 @@ AC_ARG_ENABLE(libasound,
 if test "$delight_valgrind" = "yes"; then
   AC_DEFINE(DELIGHT_VALGRIND)
 fi
+
+AC_MSG_CHECKING(for symbolic-functions)
+AC_ARG_ENABLE(symbolic-functions,
+  AS_HELP_STRING([--enable-symbolic-functions],
+    [use -Bsymbolic-functions option if available (optmization for size and speed)]),
+  symfuncs="$enableval", symfuncs="no")
+if test "$symfuncs" = "yes"; then
+  if ld --help | grep -q -- '-Bsymbolic-functions'; then
+    AC_MSG_RESULT(yes)
+  else
+    AC_MSG_RESULT(not supported by ld)
+    symfuncs="no"
+  fi
+else
+  AC_MSG_RESULT(no)
+fi
+AM_CONDITIONAL(SYMBOLIC_FUNCTIONS, test x"$symfuncs" = xyes)
 
 dnl OK, let's output...
 

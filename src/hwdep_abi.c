@@ -1,3 +1,8 @@
+/*
+ * SALSA-Lib - Hardware Dependent Interface
+ * ABI-compatible definitions
+ */
+
 #include "recipe.h"
 #include "hwdep_func.h"
 #undef __SALSA_EXPORT_FUNC

@@ -1,4 +1,6 @@
 /*
+ * SALSA-Lib - Raw MIDI interface
+ * Exported functions declarations
  */
 
 #include "global.h"

@@ -1,4 +1,6 @@
 /*
+ * SALSA-Lib - Hardware Dependent Interface
+ * Declarations of exported functions
  */
 
 #include "global.h"

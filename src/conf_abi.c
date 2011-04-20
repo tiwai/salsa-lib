@@ -1,3 +1,8 @@
+/*
+ * Dummy snd_conf_* definitions
+ * ABI-compatible definitions
+ */
+
 #include <stdio.h>
 #include <unistd.h>
 #include "recipe.h"

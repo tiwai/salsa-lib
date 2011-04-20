@@ -67,10 +67,10 @@ SEQUENCER
 INSTRUMENT LAYER
   o No APIs are provided
 
+UCM
+  o Not supported yet at all
+
 MISC
-  o The last "close" argument in snd_input_stdio_attach() and
-    snd_output_stdio_attach() is ignored and the attached IO is always
-    closed.
   o The API functions that are not supported but defined have
     "deprecated" attribute.  You'll get compile warnings when
     compiling the code using such functions.  (The same is true for
@@ -97,9 +97,8 @@ disabled as default.
 The async handler support can be enabled via --enable-async option.
 It's disabled as default.
 
-With option --enable-libasound, libasound.so will be created as a
-symlink to libsalsa.so.  This is useful for apps that require
-libasound for linking/checking.
+With option --enable-libasound, libasound.so will be created as an
+opt-in ABI-compatible library with the genuine ALSA-lib.
 
 All these options can be enabled via a single option,
 --enable-everything, for your convenience.
@@ -108,8 +107,11 @@ For disabling the deprecated attribute for non-working functions (see
 the description of "MISC" in the section "GENERAL"), pass
 --disable-deprecated option.
 
+For enabling the support for the string buffer with snd_output_*()
+function (e.g. used by PulseAudio), pass --enable-output-buffer option.
+
 The alsa-library version to be compatible can be given explicitly via
---with-compat-version option.  As default, 1.0.14 is set.
+--with-compat-version option.  As default, 1.0.24 is set.
 
 If the ALSA device files are not in /dev/snd, another directory can be
 specified with the --with-alsa-devdir option.
@@ -150,6 +152,11 @@ KNOWN PROBLEMS
 
   snd_pcm_mmap_*() are not implemented, and the mmap-mode is less
   tested, so far.
+
+- When built without --enable-output-buffer, the buffer output via 
+  snd_output_*() functions doesn't work.  And, the last "close"
+  argument in snd_input_stdio_attach() and snd_output_stdio_attach()
+  is ignored and the attached IO is always closed.
 
 
 LICENSE

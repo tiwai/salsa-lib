@@ -1,4 +1,6 @@
 /*
+ * SALSA-Lib - Input Macros
+ * ABI-compatible definitions
  */
 
 #include <stdio.h>

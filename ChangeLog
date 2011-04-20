@@ -1,3 +1,7 @@
+Version 0.1.0:
+	* Build ABI-compatible libasound
+	* Added some missing functions for alsa-lib 1.0.24
+
 Version 0.0.26:
 	* Fix segfault in hctl_elem_event_handler (thanks to Mogens
 	  Lindholdt Lauridsen)

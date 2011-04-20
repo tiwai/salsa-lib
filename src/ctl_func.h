@@ -1,4 +1,7 @@
 /*
+ * SALSA-Lib - Control Interface
+ *
+ * Declarations of control functions
  */
 
 #include "global.h"

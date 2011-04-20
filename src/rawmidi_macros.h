@@ -1,4 +1,6 @@
 /*
+ * SALSA-Lib - Raw MIDI interface
+ *
  * rawmidi privates and macros
  */
 

@@ -1,4 +1,6 @@
 /*
+ * SALSA-Lib - Control Interface
+ *
  * Control privates and macros
  */
 

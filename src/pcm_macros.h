@@ -1,4 +1,6 @@
 /*
+ * SALSA-Lib - PCM Interface
+ *
  * PCM privates and macros
  */
 

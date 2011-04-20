@@ -1,3 +1,8 @@
+/*
+ *  SALSA-Lib - Global defines
+ *  ABI-compatible definitions
+ */
+
 #include "recipe.h"
 #include <errno.h>
 #include <signal.h>

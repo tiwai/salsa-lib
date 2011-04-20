@@ -1,3 +1,8 @@
+/*
+ * SALSA-Lib - PCM Interface
+ * ABI-compatible definitions
+ */
+
 #include "recipe.h"
 #undef SALSA_MARK_DEPRECATED
 #include "pcm_func.h"

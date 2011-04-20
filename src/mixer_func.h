@@ -1,4 +1,6 @@
 /*
+ * SALSA-Lib - Mixer abstraction layer
+ * Exported functions declarations
  */
 
 #include "hcontrol.h"

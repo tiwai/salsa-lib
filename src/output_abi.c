@@ -1,4 +1,6 @@
 /*
+ * SALSA-Lib - Output Macros
+ * ABI-compatible definitions
  */
 
 #include <stdio.h>

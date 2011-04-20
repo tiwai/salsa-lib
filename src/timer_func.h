@@ -1,4 +1,6 @@
 /*
+ * SALSA-Lib - Timer Interface
+ * Exported functions declarations
  */
 
 #include "global.h"

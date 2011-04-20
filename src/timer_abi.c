@@ -1,3 +1,8 @@
+/*
+ * SALSA-Lib - Timer Interface
+ * ABI-compatible definitions
+ */
+
 #include "recipe.h"
 #include "timer_func.h"
 #undef __SALSA_EXPORT_FUNC

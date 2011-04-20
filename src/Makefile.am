@@ -1,5 +1,11 @@
 AM_CFLAGS = -Wall -g
 
+if SYMBOLIC_FUNCTIONS
+SYMFUNCS = -Wl,-Bsymbolic-functions
+else
+SYMFUNCS =
+endif
+
 lib_LTLIBRARIES = libsalsa.la
 libsalsa_la_SOURCES = control.c cards.c
 if BUILD_PCM
@@ -21,37 +27,31 @@ if BUILD_TIMER
 libsalsa_la_SOURCES += timer.c
 endif
 
-if COMPAT_ABI
-VSYMS = -Wl,--version-script=Versions
-else
-VSYMS =
-endif
-
-libsalsa_la_LDFLAGS = -version-info 0:1:0 $(VSYMS) -Wl,-Bsymbolic-functions
+libsalsa_la_LDFLAGS = -version-info 0:1:0 $(SYMFUNCS)
 
 alsaincludedir = $(includedir)/alsa
 
 alsainclude_HEADERS = asoundlib.h version.h recipe.h asound.h asoundef.h \
 	global.h input.h output.h error.h \
-	control.h ctl_types.h ctl_macros.h \
-	pcm.h pcm_types.h pcm_macros.h
+	control.h ctl_func.h ctl_types.h ctl_macros.h \
+	pcm.h pcm_func.h pcm_types.h pcm_macros.h
 
 if BUILD_MIXER
 alsainclude_HEADERS += \
-	hcontrol.h hctl_types.h hctl_macros.h \
-	mixer.h mixer_types.h mixer_macros.h
+	hcontrol.h hctl_func.h hctl_types.h hctl_macros.h \
+	mixer.h mixer_func.h mixer_types.h mixer_macros.h
 endif
 if BUILD_RAWMIDI
 alsainclude_HEADERS += \
-	rawmidi.h rawmidi_types.h rawmidi_macros.h
+	rawmidi.h rawmidi_func.h rawmidi_types.h rawmidi_macros.h
 endif
 if BUILD_HWDEP
 alsainclude_HEADERS += \
-	hwdep.h hwdep_types.h hwdep_macros.h
+	hwdep.h hwdep_func.h hwdep_types.h hwdep_macros.h
 endif
 if BUILD_TIMER
 alsainclude_HEADERS += \
-	timer.h timer_types.h timer_macros.h
+	timer.h timer_func.h timer_types.h timer_macros.h
 endif
 if BUILD_CONF
 alsainclude_HEADERS += \
@@ -92,6 +92,12 @@ endif
 
 libasound_la_SOURCES += $(libsalsa_la_SOURCES)
 
-libasound_la_LDFLAGS = -version-info 2:0:0 $(VSYMS) -Wl,-Bsymbolic-functions
+if COMPAT_ABI
+VSYMS = -Wl,--version-script=Versions
+else
+VSYMS =
+endif
+
+libasound_la_LDFLAGS = -version-info 2:0:0 $(VSYMS) $(SYMFUNCS)
 
 endif

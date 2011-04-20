@@ -1,3 +1,8 @@
+/*
+ *  SALSA-Lib - Error handler
+ *  ABI-compatible definitions
+ */
+
 #include <string.h>
 #include "recipe.h"
 #include "global.h"
