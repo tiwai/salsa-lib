@@ -13,6 +13,9 @@
 /* Enable deprecated attribute for non-working functions */
 #define SALSA_MARK_DEPRECATED	@SALSA_MARK_DEPRECATED@
 
+/* Don't support string output via snd_output_*() */
+#define SALSA_SIMPLE_OUTPUT	@SALSA_SIMPLE_OUTPUT@
+
 #define SALSA_DEVPATH "@DEVPATH@"
 
 #endif /* __ALSA_RECIPE_H */

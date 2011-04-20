@@ -24,13 +24,37 @@
 
 #include <stdio.h>
 #include <errno.h>
-
-typedef FILE snd_output_t;
+#include <stdarg.h>
 
 typedef enum _snd_output_type {
 	SND_OUTPUT_STDIO,
-	/* SND_OUTPUT_BUFFER */
+	SND_OUTPUT_BUFFER
 } snd_output_type_t;
+
+
+#if SALSA_SUPPORT_OUTPUT_BUFFER
+
+typedef struct snd_output snd_output_t;
+
+extern int snd_output_stdio_open(snd_output_t **outputp, const char *file, const char *mode);
+extern int snd_output_stdio_attach(snd_output_t **outputp, FILE *fp, int _close);
+extern int snd_output_close(snd_output_t *out);
+extern int snd_output_printf(snd_output_t *out, const char *fmt, ...);
+extern int snd_output_puts(snd_output_t *out, const char *str);
+extern int snd_output_putc(snd_output_t *out, int c);
+extern int snd_output_flush(snd_output_t *out);
+extern int snd_output_buffer_open(snd_output_t **outputp);
+extern size_t snd_output_buffer_string(snd_output_t *output, char **buf);
+
+#else /* SALSA_SUPPORT_OUTPUT_BUFFER */
+
+/*
+ * Simplified version; don't support the string output
+ */
+
+typedef FILE snd_output_t;
+
+#define _SALSA_BUF_OUT	(snd_output_t *)-1
 
 __SALSA_EXPORT_FUNC
 int snd_output_stdio_open(snd_output_t **outputp, const char *file, const char *mode)
@@ -47,22 +71,66 @@ int snd_output_stdio_attach(snd_output_t **outputp, FILE *fp, int _close)
 	return 0;
 }
 
-#define snd_output_close(out)			fclose(out)
-#define snd_output_printf			fprintf
-#define snd_output_puts(out, str)		fputs(str, out)
-#define snd_output_putc(out, c)			putc(c, out)
-#define snd_output_flush(out)			fflush(out)
+__SALSA_EXPORT_FUNC
+int snd_output_close(snd_output_t *out)
+{
+	if (out != _SALSA_BUF_OUT && out != stdout && out != stderr)
+		return fclose(out);
+	return 0;
+}
+
+__SALSA_EXPORT_FUNC
+int snd_output_printf(snd_output_t *out, const char *fmt, ...)
+{
+	va_list ap;
+	int ret;
+	if (out == _SALSA_BUF_OUT)
+		return 0;
+	va_start(ap, fmt);
+	ret = vfprintf(out, fmt, ap);
+	va_end(ap);
+	return ret;
+}
+
+__SALSA_EXPORT_FUNC
+int snd_output_puts(snd_output_t *out, const char *str)
+{
+	if (out != _SALSA_BUF_OUT)
+		return fputs(str, out);
+	return 0;
+}
+
+__SALSA_EXPORT_FUNC
+int snd_output_putc(snd_output_t *out, int c)
+{
+	if (out != _SALSA_BUF_OUT)
+		return putc(c, out);
+	return 0;
+}
+
+__SALSA_EXPORT_FUNC
+int snd_output_flush(snd_output_t *out)
+{
+	if (out != _SALSA_BUF_OUT)
+		return fflush(out);
+	return 0;
+}
 
 __SALSA_EXPORT_FUNC __SALSA_NOT_IMPLEMENTED
 int snd_output_buffer_open(snd_output_t **outputp)
 {
-	return -ENXIO;
+	*outputp = _SALSA_BUF_OUT;
+	return 0;
 }
 
 __SALSA_EXPORT_FUNC __SALSA_NOT_IMPLEMENTED
 size_t snd_output_buffer_string(snd_output_t *output, char **buf)
 {
+	static char tmp[1];
+	*buf = tmp;
 	return 0;
 }
+
+#endif /* SALSA_SUPPORT_OUTPUT_BUFFER */
 
 #endif /* __ALSA_OUTPUT_H */

@@ -153,6 +153,18 @@ else
 fi
 AC_SUBST(SALSA_MARK_DEPRECATED)
 
+AC_ARG_ENABLE(output-buffer,
+  AS_HELP_STRING([--enable-output-buffer],
+		 [support the string output via snd_output_*() functions]),
+  output_buffer="$enableval", output_buffer="no")
+
+if test "$output_buffer" = "yes"; then
+  SALSA_SUPPORT_OUTPUT_BUFFER=1
+else
+  SALSA_SUPPORT_OUTPUT_BUFFER=0
+fi
+AC_SUBST(SALSA_SUPPORT_OUTPUT_BUFFER)
+
 AC_ARG_ENABLE(libasound,
   AS_HELP_STRING([--disable-delight-valgrind],
 		 [do not initialize unnecessary fields for ioctls]),
@@ -196,3 +208,4 @@ echo "  - TLV (dB) support: $tlv"
 echo "  - Async handler support: $async"
 echo "  - Make ABI-compatible libasound.so: $libasound"
 echo "  - Mark deprecated attribute: $markdeprecated"
+echo "  - Support string-output via snd_output: $output_buffer"
