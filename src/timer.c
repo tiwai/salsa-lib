@@ -65,7 +65,7 @@ int snd_timer_open(snd_timer_t **handle, const char *name, int mode)
 			return err;
 		}
 	}
-	memset(&sel, 0, sizeof(sel));
+	memzero_valgrind(&sel, sizeof(sel));
 	sel.id.dev_class = dev_class;
 	sel.id.dev_sclass = dev_sclass;
 	sel.id.card = card;

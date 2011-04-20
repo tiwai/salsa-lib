@@ -30,6 +30,7 @@
 #include <sys/ioctl.h>
 #include "recipe.h"
 #include "global.h"
+#include "local.h"
 
 
 static snd_async_handler_t *async_list;
@@ -90,7 +91,7 @@ int snd_async_add_handler(snd_async_handler_t **handler, int fd,
 	}
 	if (!async_list) {
 		struct sigaction act;
-		memset(&act, 0, sizeof(act));
+		memzero_valgrind(&act, sizeof(act));
 		act.sa_flags = SA_RESTART | SA_SIGINFO;
 		act.sa_sigaction = snd_async_handler;
 		sigemptyset(&act.sa_mask);
@@ -126,7 +127,7 @@ int snd_async_del_handler(snd_async_handler_t *handler)
 
 	if (!async_list) {
 		struct sigaction act;
-		memset(&act, 0, sizeof(act));
+		memzero_valgrind(&act, sizeof(act));
 		act.sa_flags = 0;
 		act.sa_handler = SIG_DFL;
 		sigaction(SIGIO, &act, NULL);

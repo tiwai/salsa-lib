@@ -107,7 +107,7 @@ int snd_ctl_elem_add_integer(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
 	unsigned int i;
 	int err;
 
-	memset(&info, 0, sizeof(info));
+	memzero_valgrind(&info, sizeof(info));
 	info.id = *id;
 	info.type = SND_CTL_ELEM_TYPE_INTEGER;
 	info.access = SNDRV_CTL_ELEM_ACCESS_READWRITE;
@@ -121,7 +121,7 @@ int snd_ctl_elem_add_integer(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
 	err = snd_ctl_elem_add(ctl, &info);
 	if (err < 0)
 		return err;
-	memset(&val, 0, sizeof(val));
+	memzero_valgrind(&val, sizeof(val));
 	val.id = *id;
 	for (i = 0; i < count; i++)
 		val.value.integer.value[i] = min;
@@ -137,7 +137,7 @@ int snd_ctl_elem_add_integer64(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
 	unsigned int i;
 	int err;
 
-	memset(&info, 0, sizeof(info));
+	memzero_valgrind(&info, sizeof(info));
 	info.id = *id;
 	info.type = SND_CTL_ELEM_TYPE_INTEGER64;
 	info.count = count;
@@ -147,7 +147,7 @@ int snd_ctl_elem_add_integer64(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
 	err = snd_ctl_elem_add(ctl, &info);
 	if (err < 0)
 		return err;
-	memset(&val, 0, sizeof(val));
+	memzero_valgrind(&val, sizeof(val));
 	val.id = *id;
 	for (i = 0; i < count; i++)
 		val.value.integer64.value[i] = min;
@@ -159,7 +159,7 @@ int snd_ctl_elem_add_boolean(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
 {
 	snd_ctl_elem_info_t info;
 
-	memset(&info, 0, sizeof(info));
+	memzero_valgrind(&info, sizeof(info));
 	info.id = *id;
 	info.type = SND_CTL_ELEM_TYPE_BOOLEAN;
 	info.count = count;
@@ -172,7 +172,7 @@ int snd_ctl_elem_add_iec958(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id)
 {
 	snd_ctl_elem_info_t info;
 
-	memset(&info, 0, sizeof(info));
+	memzero_valgrind(&info, sizeof(info));
 	info.id = *id;
 	info.type = SND_CTL_ELEM_TYPE_IEC958;
 	info.count = 1;
@@ -222,7 +222,7 @@ static int snd_ctl_tlv_do(snd_ctl_t *ctl, int cmd,
 	if (!id->numid) {
 		int err;
 		snd_ctl_elem_info_t info;
-		memset(&info, 0, sizeof(info));
+		memzero_valgrind(&info, sizeof(info));
 		info.id = *id;
 		id = &info.id;
 		err = snd_ctl_elem_info(ctl, &info);

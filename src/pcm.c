@@ -60,7 +60,7 @@ static int open_with_subdev(const char *filename, int fmode,
 		fd = open(filename, fmode);
 		if (fd < 0)
 		        return -errno;
-		memset(&info, 0, sizeof(info));
+		memzero_valgrind(&info, sizeof(info));
 		if (ioctl(fd, SNDRV_PCM_IOCTL_INFO, &info) >= 0 &&
 		    info.subdevice == subdev) {
 			snd_ctl_close(ctl);
@@ -113,7 +113,7 @@ int snd_pcm_open(snd_pcm_t **pcmp, const char *name,
 	}
 	if (subdev < 0) {
 		snd_pcm_info_t info;
-		memset(&info, 0, sizeof(info));
+		memzero_valgrind(&info, sizeof(info));
 		if (ioctl(fd, SNDRV_PCM_IOCTL_INFO, &info) < 0) {
 			err = -errno;
 			goto error;
@@ -948,7 +948,7 @@ static snd_pcm_uframes_t snd_pcm_mmap_avail(snd_pcm_t *pcm)
 		return snd_pcm_mmap_capture_avail(pcm);
 }
 
-snd_pcm_sframes_t snd_pcm_hw_forwardable(struct snd_pcm_t *pcm)
+snd_pcm_sframes_t snd_pcm_hw_forwardable(snd_pcm_t *pcm)
 	__attribute__ ((alias("snd_pcm_mmap_avail")));
 
 snd_pcm_sframes_t snd_pcm_avail_update(snd_pcm_t *pcm)

@@ -283,7 +283,7 @@ u_int64_t snd_pcm_format_silence_64(snd_pcm_format_t format)
 	int i, p, w;
 	u_int64_t silence;
 
-	if (format < 0 || format > SNDRV_PCM_FORMAT_LAST)
+	if ((int)format < 0 || (int)format > SNDRV_PCM_FORMAT_LAST)
 		return 0;
 	fmt = &pcm_formats[format];
 	if (!fmt->phys)

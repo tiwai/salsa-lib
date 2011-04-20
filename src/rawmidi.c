@@ -50,7 +50,7 @@ static int open_with_subdev(const char *filename, int fmode,
 		fd = open(filename, fmode);
 		if (fd < 0)
 		        return -errno;
-		memset(&info, 0, sizeof(info));
+		memzero_valgrind(&info, sizeof(info));
 		info.stream = ((fmode & O_ACCMODE) != O_RDONLY) ?
 			SNDRV_RAWMIDI_STREAM_OUTPUT : SNDRV_RAWMIDI_STREAM_INPUT;
 		if (ioctl(fd, SNDRV_RAWMIDI_IOCTL_INFO, &info) >= 0 &&

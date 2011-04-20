@@ -7,4 +7,10 @@ int _snd_ctl_hw_open(snd_ctl_t **ctlp, int card);
 int _snd_pcm_mmap(snd_pcm_t *pcm);
 int _snd_pcm_munmap(snd_pcm_t *pcm);
 
+#ifdef DELIGHT_VALGRIND
+#define memzero_valgrind(buf, size)	memset(buf, 0, size)
+#else
+#define memzero_valgrind(buf, size)
+#endif
+
 #endif /* __LOCAL_H_INC */
