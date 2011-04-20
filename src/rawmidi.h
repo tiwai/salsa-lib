@@ -22,6 +22,7 @@
 #ifndef __ALSA_RAWMIDI_H
 #define __ALSA_RAWMIDI_H
 
+#include "recipe.h"
 #include "rawmidi_func.h"
 
 #include "rawmidi_macros.h"

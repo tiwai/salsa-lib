@@ -1,7 +1,6 @@
 /*
  */
 
-#include "recipe.h"
 #include "global.h"
 #include "hcontrol.h"
 #include "timer_types.h"

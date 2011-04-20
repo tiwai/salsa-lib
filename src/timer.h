@@ -22,6 +22,7 @@
 #ifndef __ALSA_TIMER_H
 #define __ALSA_TIMER_H
 
+#include "recipe.h"
 #include "timer_func.h"
 
 #include "timer_macros.h"

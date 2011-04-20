@@ -928,6 +928,11 @@ int _snd_pcm_hw_param_set_near(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 	return err;
 }
 
+snd_mask_t *_snd_pcm_hw_param_get_mask(snd_pcm_hw_params_t *params, int var)
+{
+	return hw_param_mask(params, var);
+}
+
 static int snd_pcm_hw_params_choose(snd_pcm_t *pcm, snd_pcm_hw_params_t *params)
 {
 	struct param_choice {

@@ -22,6 +22,7 @@
 #ifndef __ALSA_CONTROL_H
 #define __ALSA_CONTROL_H
 
+#include "recipe.h"
 #include "ctl_func.h"
 
 #include "ctl_macros.h"

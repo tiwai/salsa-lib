@@ -1,7 +1,6 @@
 /*
  */
 
-#include "recipe.h"
 #include "global.h"
 #include "hwdep_types.h"
 

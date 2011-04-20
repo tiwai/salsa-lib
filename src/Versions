@@ -11,9 +11,11 @@ ALSA_0.9 {
     __snd_pcm_sw_params_*;
     __snd_*_dlsym_*;
 
-    _snd_mixer_*;
+    _snd_pcm_hw_*;
     _snd_pcm_*_names;
     _snd_pcm_*_descriptions;
+    _snd_mixer_*;
+
   local:
     *;
 };

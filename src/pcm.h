@@ -22,6 +22,7 @@
 #ifndef __ALSA_PCM_H_INC
 #define __ALSA_PCM_H_INC
 
+#include "recipe.h"
 #include "pcm_func.h"
 
 #include "pcm_macros.h"

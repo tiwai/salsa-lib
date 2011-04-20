@@ -49,8 +49,10 @@ typedef struct _snd_seq snd_seq_t;
 #endif
 
 #if SALSA_MARK_DEPRECATED
+#define __SALSA_DEPRECATED	__attribute__ ((deprecated))
 #define __SALSA_NOT_IMPLEMENTED	__attribute__ ((deprecated))
 #else
+#define __SALSA_DEPRECATED
 #define __SALSA_NOT_IMPLEMENTED
 #endif
 
