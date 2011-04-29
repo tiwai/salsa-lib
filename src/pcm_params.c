@@ -413,13 +413,6 @@ static int snd_pcm_sw_params_default(snd_pcm_t *pcm,
 	return 0;
 }
 
-static int snd_pcm_hw_refine(snd_pcm_t *pcm, snd_pcm_hw_params_t *params)
-{
-	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_HW_REFINE, params) < 0)
-		return -errno;
-	return 0;
-}
-
 static inline int hw_is_mask(int var)
 {
 	return var >= SNDRV_PCM_HW_PARAM_FIRST_MASK &&

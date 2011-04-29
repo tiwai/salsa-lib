@@ -386,6 +386,13 @@ ssize_t snd_pcm_samples_to_bytes(snd_pcm_t *pcm, long samples)
 	return samples * pcm->sample_bits / 8;
 }
 
+static inline int snd_pcm_hw_refine(snd_pcm_t *pcm, snd_pcm_hw_params_t *params)
+{
+	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_HW_REFINE, params) < 0)
+		return -errno;
+	return 0;
+}
+
 __SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_can_mmap_sample_resolution(const snd_pcm_hw_params_t *params)
 {
@@ -1159,6 +1166,23 @@ __SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_export_buffer(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 					unsigned int *val)
 {
+	return 0;
+}
+
+__SALSA_EXPORT_FUNC
+int snd_pcm_hw_params_set_period_wakeup(snd_pcm_t *pcm, snd_pcm_hw_params_t *params, unsigned int val)
+{
+	if (!val)
+		params->flags |= SNDRV_PCM_HW_PARAMS_NO_PERIOD_WAKEUP;
+	else
+		params->flags &= ~SNDRV_PCM_HW_PARAMS_NO_PERIOD_WAKEUP;
+	return snd_pcm_hw_refine(pcm, params);
+}
+
+__SALSA_EXPORT_FUNC
+int snd_pcm_hw_params_get_period_wakeup(snd_pcm_t *pcm, snd_pcm_hw_params_t *params, unsigned int *val)
+{
+	*val = params->flags & SNDRV_PCM_HW_PARAMS_NO_PERIOD_WAKEUP ? 0 : 1;
 	return 0;
 }
 
