@@ -10,12 +10,6 @@
 
 typedef FILE snd_input_t;
 
-/** Input type. */
-typedef enum _snd_input_type {
-	/** Input from a stdio stream. */
-	SND_INPUT_STDIO,
-} snd_input_type_t;
-
 int snd_input_stdio_open(snd_input_t **inputp, const char *file, const char *mode)
 {
 	if ((*inputp = fopen(file, mode)) == NULL)

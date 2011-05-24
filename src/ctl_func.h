@@ -5,6 +5,7 @@
  */
 
 #include "global.h"
+#include "asound.h"
 #include "ctl_types.h"
 
 int snd_card_load(int card);

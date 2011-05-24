@@ -27,9 +27,7 @@
 
 typedef FILE snd_input_t;
 
-/** Input type. */
 typedef enum _snd_input_type {
-	/** Input from a stdio stream. */
 	SND_INPUT_STDIO,
 } snd_input_type_t;
 

@@ -29,6 +29,9 @@
 #include "control.h"
 #include "local.h"
 
+/* common helper function to set nonblock mode
+ * called from various *_macros.h
+ */
 int _snd_set_nonblock(int fd, int nonblock)
 {
 	long flags;
@@ -61,7 +64,7 @@ int snd_card_next(int *rcard)
 		return -EINVAL;
 	card = *rcard;
 	card = card < 0 ? 0 : card + 1;
-	for (; card < 32; card++) {
+	for (; card < SALSA_MAX_CARDS; card++) {
 		if (snd_card_load(card)) {
 			*rcard = card;
 			return 0;
@@ -125,7 +128,7 @@ int snd_card_get_index(const char *string)
 			return card;
 		return -ENODEV;
 	}
-	for (card = 0; card < 32; card++) {
+	for (card = 0; card < SALSA_MAX_CARDS; card++) {
 		if (!snd_card_load(card))
 			continue;
 		if (get_card_info(card, &info) < 0)
@@ -164,6 +167,9 @@ int snd_card_get_longname(int card, char **name)
 	return 0;
 }
 
+/* very simple device name parsing; only limited prefix are allowed:
+ * "hw" and "default"
+ */
 int _snd_dev_get_device(const char *name, int *cardp, int *devp, int *subdevp)
 {
 	int card;

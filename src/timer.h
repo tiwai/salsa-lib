@@ -33,4 +33,4 @@
 #define snd_timer_params_alloca(ptr)	__snd_alloca(ptr, snd_timer_params)
 #define snd_timer_status_alloca(ptr)	__snd_alloca(ptr, snd_timer_status)
 
-#endif /** __ALSA_TIMER_H */
+#endif /* __ALSA_TIMER_H */

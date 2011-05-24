@@ -46,7 +46,7 @@ static int open_with_subdev(const char *filename, int fmode,
 {
 	snd_pcm_info_t info;
 	snd_ctl_t *ctl;
-	int err, counts, fd;
+	int err, fd;
 
 	err = _snd_ctl_hw_open(&ctl, card);
 	if (err < 0)
@@ -56,18 +56,17 @@ static int open_with_subdev(const char *filename, int fmode,
 	if (err < 0)
 		return err;
 
-	for (counts = 0; counts < 3; counts++) {
-		fd = open(filename, fmode);
-		if (fd < 0)
-		        return -errno;
-		memzero_valgrind(&info, sizeof(info));
-		if (ioctl(fd, SNDRV_PCM_IOCTL_INFO, &info) >= 0 &&
-		    info.subdevice == subdev) {
-			snd_ctl_close(ctl);
-			return fd;
-		}
-		close(fd);
+	fd = open(filename, fmode);
+	if (fd < 0)
+	        return -errno;
+
+	memzero_valgrind(&info, sizeof(info));
+	if (ioctl(fd, SNDRV_PCM_IOCTL_INFO, &info) >= 0 &&
+	    info.subdevice == subdev) {
+		snd_ctl_close(ctl);
+		return fd;
 	}
+	close(fd);
 	snd_ctl_close(ctl);
 	return -EBUSY;
 }
@@ -75,7 +74,7 @@ static int open_with_subdev(const char *filename, int fmode,
 int snd_pcm_open(snd_pcm_t **pcmp, const char *name, 
 		 snd_pcm_stream_t stream, int mode)
 {
-	char filename[32];
+	char filename[sizeof(SALSA_DEVPATH) + 24];
 	int card, dev, subdev;
 	int fd, err, fmode, ver;
 	snd_pcm_t *pcm = NULL;
@@ -198,7 +197,7 @@ static inline int snd_pcm_check_error(snd_pcm_t *pcm, int err)
 snd_pcm_sframes_t snd_pcm_writei(snd_pcm_t *pcm, const void *buffer,
 				 snd_pcm_uframes_t size)
 {
-	struct sndrv_xferi xferi;
+	struct snd_xferi xferi;
 
 #ifdef DELIGHT_VALGRIND
 	xferi.result = 0;
@@ -214,7 +213,7 @@ snd_pcm_sframes_t snd_pcm_writei(snd_pcm_t *pcm, const void *buffer,
 snd_pcm_sframes_t snd_pcm_writen(snd_pcm_t *pcm, void **bufs,
 				 snd_pcm_uframes_t size)
 {
-	struct sndrv_xfern xfern;
+	struct snd_xfern xfern;
 
 #ifdef DELIGHT_VALGRIND
 	xfern.result = 0;
@@ -230,7 +229,7 @@ snd_pcm_sframes_t snd_pcm_writen(snd_pcm_t *pcm, void **bufs,
 snd_pcm_sframes_t snd_pcm_readi(snd_pcm_t *pcm, void *buffer,
 				snd_pcm_uframes_t size)
 {
-	struct sndrv_xferi xferi;
+	struct snd_xferi xferi;
 
 #ifdef DELIGHT_VALGRIND
 	xferi.result = 0;
@@ -246,7 +245,7 @@ snd_pcm_sframes_t snd_pcm_readi(snd_pcm_t *pcm, void *buffer,
 snd_pcm_sframes_t snd_pcm_readn(snd_pcm_t *pcm, void **bufs,
 				snd_pcm_uframes_t size)
 {
-	struct sndrv_xfern xfern;
+	struct snd_xfern xfern;
 
 #ifdef DELIGHT_VALGRIND
 	xfern.result = 0;
@@ -869,7 +868,7 @@ static int snd_pcm_hw_mmap_status(snd_pcm_t *pcm)
 		return 0;
 
 	pcm->mmap_status =
-		mmap(NULL, page_align(sizeof(struct sndrv_pcm_mmap_status)),
+		mmap(NULL, page_align(sizeof(struct snd_pcm_mmap_status)),
 		     PROT_READ, MAP_FILE|MAP_SHARED, 
 		     pcm->fd, SNDRV_PCM_MMAP_OFFSET_STATUS);
 	if (pcm->mmap_status == MAP_FAILED)
@@ -877,14 +876,14 @@ static int snd_pcm_hw_mmap_status(snd_pcm_t *pcm)
 	if (!pcm->mmap_status)
 		goto no_mmap;
 	pcm->mmap_control =
-		mmap(NULL, page_align(sizeof(struct sndrv_pcm_mmap_control)),
+		mmap(NULL, page_align(sizeof(struct snd_pcm_mmap_control)),
 		     PROT_READ|PROT_WRITE, MAP_FILE|MAP_SHARED, 
 		     pcm->fd, SNDRV_PCM_MMAP_OFFSET_CONTROL);
 	if (pcm->mmap_control == MAP_FAILED)
 		pcm->mmap_control = NULL;
 	if (!pcm->mmap_control) {
 		munmap(pcm->mmap_status,
-		       page_align(sizeof(struct sndrv_pcm_mmap_status)));
+		       page_align(sizeof(struct snd_pcm_mmap_status)));
 		pcm->mmap_status = NULL;
 		goto no_mmap;
 	}
@@ -909,9 +908,9 @@ static void snd_pcm_hw_munmap_status(snd_pcm_t *pcm)
 		pcm->sync_ptr = NULL;
 	} else {
 		munmap(pcm->mmap_status,
-		       page_align(sizeof(struct sndrv_pcm_mmap_status)));
+		       page_align(sizeof(struct snd_pcm_mmap_status)));
 		munmap(pcm->mmap_control,
-		       page_align(sizeof(struct sndrv_pcm_mmap_control)));
+		       page_align(sizeof(struct snd_pcm_mmap_control)));
 	}
 	pcm->mmap_status = NULL;
 	pcm->mmap_control = NULL;
@@ -958,7 +957,7 @@ snd_pcm_sframes_t snd_pcm_avail_update(snd_pcm_t *pcm)
 	_snd_pcm_sync_ptr(pcm, 0);
 	avail = snd_pcm_mmap_avail(pcm);
 	switch (snd_pcm_state(pcm)) {
-	case SNDRV_PCM_STATE_RUNNING:
+	case SND_PCM_STATE_RUNNING:
 		if (avail >= pcm->sw_params.stop_threshold) {
 			if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_XRUN) < 0)
 				return -errno;
@@ -968,7 +967,7 @@ snd_pcm_sframes_t snd_pcm_avail_update(snd_pcm_t *pcm)
 			return -EPIPE;
 		}
 		break;
-	case SNDRV_PCM_STATE_XRUN:
+	case SND_PCM_STATE_XRUN:
 		return -EPIPE;
 	default:
 		break;
@@ -1087,26 +1086,19 @@ int snd_pcm_wait(snd_pcm_t *pcm, int timeout)
 
 int snd_pcm_recover(snd_pcm_t *pcm, int err, int silent)
 {
-        if (err > 0)
-                err = -err;
-        if (err == -EINTR)	/* nothing to do, continue */
-                return 0;
-        if (err == -EPIPE) {
-                err = snd_pcm_prepare(pcm);
-                if (err < 0)
-                        return err;
-                return 0;
-        }
-        if (err == -ESTRPIPE) {
-                while ((err = snd_pcm_resume(pcm)) == -EAGAIN)
-                        /* wait until suspend flag is released */
-                        poll(NULL, 0, 1000);
-                if (err < 0) {
-                        err = snd_pcm_prepare(pcm);
-                        if (err < 0)
-                                return err;
-                }
-                return 0;
+	if (err > 0)
+		err = -err;
+	switch (err) {
+	case -EINTR:
+		return 0;
+	case -EPIPE:
+		return snd_pcm_prepare(pcm);
+	case -ESTRPIPE:
+		while ((err = snd_pcm_resume(pcm)) == -EAGAIN)
+			sleep(1);
+		if (err < 0)
+			return snd_pcm_prepare(pcm);
+		return 0;
         }
         return err;
 }

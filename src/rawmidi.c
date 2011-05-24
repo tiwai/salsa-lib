@@ -36,7 +36,7 @@ static int open_with_subdev(const char *filename, int fmode,
 {
 	snd_rawmidi_info_t info;
 	snd_ctl_t *ctl;
-	int err, counts, fd;
+	int err, fd;
 
 	err = _snd_ctl_hw_open(&ctl, card);
 	if (err < 0)
@@ -46,20 +46,18 @@ static int open_with_subdev(const char *filename, int fmode,
 	if (err < 0)
 		return err;
 
-	for (counts = 0; counts < 3; counts++) {
-		fd = open(filename, fmode);
-		if (fd < 0)
-		        return -errno;
-		memzero_valgrind(&info, sizeof(info));
-		info.stream = ((fmode & O_ACCMODE) != O_RDONLY) ?
-			SNDRV_RAWMIDI_STREAM_OUTPUT : SNDRV_RAWMIDI_STREAM_INPUT;
-		if (ioctl(fd, SNDRV_RAWMIDI_IOCTL_INFO, &info) >= 0 &&
-		    info.subdevice == subdev) {
-			snd_ctl_close(ctl);
-			return fd;
-		}
-		close(fd);
+	fd = open(filename, fmode);
+	if (fd < 0)
+	        return -errno;
+	memzero_valgrind(&info, sizeof(info));
+	info.stream = ((fmode & O_ACCMODE) != O_RDONLY) ?
+		SND_RAWMIDI_STREAM_OUTPUT : SND_RAWMIDI_STREAM_INPUT;
+	if (ioctl(fd, SNDRV_RAWMIDI_IOCTL_INFO, &info) >= 0 &&
+	    info.subdevice == subdev) {
+		snd_ctl_close(ctl);
+		return fd;
 	}
+	close(fd);
 	snd_ctl_close(ctl);
 	return -EBUSY;
 }
@@ -93,7 +91,7 @@ int snd_rawmidi_open(snd_rawmidi_t **in_rmidi, snd_rawmidi_t **out_rmidi,
 {
 	int fd, err, fmode, ver;
 	int card, dev, subdev;
-	char filename[32];
+	char filename[sizeof(SALSA_DEVPATH) + 24];
 	snd_rawmidi_hw_t *hw;
 
 	if (in_rmidi)

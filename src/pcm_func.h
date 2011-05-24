@@ -5,6 +5,7 @@
  */
 
 #include "global.h"
+#include "asound.h"
 #include "output.h"
 #include "pcm_types.h"
 

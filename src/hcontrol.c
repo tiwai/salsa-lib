@@ -123,14 +123,14 @@ static int snd_hctl_elem_add(snd_hctl_t *hctl, snd_hctl_elem_t *elem)
 	if (snd_hctl_find_elem(hctl, &elem->id))
 		return -EBUSY;
 	add_elem_list(hctl, elem);
-	return snd_hctl_throw_event(hctl, SNDRV_CTL_EVENT_MASK_ADD, elem);
+	return snd_hctl_throw_event(hctl, SND_CTL_EVENT_MASK_ADD, elem);
 }
 
 static void snd_hctl_elem_remove(snd_hctl_t *hctl,
 				 snd_hctl_elem_t *elem)
 {
 	del_elem_list(hctl, elem);
-	snd_hctl_elem_throw_event(elem, SNDRV_CTL_EVENT_MASK_REMOVE);
+	snd_hctl_elem_throw_event(elem, SND_CTL_EVENT_MASK_REMOVE);
 	free(elem);
 }
 
@@ -172,19 +172,20 @@ int snd_hctl_load(snd_hctl_t *hctl)
 	snd_hctl_elem_t *elem;
 
 	memset(&list, 0, sizeof(list));
-	if ((err = snd_ctl_elem_list(hctl->ctl, &list)) < 0)
+	err = snd_ctl_elem_list(hctl->ctl, &list);
+	if (err < 0)
 		goto _end;
 	while (list.count != list.used) {
 		err = snd_ctl_elem_list_alloc_space(&list, list.count);
 		if (err < 0)
 			goto _end;
-		if ((err = snd_ctl_elem_list(hctl->ctl, &list)) < 0)
+		err = snd_ctl_elem_list(hctl->ctl, &list);
+		if (err < 0)
 			goto _end;
 	}
 	for (idx = 0; idx < list.count; idx++) {
 		elem = calloc(1, sizeof(*elem));
 		if (!elem) {
-			snd_hctl_free(hctl);
 			err = -ENOMEM;
 			goto _end;
 		}
@@ -192,57 +193,50 @@ int snd_hctl_load(snd_hctl_t *hctl)
 		elem->hctl = hctl;
 		add_elem_list(hctl, elem);
 	}
-	for (elem = hctl->first_elem; elem; elem = elem->next) {
-		int res = snd_hctl_throw_event(hctl, SNDRV_CTL_EVENT_MASK_ADD,
-					       elem);
-		if (res < 0)
-			return res;
-	}
+	for (elem = hctl->first_elem; elem; elem = elem->next)
+		snd_hctl_throw_event(hctl, SND_CTL_EVENT_MASK_ADD, elem);
 	err = snd_ctl_subscribe_events(hctl->ctl, 1);
  _end:
-	free(list.pids);
+	snd_ctl_elem_list_free_space(&list);
+	if (err < 0)
+		snd_hctl_free(hctl);
 	return err;
 }
 
 static int snd_hctl_handle_event(snd_hctl_t *hctl, snd_ctl_event_t *event)
 {
 	snd_hctl_elem_t *elem;
-	int res;
+	int err;
 
-	switch (event->type) {
-	case SND_CTL_EVENT_ELEM:
-		break;
-	default:
+	if (event->type != SND_CTL_EVENT_ELEM)
 		return 0;
-	}
-	if (event->data.elem.mask == SNDRV_CTL_EVENT_MASK_REMOVE) {
-		snd_hctl_elem_t *res;
-		res = snd_hctl_find_elem(hctl, &event->data.elem.id);
-		if (!res)
-			return -ENOENT;
-		snd_hctl_elem_remove(hctl, res);
-		return 0;
-	}
-	if (event->data.elem.mask & SNDRV_CTL_EVENT_MASK_ADD) {
-		elem = calloc(1, sizeof(snd_hctl_elem_t));
-		if (elem == NULL)
-			return -ENOMEM;
-		elem->id = event->data.elem.id;
-		elem->hctl = hctl;
-		res = snd_hctl_elem_add(hctl, elem);
-		if (res < 0)
-			return res;
-	}
-	if (event->data.elem.mask & (SNDRV_CTL_EVENT_MASK_VALUE |
-				     SNDRV_CTL_EVENT_MASK_INFO)) {
+	if (event->data.elem.mask == SND_CTL_EVENT_MASK_REMOVE) {
 		elem = snd_hctl_find_elem(hctl, &event->data.elem.id);
 		if (!elem)
 			return -ENOENT;
-		res = snd_hctl_elem_throw_event(elem, event->data.elem.mask &
-						(SNDRV_CTL_EVENT_MASK_VALUE |
-						 SNDRV_CTL_EVENT_MASK_INFO));
-		if (res < 0)
-			return res;
+		snd_hctl_elem_remove(hctl, elem);
+		return 0;
+	}
+	if (event->data.elem.mask & SND_CTL_EVENT_MASK_ADD) {
+		elem = calloc(1, sizeof(*elem));
+		if (!elem)
+			return -ENOMEM;
+		elem->id = event->data.elem.id;
+		elem->hctl = hctl;
+		err = snd_hctl_elem_add(hctl, elem);
+		if (err < 0)
+			return err;
+	}
+	if (event->data.elem.mask & (SND_CTL_EVENT_MASK_VALUE |
+				     SND_CTL_EVENT_MASK_INFO)) {
+		elem = snd_hctl_find_elem(hctl, &event->data.elem.id);
+		if (!elem)
+			return -ENOENT;
+		err = snd_hctl_elem_throw_event(elem, event->data.elem.mask &
+						(SND_CTL_EVENT_MASK_VALUE |
+						 SND_CTL_EVENT_MASK_INFO));
+		if (err < 0)
+			return err;
 	}
 	return 0;
 }
@@ -253,9 +247,10 @@ int snd_hctl_handle_events(snd_hctl_t *hctl)
 	int res;
 	unsigned int count = 0;
 	
-	while ((res = snd_ctl_read(hctl->ctl, &event)) != 0 &&
-	       res != -EAGAIN) {
-		if (res < 0)
+	while ((res = snd_ctl_read(hctl->ctl, &event)) != 0) {
+		if (res == -EAGAIN)
+			break;
+		else if (res < 0)
 			return res;
 		res = snd_hctl_handle_event(hctl, &event);
 		if (res < 0)
@@ -264,4 +259,3 @@ int snd_hctl_handle_events(snd_hctl_t *hctl)
 	}
 	return count;
 }
-

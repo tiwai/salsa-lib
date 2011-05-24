@@ -23,6 +23,7 @@
 #define __ALSA_HWDEP_H
 
 #include "recipe.h"
+#include "asound.h"
 #include "hwdep_func.h"
 
 #include "hwdep_macros.h"

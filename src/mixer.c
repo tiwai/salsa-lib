@@ -726,8 +726,8 @@ static int update_simple_element(snd_hctl_elem_t *hp, snd_mixer_elem_t *elem)
 }
 
 /*
+ * registration - supports only ABSTRACT_NONE type
  */
-
 int snd_mixer_selem_register(snd_mixer_t *mixer,
 			     struct snd_mixer_selem_regopt *options,
 			     snd_mixer_class_t **classp)

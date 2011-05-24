@@ -14,7 +14,6 @@
 #include <sys/ioctl.h>
 #include <sys/poll.h>
 
-typedef struct sndrv_interval snd_interval_t;
 typedef struct {
 	struct sndrv_pcm_channel_info info;
 	void *addr;
@@ -60,9 +59,9 @@ struct _snd_pcm {
 	unsigned int frame_bits;
 	snd_pcm_uframes_t min_align;
 
-	struct sndrv_pcm_mmap_status *mmap_status;
-	struct sndrv_pcm_mmap_control *mmap_control;
-	struct sndrv_pcm_sync_ptr *sync_ptr;
+	struct snd_pcm_mmap_status *mmap_status;
+	struct snd_pcm_mmap_control *mmap_control;
+	struct snd_pcm_sync_ptr *sync_ptr;
 
 	snd_pcm_channel_info_t *mmap_channels;
 	snd_pcm_channel_area_t *running_areas;

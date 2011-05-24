@@ -33,7 +33,7 @@
 int snd_hwdep_open(snd_hwdep_t **handlep, const char *name, int mode)
 {
 	int card, device, fd, ver, err;
-	char filename[32];
+	char filename[sizeof(SALSA_DEVPATH) + 24];
 	snd_hwdep_t *hwdep;
 
 	*handlep = NULL;
@@ -41,9 +41,9 @@ int snd_hwdep_open(snd_hwdep_t **handlep, const char *name, int mode)
 	err = _snd_dev_get_device(name, &card, &device, NULL);
 	if (err < 0)
 		return err;
-	if (card < 0 || card >= 32)
+	if (card < 0 || card >= SALSA_MAX_CARDS)
 		return -EINVAL;
-	if (device < 0 || device >= 32)
+	if (device < 0 || device >= SALSA_MAX_DEVICES)
 		return -EINVAL;
 	snprintf(filename, sizeof(filename), "%s/hwC%dD%d",
 		 SALSA_DEVPATH, card, device);

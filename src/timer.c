@@ -34,7 +34,7 @@ int snd_timer_open(snd_timer_t **handle, const char *name, int mode)
 {
 	int fd, ver, tmode, err;
 	snd_timer_t *tmr;
-	struct sndrv_timer_select sel;
+	snd_timer_select_t sel;
 	int dev_class = SND_TIMER_CLASS_GLOBAL,
 		dev_sclass = SND_TIMER_SCLASS_NONE,
 		card = 0, device = 0, subdevice = 0;

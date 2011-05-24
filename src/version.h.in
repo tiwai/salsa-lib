@@ -5,11 +5,11 @@
 #define SND_LIB_MINOR		@SND_LIB_MINOR@
 #define SND_LIB_SUBMINOR	@SND_LIB_SUBMINOR@
 #define SND_LIB_EXTRAVER	@SND_LIB_EXTRAVER@
-/** library version */
+/* library version */
 #define SND_LIB_VERSION		((SND_LIB_MAJOR<<16)|\
 				 (SND_LIB_MINOR<<8)|\
 				  SND_LIB_SUBMINOR)
-/** library version (string) */
+/* library version (string) */
 #define SND_LIB_VERSION_STR	"@SND_LIB_VERSION@"
 
 __SALSA_EXPORT_FUNC
