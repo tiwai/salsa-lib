@@ -91,9 +91,29 @@ AC_ARG_ENABLE(libasound,
 		 [build a ABI-compatible libasound.so]),
   libasound="$enableval", libasound="no")
 
+AC_ARG_ENABLE(deprecated,
+  AS_HELP_STRING([--disable-deprecated],
+		 [don't mark deprecated attribute for non-working functions]),
+  markdeprecated="$enableval", markdeprecated="yes")
+
+AC_ARG_ENABLE(output-buffer,
+  AS_HELP_STRING([--enable-output-buffer],
+		 [support the string output via snd_output_*() functions]),
+  output_buffer="$enableval", output_buffer="no")
+
+AC_ARG_ENABLE(libasound,
+  AS_HELP_STRING([--disable-delight-valgrind],
+		 [do not initialize unnecessary fields for ioctls]),
+  delight_valgrind="$enableval", delight_valgrind="yes")
+
+AC_ARG_ENABLE(symbolic-functions,
+  AS_HELP_STRING([--enable-symbolic-functions],
+    [use -Bsymbolic-functions option if available (optmization for size and speed)]),
+  symfuncs="$enableval", symfuncs="no")
+
 AC_ARG_ENABLE(everything,
-  AS_HELP_STRING([--enable-everyhing],
-		 [enable everyhing :)]),
+  AS_HELP_STRING([--enable-everything],
+		 [enable everything :)]),
   everything="$enableval", everything="no")
 
 if test "$everything" = "yes"; then
@@ -107,6 +127,8 @@ if test "$everything" = "yes"; then
   tlv="yes"
   async="yes"
   libasound="yes"
+  symfuncs="yes"
+  output_buffer="yes"
 fi
 
 AM_CONDITIONAL(BUILD_PCM, test "$pcm" = "yes")
@@ -141,23 +163,12 @@ AC_SUBST(SALSA_HAS_DUMMY_CONF)
 
 AM_CONDITIONAL(COMPAT_ABI, test "$libasound" = "yes")
 
-AC_ARG_ENABLE(deprecated,
-  AS_HELP_STRING([--disable-deprecated],
-		 [don't mark deprecated attribute for non-working functions]),
-  markdeprecated="$enableval", markdeprecated="yes")
-
 if test "$markdeprecated" = "yes"; then
   SALSA_MARK_DEPRECATED=1
 else
   SALSA_MARK_DEPRECATED=0
 fi
 AC_SUBST(SALSA_MARK_DEPRECATED)
-
-AC_ARG_ENABLE(output-buffer,
-  AS_HELP_STRING([--enable-output-buffer],
-		 [support the string output via snd_output_*() functions]),
-  output_buffer="$enableval", output_buffer="no")
-
 if test "$output_buffer" = "yes"; then
   SALSA_SUPPORT_OUTPUT_BUFFER=1
 else
@@ -165,19 +176,11 @@ else
 fi
 AC_SUBST(SALSA_SUPPORT_OUTPUT_BUFFER)
 
-AC_ARG_ENABLE(libasound,
-  AS_HELP_STRING([--disable-delight-valgrind],
-		 [do not initialize unnecessary fields for ioctls]),
-  delight_valgrind="$enableval", delight_valgrind="yes")
 if test "$delight_valgrind" = "yes"; then
   AC_DEFINE(DELIGHT_VALGRIND)
 fi
 
 AC_MSG_CHECKING(for symbolic-functions)
-AC_ARG_ENABLE(symbolic-functions,
-  AS_HELP_STRING([--enable-symbolic-functions],
-    [use -Bsymbolic-functions option if available (optmization for size and speed)]),
-  symfuncs="$enableval", symfuncs="no")
 if test "$symfuncs" = "yes"; then
   if ld --help | grep -q -- '-Bsymbolic-functions'; then
     AC_MSG_RESULT(yes)
