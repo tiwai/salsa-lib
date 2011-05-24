@@ -5,19 +5,13 @@
 #ifndef __ALSA_CONF_H
 #define __ALSA_CONF_H
 
-/** Configuration node type. */
+/* Configuration node type. */
 typedef enum _snd_config_type {
-	/** Integer number. */
         SND_CONFIG_TYPE_INTEGER,
-	/** 64 bit Integer number. */
         SND_CONFIG_TYPE_INTEGER64,
-	/** Real number. */
         SND_CONFIG_TYPE_REAL,
-	/** Character string. */
         SND_CONFIG_TYPE_STRING,
-        /** Pointer (runtime only, cannot be saved). */
         SND_CONFIG_TYPE_POINTER,
-	/** Compound node. */
 	SND_CONFIG_TYPE_COMPOUND = 1024
 } snd_config_type_t;
 
@@ -347,17 +341,8 @@ snd_config_t *snd_config_iterator_entry(const snd_config_iterator_t iterator)
 	return NULL;
 }
 
-
-/**
- * \brief Helper macro to iterate over the children of a compound node.
- * \param pos Iterator variable for the current node.
- * \param next Iterator variable for the next node.
- * \param node Handle to the compound configuration node to iterate over.
- *
- * This macro is designed to permit the removal of the current node.
- */
 #define snd_config_for_each(pos, next, node) \
-	for (pos = snd_config_iterator_first(node), next = snd_config_iterator_next(pos); pos != snd_config_iterator_end(node); pos = next, next = snd_config_iterator_next(pos))
+	for (pos = next = NULL; 0;)
 
 /* Misc functions */
 
@@ -391,9 +376,9 @@ int snd_config_get_ctl_iface(const snd_config_t *conf)
 typedef struct snd_devname snd_devname_t;
 
 struct snd_devname {
-	char *name;	/**< Device name string */
-	char *comment;	/**< Comments */
-	snd_devname_t *next;	/**< Next pointer */
+	char *name;
+	char *comment;
+	snd_devname_t *next;
 };
 
 __SALSA_EXPORT_FUNC __SALSA_NOT_IMPLEMENTED
