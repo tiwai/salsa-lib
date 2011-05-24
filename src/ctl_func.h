@@ -6,7 +6,20 @@
 
 #include "global.h"
 #include "asound.h"
-#include "ctl_types.h"
+
+#include <unistd.h>
+#include <stdint.h>
+
+typedef enum _snd_ctl_type {
+	SND_CTL_TYPE_HW,
+	SND_CTL_TYPE_SHM,	/* not used by SALSA */
+	SND_CTL_TYPE_INET,	/* not used by SALSA */
+	SND_CTL_TYPE_EXT	/* not used by SALSA */
+} snd_ctl_type_t;
+
+#define SND_CTL_NONBLOCK		0x0001
+#define SND_CTL_ASYNC			0x0002
+#define SND_CTL_READONLY		0x0004
 
 int snd_card_load(int card);
 int snd_card_next(int *card);

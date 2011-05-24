@@ -857,6 +857,17 @@ typedef struct snd_ctl_event {
 #define SND_CTL_NAME_IEC958_PCM_STREAM			"PCM Stream"
 #define SND_CTL_NAME_IEC958(expl,direction,what)	"IEC958 " expl SND_CTL_NAME_##direction SND_CTL_NAME_IEC958_##what
 
+/* TLV types */
+#define SND_CTL_TLVT_CONTAINER		0
+#define SND_CTL_TLVT_DB_SCALE		1
+#define SND_CTL_TLVT_DB_LINEAR		2
+#define SND_CTL_TLVT_DB_RANGE		3
+#define SND_CTL_TLVT_DB_MINMAX		4
+#define SND_CTL_TLVT_DB_MINMAX_MUTE	5
+
+/* Mute state */
+#define SND_CTL_TLV_DB_GAIN_MUTE	-9999999
+
 struct snd_xferv {
 	const struct iovec *vector;
 	unsigned long count;
