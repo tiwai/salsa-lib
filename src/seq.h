@@ -1,26 +1,23 @@
 #ifndef __ALSA_SEQ_H
 #define __ALSA_SEQ_H
 
-#define SND_SEQ_OPEN_OUTPUT	1	/**< open for output (write) */
-#define SND_SEQ_OPEN_INPUT	2	/**< open for input (read) */
-#define SND_SEQ_OPEN_DUPLEX	(SND_SEQ_OPEN_OUTPUT|SND_SEQ_OPEN_INPUT)	/**< open for both input and output (read/write) */
+#define SND_SEQ_OPEN_OUTPUT	1
+#define SND_SEQ_OPEN_INPUT	2
+#define SND_SEQ_OPEN_DUPLEX	(SND_SEQ_OPEN_OUTPUT|SND_SEQ_OPEN_INPUT)
 
-#define SND_SEQ_NONBLOCK	0x0001	/**< non-blocking mode (flag to open mode) */
+#define SND_SEQ_NONBLOCK	0x0001
 
-/** sequencer handle type */
 typedef enum _snd_seq_type {
-	SND_SEQ_TYPE_HW,		/**< hardware */
-	SND_SEQ_TYPE_SHM,		/**< shared memory (NYI) */
-	SND_SEQ_TYPE_INET		/**< network (NYI) */
+	SND_SEQ_TYPE_HW,
+	SND_SEQ_TYPE_SHM,
+	SND_SEQ_TYPE_INET
 } snd_seq_type_t;
 
-/** special client (port) ids */
-#define SND_SEQ_ADDRESS_UNKNOWN		253	/**< unknown source */
-#define SND_SEQ_ADDRESS_SUBSCRIBERS	254	/**< send event to all subscribed ports */
-#define SND_SEQ_ADDRESS_BROADCAST	255	/**< send event to all queues/clients/ports/channels */
+#define SND_SEQ_ADDRESS_UNKNOWN		253
+#define SND_SEQ_ADDRESS_SUBSCRIBERS	254
+#define SND_SEQ_ADDRESS_BROADCAST	255
 
-/** known client numbers */
-#define SND_SEQ_CLIENT_SYSTEM		0	/**< system client */
+#define SND_SEQ_CLIENT_SYSTEM		0
 
 /*
  */
@@ -100,7 +97,6 @@ int snd_seq_set_input_buffer_size(snd_seq_t *handle, size_t size)
 	return -ENXIO;
 }
 
-/** system information container */
 typedef struct _snd_seq_system_info snd_seq_system_info_t;
 
 __SALSA_EXPORT_FUNC
@@ -108,7 +104,6 @@ size_t snd_seq_system_info_sizeof(void)
 {
 	return 0;
 }
-/** allocate a #snd_seq_system_info_t container on stack */
 #define snd_seq_system_info_alloca(ptr) 
 __SALSA_EXPORT_FUNC
 int snd_seq_system_info_malloc(snd_seq_system_info_t **ptr)
@@ -162,13 +157,11 @@ int snd_seq_system_info(snd_seq_t *handle, snd_seq_system_info_t *info)
 	return -ENXIO;
 }
 
-/** client information container */
 typedef struct _snd_seq_client_info snd_seq_client_info_t;
 
-/** client types */
 typedef enum snd_seq_client_type {
-	SND_SEQ_USER_CLIENT     = 1,	/**< user client */
-	SND_SEQ_KERNEL_CLIENT   = 2	/**< kernel client */
+	SND_SEQ_USER_CLIENT     = 1,
+	SND_SEQ_KERNEL_CLIENT   = 2
 } snd_seq_client_type_t;
                         
 __SALSA_EXPORT_FUNC
@@ -176,7 +169,6 @@ size_t snd_seq_client_info_sizeof(void)
 {
 	return 0;
 }
-/** allocate a #snd_seq_client_info_t container on stack */
 #define snd_seq_client_info_alloca(ptr)
 
 __SALSA_EXPORT_FUNC
@@ -280,7 +272,6 @@ int snd_seq_query_next_client(snd_seq_t *handle, snd_seq_client_info_t *info)
 /*
  */
 
-/** client pool information container */
 typedef struct _snd_seq_client_pool snd_seq_client_pool_t;
 
 __SALSA_EXPORT_FUNC
@@ -288,7 +279,6 @@ size_t snd_seq_client_pool_sizeof(void)
 {
 	return 0;
 }
-/** allocate a #snd_seq_client_pool_t container on stack */
 #define snd_seq_client_pool_alloca(ptr)
 
 __SALSA_EXPORT_FUNC
@@ -362,60 +352,40 @@ int snd_seq_set_client_pool(snd_seq_t *handle, snd_seq_client_pool_t *info)
 }
 
 
-/** port information container */
 typedef struct _snd_seq_port_info snd_seq_port_info_t;
 
-/** known port numbers */
-#define SND_SEQ_PORT_SYSTEM_TIMER	0	/**< system timer port */
-#define SND_SEQ_PORT_SYSTEM_ANNOUNCE	1	/**< system announce port */
+/* known port numbers */
+#define SND_SEQ_PORT_SYSTEM_TIMER	0
+#define SND_SEQ_PORT_SYSTEM_ANNOUNCE	1
 
-/** port capabilities (32 bits) */
-#define SND_SEQ_PORT_CAP_READ		(1<<0)	/**< readable from this port */
-#define SND_SEQ_PORT_CAP_WRITE		(1<<1)	/**< writable to this port */
+/* port capabilities (32 bits) */
+#define SND_SEQ_PORT_CAP_READ		(1<<0)
+#define SND_SEQ_PORT_CAP_WRITE		(1<<1)
 
-#define SND_SEQ_PORT_CAP_SYNC_READ	(1<<2)	/**< allow read subscriptions */
-#define SND_SEQ_PORT_CAP_SYNC_WRITE	(1<<3)	/**< allow write subscriptions */
+#define SND_SEQ_PORT_CAP_SYNC_READ	(1<<2)
+#define SND_SEQ_PORT_CAP_SYNC_WRITE	(1<<3)
 
-#define SND_SEQ_PORT_CAP_DUPLEX		(1<<4)	/**< allow read/write duplex */
+#define SND_SEQ_PORT_CAP_DUPLEX		(1<<4)
 
-#define SND_SEQ_PORT_CAP_SUBS_READ	(1<<5)	/**< allow read subscription */
-#define SND_SEQ_PORT_CAP_SUBS_WRITE	(1<<6)	/**< allow write subscription */
-#define SND_SEQ_PORT_CAP_NO_EXPORT	(1<<7)	/**< routing not allowed */
+#define SND_SEQ_PORT_CAP_SUBS_READ	(1<<5)
+#define SND_SEQ_PORT_CAP_SUBS_WRITE	(1<<6)
+#define SND_SEQ_PORT_CAP_NO_EXPORT	(1<<7)
 
 /* port type */
-/** Messages sent from/to this port have device-specific semantics. */
 #define SND_SEQ_PORT_TYPE_SPECIFIC	(1<<0)
-/** This port understands MIDI messages. */
 #define SND_SEQ_PORT_TYPE_MIDI_GENERIC	(1<<1)
-/** This port is compatible with the General MIDI specification. */
 #define SND_SEQ_PORT_TYPE_MIDI_GM	(1<<2)
-/** This port is compatible with the Roland GS standard. */
 #define SND_SEQ_PORT_TYPE_MIDI_GS	(1<<3)
-/** This port is compatible with the Yamaha XG specification. */
 #define SND_SEQ_PORT_TYPE_MIDI_XG	(1<<4)
-/** This port is compatible with the Roland MT-32. */
 #define SND_SEQ_PORT_TYPE_MIDI_MT32	(1<<5)
-/** This port is compatible with the General MIDI 2 specification. */
 #define SND_SEQ_PORT_TYPE_MIDI_GM2	(1<<6)
-/** This port understands SND_SEQ_EVENT_SAMPLE_xxx messages
-    (these are not MIDI messages). */
 #define SND_SEQ_PORT_TYPE_SYNTH		(1<<10)
-/** Instruments can be downloaded to this port
-    (with SND_SEQ_EVENT_INSTR_xxx messages sent directly). */
 #define SND_SEQ_PORT_TYPE_DIRECT_SAMPLE (1<<11)
-/** Instruments can be downloaded to this port
-    (with SND_SEQ_EVENT_INSTR_xxx messages sent directly or through a queue). */
 #define SND_SEQ_PORT_TYPE_SAMPLE	(1<<12)
-/** This port is implemented in hardware. */
 #define SND_SEQ_PORT_TYPE_HARDWARE	(1<<16)
-/** This port is implemented in software. */
 #define SND_SEQ_PORT_TYPE_SOFTWARE	(1<<17)
-/** Messages sent to this port will generate sounds. */
 #define SND_SEQ_PORT_TYPE_SYNTHESIZER	(1<<18)
-/** This port may connect to other devices
-    (whose characteristics are not known). */
 #define SND_SEQ_PORT_TYPE_PORT		(1<<19)
-/** This port belongs to an application, such as a sequencer or editor. */
 #define SND_SEQ_PORT_TYPE_APPLICATION	(1<<20)
 
 
@@ -424,7 +394,6 @@ size_t snd_seq_port_info_sizeof(void)
 {
 	return 0;
 }
-/** allocate a #snd_seq_port_info_t container on stack */
 #define snd_seq_port_info_alloca(ptr)
 
 __SALSA_EXPORT_FUNC
@@ -610,7 +579,6 @@ int snd_seq_query_next_port(snd_seq_t *handle, snd_seq_port_info_t *info)
 	return -ENXIO;
 }
 
-/** port subscription container */
 typedef struct _snd_seq_port_subscribe snd_seq_port_subscribe_t;
 
 __SALSA_EXPORT_FUNC
@@ -618,7 +586,6 @@ size_t snd_seq_port_subscribe_sizeof(void)
 {
 	return 0;
 }
-/** allocate a #snd_seq_port_subscribe_t container on stack */
 #define snd_seq_port_subscribe_alloca(ptr)
 
 __SALSA_EXPORT_FUNC
@@ -717,13 +684,11 @@ int snd_seq_unsubscribe_port(snd_seq_t *handle, snd_seq_port_subscribe_t *sub)
 /*
  */
 
-/** subscription query container */
 typedef struct _snd_seq_query_subscribe snd_seq_query_subscribe_t;
 
-/** type of query subscription */
 typedef enum {
-	SND_SEQ_QUERY_SUBS_READ,	/**< query read subscriptions */
-	SND_SEQ_QUERY_SUBS_WRITE	/**< query write subscriptions */
+	SND_SEQ_QUERY_SUBS_READ,
+	SND_SEQ_QUERY_SUBS_WRITE
 } snd_seq_query_subs_type_t;
 
 __SALSA_EXPORT_FUNC
@@ -731,7 +696,6 @@ size_t snd_seq_query_subscribe_sizeof(void)
 {
 	return 0;
 }
-/** allocate a #snd_seq_query_subscribe_t container on stack */
 #define snd_seq_query_subscribe_alloca(ptr)
 
 __SALSA_EXPORT_FUNC
@@ -837,24 +801,18 @@ int snd_seq_query_port_subscribers(snd_seq_t *seq,
 	return -ENXIO;
 }
 
-/** queue information container */
 typedef struct _snd_seq_queue_info snd_seq_queue_info_t;
-/** queue status container */
 typedef struct _snd_seq_queue_status snd_seq_queue_status_t;
-/** queue tempo container */
 typedef struct _snd_seq_queue_tempo snd_seq_queue_tempo_t;
-/** queue timer information container */
 typedef struct _snd_seq_queue_timer snd_seq_queue_timer_t;
 
-/** special queue ids */
-#define SND_SEQ_QUEUE_DIRECT		253	/**< direct dispatch */
+#define SND_SEQ_QUEUE_DIRECT		253
 
 __SALSA_EXPORT_FUNC
 size_t snd_seq_queue_info_sizeof(void)
 {
 	return 0;
 }
-/** allocate a #snd_seq_queue_info_t container on stack */
 #define snd_seq_queue_info_alloca(ptr)
 
 __SALSA_EXPORT_FUNC
@@ -969,7 +927,6 @@ size_t snd_seq_queue_status_sizeof(void)
 {
 	return 0;
 }
-/** allocate a #snd_seq_queue_status_t container on stack */
 #define snd_seq_queue_status_alloca(ptr)
 
 __SALSA_EXPORT_FUNC
@@ -1027,7 +984,6 @@ size_t snd_seq_queue_tempo_sizeof(void)
 {
 	return 0;
 }
-/** allocate a #snd_seq_queue_tempo_t container on stack */
 #define snd_seq_queue_tempo_alloca(ptr)
 
 __SALSA_EXPORT_FUNC
@@ -1106,11 +1062,10 @@ int snd_seq_set_queue_tempo(snd_seq_t *handle, int q,
 /*
  */
 
-/** sequencer timer sources */
 typedef enum {
-	SND_SEQ_TIMER_ALSA = 0,		/* ALSA timer */
-	SND_SEQ_TIMER_MIDI_CLOCK = 1,	/* Midi Clock (CLOCK event) */
-	SND_SEQ_TIMER_MIDI_TICK = 2	/* Midi Timer Tick (TICK event */
+	SND_SEQ_TIMER_ALSA = 0,
+	SND_SEQ_TIMER_MIDI_CLOCK = 1,
+	SND_SEQ_TIMER_MIDI_TICK = 2
 } snd_seq_queue_timer_type_t;
 
 __SALSA_EXPORT_FUNC
@@ -1118,7 +1073,6 @@ size_t snd_seq_queue_timer_sizeof(void)
 {
 	return 0;
 }
-/** allocate a #snd_seq_queue_timer_t container on stack */
 #define snd_seq_queue_timer_alloca(ptr)
 
 __SALSA_EXPORT_FUNC
@@ -1258,27 +1212,24 @@ int snd_seq_drop_input_buffer(snd_seq_t *handle)
 	return -ENXIO;
 }
 
-/** event removal conditionals */
 typedef struct _snd_seq_remove_events snd_seq_remove_events_t;
 
-/** Remove conditional flags */
-#define SND_SEQ_REMOVE_INPUT		(1<<0)	/**< Flush input queues */
-#define SND_SEQ_REMOVE_OUTPUT		(1<<1)	/**< Flush output queues */
-#define SND_SEQ_REMOVE_DEST		(1<<2)	/**< Restrict by destination q:client:port */
-#define SND_SEQ_REMOVE_DEST_CHANNEL	(1<<3)	/**< Restrict by channel */
-#define SND_SEQ_REMOVE_TIME_BEFORE	(1<<4)	/**< Restrict to before time */
-#define SND_SEQ_REMOVE_TIME_AFTER	(1<<5)	/**< Restrict to time or after */
-#define SND_SEQ_REMOVE_TIME_TICK	(1<<6)	/**< Time is in ticks */
-#define SND_SEQ_REMOVE_EVENT_TYPE	(1<<7)	/**< Restrict to event type */
-#define SND_SEQ_REMOVE_IGNORE_OFF 	(1<<8)	/**< Do not flush off events */
-#define SND_SEQ_REMOVE_TAG_MATCH 	(1<<9)	/**< Restrict to events with given tag */
+#define SND_SEQ_REMOVE_INPUT		(1<<0)
+#define SND_SEQ_REMOVE_OUTPUT		(1<<1)
+#define SND_SEQ_REMOVE_DEST		(1<<2)
+#define SND_SEQ_REMOVE_DEST_CHANNEL	(1<<3)
+#define SND_SEQ_REMOVE_TIME_BEFORE	(1<<4)
+#define SND_SEQ_REMOVE_TIME_AFTER	(1<<5)
+#define SND_SEQ_REMOVE_TIME_TICK	(1<<6)
+#define SND_SEQ_REMOVE_EVENT_TYPE	(1<<7)
+#define SND_SEQ_REMOVE_IGNORE_OFF 	(1<<8)
+#define SND_SEQ_REMOVE_TAG_MATCH 	(1<<9)
 
 __SALSA_EXPORT_FUNC
 size_t snd_seq_remove_events_sizeof(void)
 {
 	return 0;
 }
-/** allocate a #snd_seq_remove_events_t container on stack */
 #define snd_seq_remove_events_alloca(ptr)
 
 __SALSA_EXPORT_FUNC
@@ -1387,7 +1338,6 @@ int snd_seq_get_bit(int nr, void *array)
 {
 	return 0;
 }
-
 
 
 /* event type macros */
