@@ -27,18 +27,7 @@
 #include "pcm.h"
 
 
-/* NOTE: "signed" prefix must be given below since the default char is
- *       unsigned on some architectures!
- */
-struct pcm_format_data {
-	unsigned char width;	/* bit width */
-	unsigned char phys;	/* physical bit width */
-	signed char le;	/* 0 = big-endian, 1 = little-endian, -1 = others */
-	signed char signd;	/* 0 = unsigned, 1 = signed, -1 = others */
-	unsigned char silence[8];	/* silence data to fill */
-};
-
-static struct pcm_format_data pcm_formats[SND_PCM_FORMAT_LAST+1] = {
+const struct snd_pcm_format_data _snd_pcm_formats[SND_PCM_FORMAT_LAST+1] = {
 	[SND_PCM_FORMAT_S8] = {
 		.width = 8, .phys = 8, .le = -EINVAL, .signd = 1,
 		.silence = {},
@@ -132,13 +121,8 @@ static struct pcm_format_data pcm_formats[SND_PCM_FORMAT_LAST+1] = {
 		.silence = {},
 	},
 	/* FIXME: the following three formats are not defined properly yet */
-	[SND_PCM_FORMAT_MPEG] = {
-		.le = -EINVAL, .signd = -EINVAL,
-	},
-	[SND_PCM_FORMAT_GSM] = {
-		.le = -EINVAL, .signd = -EINVAL,
-	},
-	[SND_PCM_FORMAT_SPECIAL] = {
+	[SND_PCM_FORMAT_MPEG...SND_PCM_FORMAT_SPECIAL] = {
+		.width = -EINVAL, .phys = -EINVAL,
 		.le = -EINVAL, .signd = -EINVAL,
 	},
 	[SND_PCM_FORMAT_S24_3LE] = {
@@ -191,102 +175,14 @@ static struct pcm_format_data pcm_formats[SND_PCM_FORMAT_LAST+1] = {
 	},
 };
 
-
-int snd_pcm_format_signed(snd_pcm_format_t format)
-{
-	if (format < 0 || format > SND_PCM_FORMAT_LAST)
-		return -EINVAL;
-	return pcm_formats[format].signd;
-}
-
-int snd_pcm_format_unsigned(snd_pcm_format_t format)
-{
-	int val = snd_pcm_format_signed(format);
-	if (val < 0)
-		return val;
-	return !val;
-}
-
-int snd_pcm_format_linear(snd_pcm_format_t format)
-{
-	return snd_pcm_format_signed(format) >= 0;
-}
-
-int snd_pcm_format_float(snd_pcm_format_t format)
-{
-	switch (format) {
-	case SND_PCM_FORMAT_FLOAT_LE:
-	case SND_PCM_FORMAT_FLOAT_BE:
-	case SND_PCM_FORMAT_FLOAT64_LE:
-	case SND_PCM_FORMAT_FLOAT64_BE:
-		return 1;
-	default:
-		return 0;
-	}
-}
-
-int snd_pcm_format_little_endian(snd_pcm_format_t format)
-{
-	if (format < 0 || format > SND_PCM_FORMAT_LAST)
-		return -EINVAL;
-	return pcm_formats[format].le;
-}
-
-int snd_pcm_format_big_endian(snd_pcm_format_t format)
-{
-	int val = snd_pcm_format_little_endian(format);
-	if (val < 0)
-		return val;
-	return !val;
-}
-
-int snd_pcm_format_cpu_endian(snd_pcm_format_t format)
-{
-#ifdef SND_LITTLE_ENDIAN
-	return snd_pcm_format_little_endian(format);
-#else
-	return snd_pcm_format_big_endian(format);
-#endif
-}
-
-int snd_pcm_format_width(snd_pcm_format_t format)
-{
-	int val;
-	if (format < 0 || format > SND_PCM_FORMAT_LAST)
-		return -EINVAL;
-	if ((val = pcm_formats[format].width) == 0)
-		return -EINVAL;
-	return val;
-}
-
-int snd_pcm_format_physical_width(snd_pcm_format_t format)
-{
-	int val;
-	if (format < 0 || format > SND_PCM_FORMAT_LAST)
-		return -EINVAL;
-	if ((val = pcm_formats[format].phys) == 0)
-		return -EINVAL;
-	return val;
-}
-
-ssize_t snd_pcm_format_size(snd_pcm_format_t format, size_t samples)
-{
-	int phys_width = snd_pcm_format_physical_width(format);
-	if (phys_width < 0)
-		return -EINVAL;
-	return samples * phys_width / 8;
-}
-
 u_int64_t snd_pcm_format_silence_64(snd_pcm_format_t format)
 {
-	struct pcm_format_data *fmt;
+	const struct snd_pcm_format_data *fmt;
 	int i, p, w;
 	u_int64_t silence;
 
-	if ((int)format < 0 || (int)format > SND_PCM_FORMAT_LAST)
-		return 0;
-	fmt = &pcm_formats[format];
-	if (!fmt->phys)
+	fmt = &_snd_pcm_formats[format];
+	if (fmt->phys <= 0)
 		return 0;
 	w = fmt->width / 8;
 	p = 0;
@@ -298,37 +194,21 @@ u_int64_t snd_pcm_format_silence_64(snd_pcm_format_t format)
 	return silence;
 }
 
-u_int32_t snd_pcm_format_silence_32(snd_pcm_format_t format)
-{
-	return (u_int32_t)snd_pcm_format_silence_64(format);
-}
-
-u_int16_t snd_pcm_format_silence_16(snd_pcm_format_t format)
-{
-	return (u_int16_t)snd_pcm_format_silence_64(format);
-}
-
-u_int8_t snd_pcm_format_silence(snd_pcm_format_t format)
-{
-	return (u_int8_t)snd_pcm_format_silence_64(format);
-}
-
 int snd_pcm_format_set_silence(snd_pcm_format_t format, void *data,
 			       unsigned int samples)
 {
 	int width;
-	unsigned char *dst, *pat;
+	unsigned char *dst;
+	const unsigned char *pat;
 
-	if (format < 0 || format > SND_PCM_FORMAT_LAST)
-		return -EINVAL;
-	if (samples == 0)
+	if (!samples)
 		return 0;
-	width = pcm_formats[format].phys; /* physical width */
-	pat = pcm_formats[format].silence;
-	if (!width)
+	width = _snd_pcm_formats[format].phys;
+	if (width <= 0)
 		return -EINVAL;
+	pat = _snd_pcm_formats[format].silence;
 	/* signed or 1 byte data */
-	if (pcm_formats[format].signd == 1 || width <= 8) {
+	if (_snd_pcm_formats[format].signd == 1 || width <= 8) {
 		unsigned int bytes = samples * width / 8;
 		memset(data, *pat, bytes);
 		return 0;
@@ -343,7 +223,7 @@ int snd_pcm_format_set_silence(snd_pcm_format_t format, void *data,
 	return 0;
 }
 
-static int linear_formats[4][2][2] = {
+static const int linear_formats[4][2][2] = {
 	{ { SND_PCM_FORMAT_S8, SND_PCM_FORMAT_S8 },
 	  { SND_PCM_FORMAT_U8, SND_PCM_FORMAT_U8 } },
 	{ { SND_PCM_FORMAT_S16_LE, SND_PCM_FORMAT_S16_BE },
@@ -354,7 +234,7 @@ static int linear_formats[4][2][2] = {
 	  { SND_PCM_FORMAT_U32_LE, SND_PCM_FORMAT_U32_BE } }
 };
 
-static int linear24_formats[3][2][2] = {
+static const int linear24_formats[3][2][2] = {
 	{ { SND_PCM_FORMAT_S24_3LE, SND_PCM_FORMAT_S24_3BE },
 	  { SND_PCM_FORMAT_U24_3LE, SND_PCM_FORMAT_U24_3BE } },
 	{ { SND_PCM_FORMAT_S20_3LE, SND_PCM_FORMAT_S20_3BE },

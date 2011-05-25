@@ -2198,4 +2198,121 @@ snd_pcm_t *snd_async_handler_get_pcm(snd_async_handler_t *handler)
 
 #endif /* SALSA_HAS_ASYNC_SUPPORT */
 
+/*
+ */
+
+/* NOTE: "signed" prefix must be given below since the default char is
+ *       unsigned on some architectures!
+ */
+struct snd_pcm_format_data {
+	signed char width;	/* bit width */
+	signed char phys;	/* physical bit width */
+	signed char le;		/* 0 = big-endian, 1 = little-endian */
+	signed char signd;	/* 0 = unsigned, 1 = signed */
+	unsigned char silence[8]; /* silence data to fill */
+};
+
+extern const struct snd_pcm_format_data _snd_pcm_formats[];
+
+__SALSA_EXPORT_FUNC
+int snd_pcm_format_signed(snd_pcm_format_t format)
+{
+	return _snd_pcm_formats[format].signd;
+}
+
+__SALSA_EXPORT_FUNC
+int snd_pcm_format_unsigned(snd_pcm_format_t format)
+{
+	int val = snd_pcm_format_signed(format);
+	if (val < 0)
+		return val;
+	return !val;
+}
+
+__SALSA_EXPORT_FUNC
+int snd_pcm_format_linear(snd_pcm_format_t format)
+{
+	return snd_pcm_format_signed(format) >= 0;
+}
+
+__SALSA_EXPORT_FUNC
+int snd_pcm_format_float(snd_pcm_format_t format)
+{
+	switch (format) {
+	case SND_PCM_FORMAT_FLOAT_LE:
+	case SND_PCM_FORMAT_FLOAT_BE:
+	case SND_PCM_FORMAT_FLOAT64_LE:
+	case SND_PCM_FORMAT_FLOAT64_BE:
+		return 1;
+	default:
+		return 0;
+	}
+}
+
+__SALSA_EXPORT_FUNC
+int snd_pcm_format_little_endian(snd_pcm_format_t format)
+{
+	return _snd_pcm_formats[format].le;
+}
+
+__SALSA_EXPORT_FUNC
+int snd_pcm_format_big_endian(snd_pcm_format_t format)
+{
+	int val = snd_pcm_format_little_endian(format);
+	if (val < 0)
+		return val;
+	return !val;
+}
+
+__SALSA_EXPORT_FUNC
+int snd_pcm_format_cpu_endian(snd_pcm_format_t format)
+{
+#ifdef SND_LITTLE_ENDIAN
+	return snd_pcm_format_little_endian(format);
+#else
+	return snd_pcm_format_big_endian(format);
+#endif
+}
+
+__SALSA_EXPORT_FUNC
+int snd_pcm_format_width(snd_pcm_format_t format)
+{
+	return _snd_pcm_formats[format].width;
+}
+
+__SALSA_EXPORT_FUNC
+int snd_pcm_format_physical_width(snd_pcm_format_t format)
+{
+	return _snd_pcm_formats[format].phys;
+}
+
+__SALSA_EXPORT_FUNC
+ssize_t snd_pcm_format_size(snd_pcm_format_t format, size_t samples)
+{
+	int phys_width = snd_pcm_format_physical_width(format);
+	if (phys_width < 0)
+		return -EINVAL;
+	return samples * phys_width / 8;
+}
+
+extern u_int64_t snd_pcm_format_silence_64(snd_pcm_format_t format);
+
+__SALSA_EXPORT_FUNC
+u_int32_t snd_pcm_format_silence_32(snd_pcm_format_t format)
+{
+	return (u_int32_t)snd_pcm_format_silence_64(format);
+}
+
+__SALSA_EXPORT_FUNC
+u_int16_t snd_pcm_format_silence_16(snd_pcm_format_t format)
+{
+	return (u_int16_t)snd_pcm_format_silence_64(format);
+}
+
+__SALSA_EXPORT_FUNC
+u_int8_t snd_pcm_format_silence(snd_pcm_format_t format)
+{
+	return (u_int8_t)snd_pcm_format_silence_64(format);
+}
+
 #endif /* __ALSA_PCM_MACROS_H */
