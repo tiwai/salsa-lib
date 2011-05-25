@@ -27,11 +27,11 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <sys/poll.h>
-#ifdef SALSA_SUPPORT_FLOAT
-#include <math.h>
-#endif
 #include "control.h"
 #include "local.h"
+#if SALSA_SUPPORT_FLOAT
+#include <math.h>
+#endif
 
 
 /*
@@ -414,7 +414,7 @@ static int tlv_to_dB_minmax(unsigned int *tlv, long rangemin, long rangemax,
 	return 0;
 }
 
-#ifdef SALSA_SUPPORT_FLOAT
+#if SALSA_SUPPORT_FLOAT
 static int tlv_to_dB_linear(unsigned int *tlv, long rangemin, long rangemax,
 			    long volume, long *db_gain)
 {
@@ -633,7 +633,7 @@ static int tlv_from_dB_minmax(unsigned int *tlv, long rangemin, long rangemax,
 	return 0;
 }
 
-#ifdef SALSA_SUPPORT_FLOAT
+#if SALSA_SUPPORT_FLOAT
 static int tlv_from_dB_linear(unsigned int *tlv, long rangemin, long rangemax,
 			      long db_gain, long *value, int xdir)
 {

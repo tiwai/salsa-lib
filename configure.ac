@@ -111,6 +111,11 @@ AC_ARG_ENABLE(symbolic-functions,
     [use -Bsymbolic-functions option if available (optmization for size and speed)]),
   symfuncs="$enableval", symfuncs="no")
 
+AC_ARG_ENABLE(float,
+  AS_HELP_STRING([--enable-float],
+		 [support floatin-point unit]),
+  support_float="$enableval", support_float="no")
+
 AC_ARG_ENABLE(everything,
   AS_HELP_STRING([--enable-everything],
 		 [enable everything :)]),
@@ -129,7 +134,10 @@ if test "$everything" = "yes"; then
   libasound="yes"
   symfuncs="yes"
   output_buffer="yes"
+  support_float="yes"
 fi
+
+SALSA_DEPLIBS=""
 
 AM_CONDITIONAL(BUILD_PCM, test "$pcm" = "yes")
 AM_CONDITIONAL(BUILD_MIXER, test "$mixer" = "yes")
@@ -176,6 +184,14 @@ else
 fi
 AC_SUBST(SALSA_SUPPORT_OUTPUT_BUFFER)
 
+if test "$support_float" = "yes"; then
+  SALSA_SUPPORT_FLOAT=1
+  SALSA_DEPLIBS="$SALSA_DEPLIBS -lm"
+else
+  SALSA_SUPPORT_FLOAT=0
+fi
+AC_SUBST(SALSA_SUPPORT_FLOAT)
+
 if test "$delight_valgrind" = "yes"; then
   AC_DEFINE(DELIGHT_VALGRIND)
 fi
@@ -192,6 +208,8 @@ else
   AC_MSG_RESULT(no)
 fi
 AM_CONDITIONAL(SYMBOLIC_FUNCTIONS, test x"$symfuncs" = xyes)
+
+AC_SUBST(SALSA_DEPLIBS)
 
 dnl OK, let's output...
 
@@ -229,3 +247,4 @@ echo "  - Async handler support: $async"
 echo "  - Make ABI-compatible libasound.so: $libasound"
 echo "  - Mark deprecated attribute: $markdeprecated"
 echo "  - Support string-output via snd_output: $output_buffer"
+echo "  - Support floating-point: $support_float"

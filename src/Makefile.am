@@ -28,6 +28,7 @@ libsalsa_la_SOURCES += timer.c
 endif
 
 libsalsa_la_LDFLAGS = -version-info 0:1:0 $(SYMFUNCS)
+libsalsa_la_LIBADD = @SALSA_DEPLIBS@
 
 alsaincludedir = $(includedir)/alsa
 
@@ -99,5 +100,6 @@ VSYMS =
 endif
 
 libasound_la_LDFLAGS = -version-info 2:0:0 $(VSYMS) $(SYMFUNCS)
+libasound_la_LIBADD = @SALSA_DEPLIBS@
 
 endif

@@ -16,6 +16,9 @@
 /* Don't support string output via snd_output_*() */
 #define SALSA_SIMPLE_OUTPUT	@SALSA_SIMPLE_OUTPUT@
 
+/* Support floating pointer */
+#define SALSA_SUPPORT_FLOAT	@SALSA_SUPPORT_FLOAT@
+
 #define SALSA_DEVPATH "@DEVPATH@"
 
 #endif /* __ALSA_RECIPE_H */
