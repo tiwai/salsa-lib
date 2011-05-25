@@ -70,7 +70,7 @@ static void snd_mask_reset_range(snd_mask_t *mask, unsigned int from,
 		mask->bits[MASK_OFS(i)] &= ~MASK_BIT(i);
 }
 
-static inline unsigned int ld2(u_int32_t v)
+static unsigned int ld2(u_int32_t v)
 {
         unsigned r = 0;
 
@@ -137,7 +137,7 @@ static inline int snd_mask_refine(snd_mask_t *mask, const snd_mask_t *v)
 		mask->bits[i] &= v->bits[i];
 	if (_snd_mask_empty(mask))
 		return -EINVAL;
-	return !! memcmp(mask, &old, MASK_SIZE * 4);
+	return !! memcmp(mask, &old, sizeof(old));
 }
 
 static inline int snd_mask_refine_first(snd_mask_t *mask)
@@ -1071,6 +1071,37 @@ int snd_pcm_sw_params(snd_pcm_t *pcm, snd_pcm_sw_params_t *params)
  * DUMP HW PARAMS
  */
 
+static void snd_mask_print(const snd_mask_t *mask, int var, snd_output_t *out)
+{
+	unsigned int i;
+	if (_snd_mask_empty(mask)) {
+		snd_output_puts(out, " NONE");
+		return;
+	} else if (snd_mask_full(mask)) {
+		snd_output_puts(out, " ALL");
+		return;
+	}
+	for (i = 0; i < SND_MASK_MAX; i++) {
+		const char *s;
+		if (!_snd_mask_test(mask, i))
+			continue;
+		switch (var) {
+		case SNDRV_PCM_HW_PARAM_ACCESS:
+			s = snd_pcm_access_name(i);
+			break;
+		case SNDRV_PCM_HW_PARAM_FORMAT:
+			s = snd_pcm_format_name(i);
+			break;
+		case SNDRV_PCM_HW_PARAM_SUBFORMAT:
+			s = snd_pcm_subformat_name(i);
+			break;
+		default:
+			continue;
+		}
+		snd_output_printf(out, " %s", s);
+	}
+}
+
 static void snd_interval_print(const snd_interval_t *i, snd_output_t *out)
 {
 	if (snd_interval_empty(i))
@@ -1090,43 +1121,10 @@ static void snd_interval_print(const snd_interval_t *i, snd_output_t *out)
 void snd_pcm_hw_param_dump(const snd_pcm_hw_params_t *params,
 			   int var, snd_output_t *out)
 {
-	if (hw_is_mask(var)) {
-		const snd_mask_t *mask = hw_param_mask_c(params, var);
-		if (_snd_mask_empty(mask))
-			snd_output_puts(out, " NONE");
-		else if (snd_mask_full(mask))
-			snd_output_puts(out, " ALL");
-		else {
-			unsigned int k;
-			for (k = 0; k <= SND_MASK_MAX; ++k) {
-				if (_snd_mask_test(mask, k)) {
-					const char *s;
-					switch (var) {
-					case SNDRV_PCM_HW_PARAM_ACCESS:
-						s = snd_pcm_access_name(k);
-						break;
-					case SNDRV_PCM_HW_PARAM_FORMAT:
-						s = snd_pcm_format_name(k);
-						break;
-					case SNDRV_PCM_HW_PARAM_SUBFORMAT:
-						s = snd_pcm_subformat_name(k);
-						break;
-					default:
-						s = NULL;
-					}
-					if (s) {
-						snd_output_putc(out, ' ');
-						snd_output_puts(out, s);
-					}
-				}
-			}
-		}
-		return;
-	}
-	if (hw_is_interval(var)) {
+	if (hw_is_mask(var))
+		snd_mask_print(hw_param_mask_c(params, var), var, out);
+	else if (hw_is_interval(var))
 		snd_interval_print(hw_param_interval_c(params, var), out);
-		return;
-	}
 }
 
 #define HW_PARAM(v) [SNDRV_PCM_HW_PARAM_##v] = #v

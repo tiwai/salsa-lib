@@ -296,10 +296,10 @@ typedef struct snd_interval {
 		     empty:1;
 } snd_interval_t;
 
-#define SNDRV_MASK_MAX	256
+#define SND_MASK_MAX	256
 
 typedef struct snd_mask {
-	u_int32_t bits[(SNDRV_MASK_MAX+31)/32];
+	u_int32_t bits[SND_MASK_MAX / 32];
 } snd_mask_t;
 
 typedef struct snd_pcm_hw_params {

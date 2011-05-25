@@ -555,8 +555,6 @@ int _snd_mask_test(const snd_mask_t *mask, unsigned int val)
 	return mask->bits[MASK_OFS(val)] & MASK_BIT(val);
 }
 
-#define SND_MASK_MAX	SNDRV_MASK_MAX
-
 __SALSA_EXPORT_FUNC
 int _snd_mask_empty(const snd_mask_t *mask)
 {
