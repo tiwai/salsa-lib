@@ -116,6 +116,11 @@ AC_ARG_ENABLE(float,
 		 [support floatin-point unit]),
   support_float="$enableval", support_float="no")
 
+AC_ARG_ENABLE(float,
+  AS_HELP_STRING([--disable-4bit],
+		 [drop the support for 4bit PCM (IMA ADPCM)]),
+  support_4bit="$enableval", support_4bit="yes")
+
 AC_ARG_ENABLE(everything,
   AS_HELP_STRING([--enable-everything],
 		 [enable everything :)]),
@@ -135,6 +140,7 @@ if test "$everything" = "yes"; then
   symfuncs="yes"
   output_buffer="yes"
   support_float="yes"
+  support_4bit="yes"
 fi
 
 SALSA_DEPLIBS=""
@@ -191,6 +197,13 @@ else
   SALSA_SUPPORT_FLOAT=0
 fi
 AC_SUBST(SALSA_SUPPORT_FLOAT)
+
+if test "$support_4bit" = "yes"; then
+  SALSA_SUPPORT_4BIT_PCM=1
+else
+  SALSA_SUPPORT_4BIT_PCM=0
+fi
+AC_SUBST(SALSA_SUPPORT_4BIT_PCM)
 
 if test "$delight_valgrind" = "yes"; then
   AC_DEFINE(DELIGHT_VALGRIND)

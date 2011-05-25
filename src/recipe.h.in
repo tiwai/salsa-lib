@@ -19,6 +19,9 @@
 /* Support floating pointer */
 #define SALSA_SUPPORT_FLOAT	@SALSA_SUPPORT_FLOAT@
 
+/* Support 4bit PCM (IMA ADPCM) */
+#define SALSA_SUPPORT_4BIT_PCM	@SALSA_SUPPORT_4BIT_PCM@
+
 #define SALSA_DEVPATH "@DEVPATH@"
 
 #endif /* __ALSA_RECIPE_H */

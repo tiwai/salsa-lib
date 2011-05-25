@@ -573,6 +573,7 @@ void *snd_pcm_channel_area_addr(const snd_pcm_channel_area_t *area,
 	return (char *) area->addr + bitofs / 8;
 }
 
+#if SALSA_SUPPORT_4BIT_PCM
 static int area_silence_4bit(const snd_pcm_channel_area_t *dst_area,
 			     snd_pcm_uframes_t dst_offset,
 			     unsigned int samples, snd_pcm_format_t format)
@@ -595,6 +596,14 @@ static int area_silence_4bit(const snd_pcm_channel_area_t *dst_area,
 	}
 	return 0;
 }
+#else
+static int area_silence_4bit(const snd_pcm_channel_area_t *dst_area,
+			     snd_pcm_uframes_t dst_offset,
+			     unsigned int samples, snd_pcm_format_t format)
+{
+	return -EINVAL;
+}
+#endif /* SALSA_SUPPORT_4BIT_PCM */
 
 int snd_pcm_area_silence(const snd_pcm_channel_area_t *dst_area,
 			 snd_pcm_uframes_t dst_offset,
@@ -635,6 +644,7 @@ int snd_pcm_areas_silence(const snd_pcm_channel_area_t *dst_areas,
 	return 0;
 }
 
+#if SALSA_SUPPORT_4BIT_PCM
 static int area_copy_4bit(const snd_pcm_channel_area_t *dst_area,
 			  snd_pcm_uframes_t dst_offset,
 			  const snd_pcm_channel_area_t *src_area,
@@ -677,6 +687,16 @@ static int area_copy_4bit(const snd_pcm_channel_area_t *dst_area,
 	}
 	return 0;
 }
+#else
+static int area_copy_4bit(const snd_pcm_channel_area_t *dst_area,
+			  snd_pcm_uframes_t dst_offset,
+			  const snd_pcm_channel_area_t *src_area,
+			  snd_pcm_uframes_t src_offset,
+			  unsigned int samples, snd_pcm_format_t format)
+{
+	return -EINVAL;
+}
+#endif /* SALSA_SUPPORT_4BIT_PCM */
 
 int snd_pcm_area_copy(const snd_pcm_channel_area_t *dst_area,
 		      snd_pcm_uframes_t dst_offset,
