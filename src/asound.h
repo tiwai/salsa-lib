@@ -1,5 +1,5 @@
 /*
- * This is a stripped version of <linux/asound.h>
+ * ALSA kernel API and common-type definitions
  *
  *  Copyright (c) 2011 by Takashi Iwai <tiwai@suse.de>
  *
@@ -14,8 +14,8 @@
  *   GNU Lesser General Public License for more details.
  */
 
-#ifndef __SOUND_ASOUND_H
-#define __SOUND_ASOUND_H
+#ifndef __ALSA_ASOUND_H
+#define __ALSA_ASOUND_H
 
 #include <sys/time.h>
 #include <sys/types.h>
@@ -878,4 +878,4 @@ enum {
 	SNDRV_IOCTL_WRITEV = _IOW('K', 0x01, struct snd_xferv),
 };
 
-#endif /* __SOUND_ASOUND_H */
+#endif /* __ALSA_ASOUND_H */
