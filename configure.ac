@@ -107,9 +107,9 @@ AC_ARG_ENABLE(libasound,
   delight_valgrind="$enableval", delight_valgrind="yes")
 
 AC_ARG_ENABLE(symbolic-functions,
-  AS_HELP_STRING([--enable-symbolic-functions],
+  AS_HELP_STRING([--disable-symbolic-functions],
     [use -Bsymbolic-functions option if available (optmization for size and speed)]),
-  symfuncs="$enableval", symfuncs="no")
+  symfuncs="$enableval", symfuncs="yes")
 
 AC_ARG_ENABLE(float,
   AS_HELP_STRING([--enable-float],

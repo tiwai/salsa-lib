@@ -92,7 +92,9 @@ The PCM and mixer components are enabled as default, and can be
 disabled via --disable-pcm and --disable-mixer option, respectively.
 
 The dB range support can be enabled via --enable-tlv option.  It's
-disabled as default.
+disabled as default.  For enabling the floating-point math calculation
+used in dB <-> linear conversion for the mixer, pass --enable-float
+option as well.
 
 The async handler support can be enabled via --enable-async option.
 It's disabled as default.
