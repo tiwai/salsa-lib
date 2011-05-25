@@ -259,7 +259,7 @@ int snd_mixer_selem_has_common_switch(snd_mixer_elem_t *elem)
 	return !!(elem->caps & SND_SM_CAP_GSWITCH);
 }
 
-extern const char *_snd_mixer_selem_channels[];
+extern const char * const _snd_mixer_selem_channels[];
 
 __SALSA_EXPORT_FUNC
 const char *snd_mixer_selem_channel_name(snd_mixer_selem_channel_id_t channel)

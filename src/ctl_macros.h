@@ -222,9 +222,9 @@ int snd_ctl_read(snd_ctl_t *ctl, snd_ctl_event_t *event)
 }
 
 
-extern const char *_snd_ctl_elem_type_names[];
-extern const char *_snd_ctl_elem_iface_names[];
-extern const char *_snd_ctl_event_type_names[];
+extern const char * const _snd_ctl_elem_type_names[];
+extern const char * const _snd_ctl_elem_iface_names[];
+extern const char * const _snd_ctl_event_type_names[];
 
 #define snd_ctl_elem_type_name(type)	_snd_ctl_elem_type_names[type]
 #define snd_ctl_elem_iface_name(iface)	_snd_ctl_elem_iface_names[iface]

@@ -759,7 +759,7 @@ snd_mixer_elem_t *snd_mixer_find_selem(snd_mixer_t *mixer,
 	return NULL;
 }
 
-const char *_snd_mixer_selem_channels[SND_MIXER_SCHN_LAST + 1] = {
+const char * const _snd_mixer_selem_channels[SND_MIXER_SCHN_LAST + 1] = {
 	[SND_MIXER_SCHN_FRONT_LEFT] = "Front Left",
 	[SND_MIXER_SCHN_FRONT_RIGHT] = "Front Right",
 	[SND_MIXER_SCHN_REAR_LEFT] = "Rear Left",

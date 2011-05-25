@@ -299,7 +299,7 @@ int snd_ctl_wait(snd_ctl_t *ctl, int timeout)
 #define IFACE1(v, n) [SND_CTL_ELEM_IFACE_##v] = #n
 #define EVENT(v) [SND_CTL_EVENT_##v] = #v
 
-const char *_snd_ctl_elem_type_names[] = {
+const char * const _snd_ctl_elem_type_names[] = {
 	TYPE(NONE),
 	TYPE(BOOLEAN),
 	TYPE(INTEGER),
@@ -309,7 +309,7 @@ const char *_snd_ctl_elem_type_names[] = {
 	TYPE(INTEGER64),
 };
 
-const char *_snd_ctl_elem_iface_names[] = {
+const char * const _snd_ctl_elem_iface_names[] = {
 	IFACE(CARD),
 	IFACE(HWDEP),
 	IFACE(MIXER),
@@ -319,7 +319,7 @@ const char *_snd_ctl_elem_iface_names[] = {
 	IFACE(SEQUENCER),
 };
 
-const char *_snd_ctl_event_type_names[] = {
+const char * const _snd_ctl_event_type_names[] = {
 	EVENT(ELEM),
 };
 

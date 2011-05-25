@@ -20,7 +20,7 @@ typedef struct {
 } snd_pcm_channel_info_t;
 
 struct _snd_pcm {
-	char *name;
+	const char *name;
 	snd_pcm_type_t type;
 	snd_pcm_stream_t stream;
 	int mode;
@@ -297,15 +297,15 @@ int snd_pcm_unlink(snd_pcm_t *pcm)
 }
 
 
-extern const char *_snd_pcm_stream_names[];
-extern const char *_snd_pcm_state_names[];
-extern const char *_snd_pcm_access_names[];
-extern const char *_snd_pcm_format_names[];
-extern const char *_snd_pcm_format_descriptions[];
-extern const char *_snd_pcm_type_names[];
-extern const char *_snd_pcm_subformat_names[] ;
-extern const char *_snd_pcm_subformat_descriptions[];
-extern const char *_snd_pcm_tstamp_mode_names[];
+extern const char * const _snd_pcm_stream_names[];
+extern const char * const _snd_pcm_state_names[];
+extern const char * const _snd_pcm_access_names[];
+extern const char * const _snd_pcm_format_names[];
+extern const char * const _snd_pcm_format_descriptions[];
+extern const char * const _snd_pcm_type_names[];
+extern const char * const _snd_pcm_subformat_names[] ;
+extern const char * const _snd_pcm_subformat_descriptions[];
+extern const char * const _snd_pcm_tstamp_mode_names[];
 
 __SALSA_EXPORT_FUNC
 const char *snd_pcm_stream_name(snd_pcm_stream_t stream)

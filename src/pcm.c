@@ -280,12 +280,12 @@ snd_pcm_sframes_t snd_pcm_readn(snd_pcm_t *pcm, void **bufs,
 #define SUBFORMATD(v, d) [SND_PCM_SUBFORMAT_##v] = d 
 
 
-const char *_snd_pcm_stream_names[] = {
+const char * const _snd_pcm_stream_names[SND_PCM_STREAM_LAST + 1] = {
 	STREAM(PLAYBACK),
 	STREAM(CAPTURE),
 };
 
-const char *_snd_pcm_state_names[] = {
+const char * const _snd_pcm_state_names[SND_PCM_STATE_LAST + 1] = {
 	STATE(OPEN),
 	STATE(SETUP),
 	STATE(PREPARED),
@@ -297,7 +297,7 @@ const char *_snd_pcm_state_names[] = {
 	STATE(DISCONNECTED),
 };
 
-const char *_snd_pcm_access_names[SND_MASK_MAX + 1] = {
+const char * const _snd_pcm_access_names[SND_PCM_ACCESS_LAST + 1] = {
 	ACCESS(MMAP_INTERLEAVED), 
 	ACCESS(MMAP_NONINTERLEAVED),
 	ACCESS(MMAP_COMPLEX),
@@ -305,7 +305,7 @@ const char *_snd_pcm_access_names[SND_MASK_MAX + 1] = {
 	ACCESS(RW_NONINTERLEAVED),
 };
 
-const char *_snd_pcm_format_names[SND_MASK_MAX + 1] = {
+const char * const _snd_pcm_format_names[SND_PCM_FORMAT_LAST + 1] = {
 	FORMAT(S8),
 	FORMAT(U8),
 	FORMAT(S16_LE),
@@ -346,7 +346,7 @@ const char *_snd_pcm_format_names[SND_MASK_MAX + 1] = {
 	FORMAT(U18_3BE),
 };
 
-static const char *_snd_pcm_format_aliases[SND_MASK_MAX + 1] = {
+static const char * const _snd_pcm_format_aliases[SND_PCM_FORMAT_LAST + 1] = {
 	FORMAT(S16),
 	FORMAT(U16),
 	FORMAT(S24),
@@ -358,7 +358,7 @@ static const char *_snd_pcm_format_aliases[SND_MASK_MAX + 1] = {
 	FORMAT(IEC958_SUBFRAME),
 };
 
-const char *_snd_pcm_format_descriptions[SND_MASK_MAX + 1] = {
+const char * const _snd_pcm_format_descriptions[SND_PCM_FORMAT_LAST + 1] = {
 	FORMATD(S8, "Signed 8 bit"), 
 	FORMATD(U8, "Unsigned 8 bit"),
 	FORMATD(S16_LE, "Signed 16 bit Little Endian"),
@@ -399,7 +399,7 @@ const char *_snd_pcm_format_descriptions[SND_MASK_MAX + 1] = {
 	FORMATD(U18_3BE, "Unsigned 18 bit Big Endian in 3bytes"),
 };
 
-const char *_snd_pcm_type_names[] = {
+const char * const _snd_pcm_type_names[] = {
 	PCMTYPE(HW), 
 	PCMTYPE(HOOKS), 
 	PCMTYPE(MULTI), 
@@ -431,15 +431,15 @@ const char *_snd_pcm_type_names[] = {
         PCMTYPE(EXTPLUG),
 };
 
-const char *_snd_pcm_subformat_names[SND_MASK_MAX + 1] = {
+const char * const _snd_pcm_subformat_names[SND_PCM_SUBFORMAT_LAST + 1] = {
 	SUBFORMAT(STD), 
 };
 
-const char *_snd_pcm_subformat_descriptions[SND_MASK_MAX + 1] = {
+const char * const _snd_pcm_subformat_descriptions[SND_PCM_SUBFORMAT_LAST + 1] = {
 	SUBFORMATD(STD, "Standard"), 
 };
 
-const char *_snd_pcm_tstamp_mode_names[] = {
+const char * const _snd_pcm_tstamp_mode_names[SND_PCM_TSTAMP_LAST + 1] = {
 	TSTAMP(NONE),
 	TSTAMP(MMAP),
 };
