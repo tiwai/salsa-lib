@@ -13,8 +13,8 @@
 /* Enable deprecated attribute for non-working functions */
 #define SALSA_MARK_DEPRECATED	@SALSA_MARK_DEPRECATED@
 
-/* Don't support string output via snd_output_*() */
-#define SALSA_SIMPLE_OUTPUT	@SALSA_SIMPLE_OUTPUT@
+/* Support string output via snd_output_*() */
+#define SALSA_SUPPORT_OUTPUT_BUFFER	@SALSA_SUPPORT_OUTPUT_BUFFER@
 
 /* Support floating pointer */
 #define SALSA_SUPPORT_FLOAT	@SALSA_SUPPORT_FLOAT@

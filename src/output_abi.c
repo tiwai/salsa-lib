@@ -140,4 +140,4 @@ size_t snd_output_buffer_string(snd_output_t *out, char **buf)
 	return out->len;
 }
 
-#endif /* !SALSA_SIMPLE_OUTPUT */
+#endif /* SALSA_SUPPORT_OUTPUT_BUFFER */
