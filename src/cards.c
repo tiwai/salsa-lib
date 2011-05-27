@@ -49,10 +49,13 @@ int _snd_set_nonblock(int fd, int nonblock)
 
 #define SND_FILE_CONTROL	SALSA_DEVPATH "/controlC%i"
 
+#define fill_control_name(name, card)		\
+	sprintf(name, SND_FILE_CONTROL, card);
+
 int snd_card_load(int card)
 {
 	char control[sizeof(SND_FILE_CONTROL) + 10];
-	sprintf(control, SND_FILE_CONTROL, card);
+	fill_control_name(control, card);
 	return !access(control, R_OK);
 }
 
@@ -81,35 +84,36 @@ int _snd_ctl_hw_open(snd_ctl_t **ctlp, int card)
 	return snd_ctl_open(ctlp, name, 0);
 }
 
-static int get_card_info(int card, snd_ctl_card_info_t *info)
+static int load_card_info(const char *control, snd_ctl_card_info_t *info)
 {
-	int err;
-	snd_ctl_t *handle;
+	int open_dev;
 
-	memset(info, 0, sizeof(*info));
-	err = _snd_ctl_hw_open(&handle, card);
-	if (err < 0)
-		return err;
-	err = snd_ctl_card_info(handle, info);
-	snd_ctl_close(handle);
-	return err;
+	memzero_valgrind(info, sizeof(*info));
+	open_dev = open(control, O_RDONLY);
+	if (open_dev < 0)
+		return -errno;
+	if (ioctl(open_dev, SNDRV_CTL_IOCTL_CARD_INFO, info) < 0) {
+		close(open_dev);
+		return -errno;
+	}
+	close(open_dev);
+	return 0;
 }
 
 static int snd_card_load2(const char *control)
 {
-	int open_dev;
 	snd_ctl_card_info_t info;
-
-	open_dev = open(control, O_RDONLY);
-	if (open_dev < 0)
-		return -errno;
-	if (ioctl(open_dev, SNDRV_CTL_IOCTL_CARD_INFO, &info) < 0) {
-		int err = -errno;
-		close(open_dev);
+	int err = load_card_info(control, &info);
+	if (err < 0)
 		return err;
-	}
-	close(open_dev);
 	return info.card;
+}
+
+static int get_card_info(int card, snd_ctl_card_info_t *info)
+{
+	char control[sizeof(SND_FILE_CONTROL) + 10];
+	fill_control_name(control, card);
+	return load_card_info(control, info);
 }
 
 int snd_card_get_index(const char *string)
@@ -129,8 +133,6 @@ int snd_card_get_index(const char *string)
 		return -ENODEV;
 	}
 	for (card = 0; card < SALSA_MAX_CARDS; card++) {
-		if (!snd_card_load(card))
-			continue;
 		if (get_card_info(card, &info) < 0)
 			continue;
 		if (!strcmp((const char *)info.id, string))
