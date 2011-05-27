@@ -116,7 +116,7 @@ AC_ARG_ENABLE(float,
 		 [support floatin-point unit]),
   support_float="$enableval", support_float="no")
 
-AC_ARG_ENABLE(float,
+AC_ARG_ENABLE(support_4bit,
   AS_HELP_STRING([--disable-4bit],
 		 [drop the support for 4bit PCM (IMA ADPCM)]),
   support_4bit="$enableval", support_4bit="yes")
