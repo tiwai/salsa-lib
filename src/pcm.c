@@ -45,35 +45,8 @@ static int get_pcm_subdev(int fd)
 	snd_pcm_info_t info;
 	memzero_valgrind(&info, sizeof(info));
 	if (ioctl(fd, SNDRV_PCM_IOCTL_INFO, &info) < 0)
-		return -errno;
+		return -1;
 	return info.subdevice;
-}
-
-/* open the substream with the given subdevice number */
-static int open_with_subdev(const char *filename, int fmode,
-			    int card, int subdev)
-{
-	snd_ctl_t *ctl;
-	int err, fd;
-
-	err = _snd_ctl_hw_open(&ctl, card);
-	if (err < 0)
-		return err;
-
-	err = snd_ctl_pcm_prefer_subdevice(ctl, subdev);
-	if (err < 0)
-		return err;
-
-	fd = open(filename, fmode);
-	if (fd < 0)
-	        return -errno;
-
-	if (get_pcm_subdev(fd) != subdev) {
-		close(fd);
-		fd = -EBUSY;
-	}
-	snd_ctl_close(ctl);
-	return fd;
 }
 
 int snd_pcm_open(snd_pcm_t **pcmp, const char *name, 
@@ -98,9 +71,14 @@ int snd_pcm_open(snd_pcm_t **pcmp, const char *name,
 		fmode |= O_ASYNC;
 
 	if (subdev >= 0) {
-		fd = open_with_subdev(filename, fmode, card, subdev);
+		fd = _snd_open_subdev(filename, fmode, card, subdev,
+				      SNDRV_CTL_IOCTL_PCM_PREFER_SUBDEVICE);
 		if (fd < 0)
 			return fd;
+		if (get_pcm_subdev(fd) != subdev) {
+			close(fd);
+			return -EBUSY;
+		}
 	} else {
 		fd = open(filename, fmode);
 		if (fd < 0)

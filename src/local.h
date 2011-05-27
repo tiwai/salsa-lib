@@ -5,7 +5,8 @@
 #define SALSA_MAX_DEVICES	32
 
 int _snd_dev_get_device(const char *name, int *cardp, int *devp, int *subdevp);
-int _snd_ctl_hw_open(snd_ctl_t **ctlp, int card);
+int _snd_open_subdev(const char *filename, int fmode,
+		     int card, int subdev, unsigned int prefer_ioctl);
 
 int _snd_pcm_mmap(snd_pcm_t *pcm);
 int _snd_pcm_munmap(snd_pcm_t *pcm);

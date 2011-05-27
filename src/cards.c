@@ -77,11 +77,23 @@ int snd_card_next(int *rcard)
 	return 0;
 }
 
-int _snd_ctl_hw_open(snd_ctl_t **ctlp, int card)
+/* open the substream with the given subdevice number */
+int _snd_open_subdev(const char *filename, int fmode,
+		     int card, int subdev, unsigned int prefer_ioctl)
 {
-	char name[16];
-	sprintf(name, "hw:%d", card);
-	return snd_ctl_open(ctlp, name, 0);
+	char control[sizeof(SND_FILE_CONTROL) + 10];
+	int ctl, fd;
+
+	fill_control_name(control, card);
+	ctl = open(control, O_RDWR);
+	if (ctl < 0)
+		return -errno;
+	if (ioctl(ctl, prefer_ioctl, &subdev) >= 0)
+		fd = -1;
+	else
+		fd = open(filename, fmode);
+	close(ctl);
+	return fd < 0 ? -errno : fd;
 }
 
 static int load_card_info(const char *control, snd_ctl_card_info_t *info)
@@ -126,7 +138,7 @@ int snd_card_get_index(const char *string)
 	if (*string == '/') /* device name */
 		return snd_card_load2(string);
 	if (sscanf(string, "%i", &card) == 1) {
-		if (card < 0 || card > 31)
+		if (card < 0 || card >= SALSA_MAX_CARDS)
 			return -EINVAL;
 		if (snd_card_load(card))
 			return card;
@@ -195,8 +207,11 @@ int _snd_dev_get_device(const char *name, int *cardp, int *devp, int *subdevp)
 	if (devp && subdevp) {
 		/* parse the secondary and third arguments (if any) */
 		name = strchr(name, ',');
-		if (name)
+		if (name) {
 			sscanf(name, ",%d,%d",  devp, subdevp);
+			if (*devp < 0 || *devp >= SALSA_MAX_DEVICES)
+				return -EINVAL;
+		}
 	}
 	return 0;
 }

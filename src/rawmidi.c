@@ -31,35 +31,15 @@
 #include "control.h"
 #include "local.h"
 
-static int open_with_subdev(const char *filename, int fmode,
-			    int card, int subdev)
+static int get_rawmidi_subdev(int fd, int fmode)
 {
 	snd_rawmidi_info_t info;
-	snd_ctl_t *ctl;
-	int err, fd;
-
-	err = _snd_ctl_hw_open(&ctl, card);
-	if (err < 0)
-		return err;
-
-	err = snd_ctl_rawmidi_prefer_subdevice(ctl, subdev);
-	if (err < 0)
-		return err;
-
-	fd = open(filename, fmode);
-	if (fd < 0)
-	        return -errno;
 	memzero_valgrind(&info, sizeof(info));
 	info.stream = ((fmode & O_ACCMODE) != O_RDONLY) ?
 		SND_RAWMIDI_STREAM_OUTPUT : SND_RAWMIDI_STREAM_INPUT;
-	if (ioctl(fd, SNDRV_RAWMIDI_IOCTL_INFO, &info) >= 0 &&
-	    info.subdevice == subdev) {
-		snd_ctl_close(ctl);
-		return fd;
-	}
-	close(fd);
-	snd_ctl_close(ctl);
-	return -EBUSY;
+	if (ioctl(fd, SNDRV_RAWMIDI_IOCTL_INFO, &info) < 0)
+		return -1;
+	return info.subdevice;
 }
 
 static snd_rawmidi_t *new_rmidi(snd_rawmidi_hw_t *hw, int stream, int mode)
@@ -119,9 +99,14 @@ int snd_rawmidi_open(snd_rawmidi_t **in_rmidi, snd_rawmidi_t **out_rmidi,
 		fmode |= O_SYNC;
 
 	if (subdev >= 0) {
-		fd = open_with_subdev(filename, fmode, card, subdev);
+		fd = _snd_open_subdev(filename, fmode, card, subdev,
+				      SNDRV_CTL_IOCTL_RAWMIDI_PREFER_SUBDEVICE);
 		if (fd < 0)
 			return fd;
+		if (get_rawmidi_subdev(fd, fmode) != subdev) {
+			close(fd);
+			return -EBUSY;
+		}
 	} else {
 		fd = open(filename, fmode);
 		if (fd < 0)
