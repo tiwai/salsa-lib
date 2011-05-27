@@ -83,6 +83,11 @@ int snd_pcm_open(snd_pcm_t **pcmp, const char *name,
 		fd = open(filename, fmode);
 		if (fd < 0)
 			return -errno;
+		subdev = get_pcm_subdev(fd);
+		if (subdev < 0) {
+			close(fd);
+			return -EBUSY;
+		}
 	}
 	if (!(mode & SND_PCM_NONBLOCK)) {
 		fmode &= ~O_NONBLOCK;
@@ -92,13 +97,6 @@ int snd_pcm_open(snd_pcm_t **pcmp, const char *name,
 	if (ioctl(fd, SNDRV_PCM_IOCTL_PVERSION, &ver) < 0) {
 		err = -errno;
 		goto error;
-	}
-	if (subdev < 0) {
-		subdev = get_pcm_subdev(fd);
-		if (subdev < 0) {
-			err = subdev;
-			goto error;
-		}
 	}
 
 	pcm = calloc(1, sizeof(*pcm));
@@ -127,8 +125,7 @@ int snd_pcm_open(snd_pcm_t **pcmp, const char *name,
 
  error:
 	free(pcm);
-	if (fd >= 0)
-		close(fd);
+	close(fd);
 	return err;
 }
 
