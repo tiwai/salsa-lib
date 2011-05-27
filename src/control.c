@@ -38,11 +38,18 @@
  * open/close
  */
 
+#if SALSA_CHECK_ABI
+int _snd_ctl_open(snd_ctl_t **ctlp, const char *name, int mode,
+		  unsigned int magic)
+#else
 int snd_ctl_open(snd_ctl_t **ctlp, const char *name, int mode)
+#endif
 {
 	snd_ctl_t *ctl;
 	char filename[sizeof(SALSA_DEVPATH) + 24];
 	int err, fmode, fd, card, ver;
+
+	check_incompatible_abi(magic, SALSA_CTL_MAGIC);
 
 	*ctlp = NULL;
 

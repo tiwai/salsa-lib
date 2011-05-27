@@ -56,7 +56,11 @@ struct snd_mixer_selem_regopt {
 
 typedef struct _snd_mixer_selem_id snd_mixer_selem_id_t;
 
+#if SALSA_CHECK_ABI
+int _snd_mixer_open(snd_mixer_t **mixer, int mode, unsigned int magic);
+#else
 int snd_mixer_open(snd_mixer_t **mixer, int mode);
+#endif
 int snd_mixer_close(snd_mixer_t *mixer);
 int snd_mixer_handle_events(snd_mixer_t *mixer);
 int snd_mixer_attach(snd_mixer_t *mixer, const char *name);

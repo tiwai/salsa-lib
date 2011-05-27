@@ -16,7 +16,12 @@ typedef enum _snd_rawmidi_type {
 	SND_RAWMIDI_TYPE_VIRTUAL	/* not used by SALSA */
 } snd_rawmidi_type_t;
 
+#if SALSA_CHECK_ABI
+int _snd_rawmidi_open(snd_rawmidi_t **in_rmidi, snd_rawmidi_t **out_rmidi,
+		      const char *name, int mode, unsigned int magic);
+#else
 int snd_rawmidi_open(snd_rawmidi_t **in_rmidi, snd_rawmidi_t **out_rmidi,
 		     const char *name, int mode);
+#endif
 int snd_rawmidi_close(snd_rawmidi_t *rmidi);
 

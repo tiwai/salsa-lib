@@ -74,6 +74,16 @@ struct _snd_pcm {
  * Macros
  */
 
+#if SALSA_CHECK_ABI
+#define SALSA_PCM_MAGIC		sizeof(struct _snd_pcm)
+__SALSA_EXPORT_FUNC
+int snd_pcm_open(snd_pcm_t **pcm, const char *name, 
+		 snd_pcm_stream_t stream, int mode)
+{
+	return _snd_pcm_open(pcm, name, stream, mode, SALSA_PCM_MAGIC);
+}
+#endif
+
 __SALSA_EXPORT_FUNC
 int snd_pcm_nonblock(snd_pcm_t *pcm, int nonblock)
 {

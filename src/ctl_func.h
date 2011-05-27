@@ -27,7 +27,12 @@ int snd_card_get_index(const char *name);
 int snd_card_get_name(int card, char **name);
 int snd_card_get_longname(int card, char **name);
 
+#if SALSA_CHECK_ABI
+int _snd_ctl_open(snd_ctl_t **ctl, const char *name, int mode,
+		  unsigned int magic);
+#else
 int snd_ctl_open(snd_ctl_t **ctl, const char *name, int mode);
+#endif
 int snd_ctl_close(snd_ctl_t *ctl);
 int snd_ctl_wait(snd_ctl_t *ctl, int timeout);
 

@@ -18,7 +18,12 @@ typedef int (*snd_hctl_callback_t)(snd_hctl_t *hctl,
 typedef int (*snd_hctl_elem_callback_t)(snd_hctl_elem_t *elem,
 					unsigned int mask);
 
+#if SALSA_CHECK_ABI
+int _snd_hctl_open(snd_hctl_t **hctl, const char *name, int mode,
+		   unsigned int magic);
+#else
 int snd_hctl_open(snd_hctl_t **hctl, const char *name, int mode);
+#endif
 int snd_hctl_open_ctl(snd_hctl_t **hctlp, snd_ctl_t *ctl);
 int snd_hctl_close(snd_hctl_t *hctl);
 snd_hctl_elem_t *snd_hctl_find_elem(snd_hctl_t *hctl, const snd_ctl_elem_id_t *id);

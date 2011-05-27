@@ -77,8 +77,13 @@ typedef struct _snd_pcm_channel_area {
 	unsigned int step;
 } snd_pcm_channel_area_t;
 
+#if SALSA_CHECK_ABI
+int _snd_pcm_open(snd_pcm_t **pcm, const char *name, 
+		  snd_pcm_stream_t stream, int mode, unsigned int magic);
+#else
 int snd_pcm_open(snd_pcm_t **pcm, const char *name, 
 		 snd_pcm_stream_t stream, int mode);
+#endif
 int snd_pcm_close(snd_pcm_t *pcm);
 int snd_pcm_hw_params(snd_pcm_t *pcm, snd_pcm_hw_params_t *params);
 int snd_pcm_hw_free(snd_pcm_t *pcm);

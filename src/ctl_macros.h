@@ -28,6 +28,15 @@ struct _snd_ctl {
 };
 
 
+#if SALSA_CHECK_ABI
+#define SALSA_CTL_MAGIC		sizeof(struct _snd_ctl)
+__SALSA_EXPORT_FUNC
+int snd_ctl_open(snd_ctl_t **ctl, const char *name, int mode)
+{
+	return _snd_ctl_open(ctl, name, mode, SALSA_CTL_MAGIC);
+}
+#endif
+
 __SALSA_EXPORT_FUNC
 int snd_ctl_nonblock(snd_ctl_t *ctl, int nonblock)
 {

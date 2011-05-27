@@ -34,6 +34,16 @@ struct _snd_hctl_elem {
 };
 
 
+#if SALSA_CHECK_ABI
+#define SALSA_HCTL_MAGIC \
+	((sizeof(struct _snd_hctl) << 8) | sizeof(struct _snd_hctl_elem))
+__SALSA_EXPORT_FUNC
+int snd_hctl_open(snd_hctl_t **hctl, const char *name, int mode)
+{
+	return _snd_hctl_open(hctl, name, mode, SALSA_HCTL_MAGIC);
+}
+#endif
+
 __SALSA_EXPORT_FUNC
 int snd_hctl_wait(snd_hctl_t *hctl, int timeout)
 {

@@ -66,13 +66,20 @@ static snd_rawmidi_t *new_rmidi(snd_rawmidi_hw_t *hw, int stream, int mode)
 	return rmidi;
 }
 
+#if SALSA_CHECK_ABI
+int _snd_rawmidi_open(snd_rawmidi_t **in_rmidi, snd_rawmidi_t **out_rmidi,
+		      const char *name, int mode, unsigned int magic)
+#else
 int snd_rawmidi_open(snd_rawmidi_t **in_rmidi, snd_rawmidi_t **out_rmidi,
 		     const char *name, int mode)
+#endif
 {
 	int fd, err, fmode, ver;
 	int card, dev, subdev;
 	char filename[sizeof(SALSA_DEVPATH) + 24];
 	snd_rawmidi_hw_t *hw;
+
+	check_incompatible_abi(magic, SALSA_RAWMIDI_MAGIC);
 
 	if (in_rmidi)
 		*in_rmidi = NULL;

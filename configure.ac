@@ -121,6 +121,11 @@ AC_ARG_ENABLE(float,
 		 [drop the support for 4bit PCM (IMA ADPCM)]),
   support_4bit="$enableval", support_4bit="yes")
 
+AC_ARG_ENABLE(abicheck,
+  AS_HELP_STRING([--enable-abicheck],
+		 [enable library ABI check]),
+  abicheck="$enableval", abicheck="no")
+
 AC_ARG_ENABLE(everything,
   AS_HELP_STRING([--enable-everything],
 		 [enable everything :)]),
@@ -141,6 +146,7 @@ if test "$everything" = "yes"; then
   output_buffer="yes"
   support_float="yes"
   support_4bit="yes"
+  abicheck="yes"
 fi
 
 SALSA_DEPLIBS=""
@@ -183,6 +189,7 @@ else
   SALSA_MARK_DEPRECATED=0
 fi
 AC_SUBST(SALSA_MARK_DEPRECATED)
+
 if test "$output_buffer" = "yes"; then
   SALSA_SUPPORT_OUTPUT_BUFFER=1
 else
@@ -204,6 +211,13 @@ else
   SALSA_SUPPORT_4BIT_PCM=0
 fi
 AC_SUBST(SALSA_SUPPORT_4BIT_PCM)
+
+if test "$abicheck" = "yes"; then
+  SALSA_CHECK_ABI=1
+else
+  SALSA_CHECK_ABI=0
+fi
+AC_SUBST(SALSA_CHECK_ABI)
 
 if test "$delight_valgrind" = "yes"; then
   AC_DEFINE(DELIGHT_VALGRIND)
@@ -261,3 +275,4 @@ echo "  - Make ABI-compatible libasound.so: $libasound"
 echo "  - Mark deprecated attribute: $markdeprecated"
 echo "  - Support string-output via snd_output: $output_buffer"
 echo "  - Support floating-point: $support_float"
+echo "  - Enable library ABI check: $abicheck"

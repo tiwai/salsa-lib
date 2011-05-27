@@ -34,11 +34,18 @@
 /*
  * open/close
  */
+#if SALSA_CHECK_ABI
+int _snd_hctl_open(snd_hctl_t **hctlp, const char *name, int mode,
+		   unsigned int magic)
+#else
 int snd_hctl_open(snd_hctl_t **hctlp, const char *name, int mode)
+#endif
 {
 	snd_ctl_t *ctl;
 	int err;
 	
+	check_incompatible_abi(magic, SALSA_HCTL_MAGIC);
+
 	err = snd_ctl_open(&ctl, name, mode);
 	if (err < 0)
 		return err;

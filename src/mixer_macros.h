@@ -89,6 +89,18 @@ struct _snd_mixer_elem {
 };
 
 
+#if SALSA_CHECK_ABI
+#define SALSA_MIXER_MAGIC \
+	(sizeof(struct _snd_mixer) | (sizeof(struct _snd_mixer_elem) << 8) | \
+	 (sizeof(snd_selem_item_head_t) + sizeof(snd_selem_vol_item_t) + \
+	  sizeof(snd_selem_sw_item_t) + sizeof(snd_selem_enum_item_t)))
+__SALSA_EXPORT_FUNC
+int snd_mixer_open(snd_mixer_t **mixer, int mode)
+{
+	return _snd_mixer_open(mixer, mode, SALSA_MIXER_MAGIC);
+}
+#endif
+
 __SALSA_EXPORT_FUNC
 int snd_mixer_poll_descriptors_count(snd_mixer_t *mixer)
 {

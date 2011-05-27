@@ -17,4 +17,11 @@ int _snd_pcm_munmap(snd_pcm_t *pcm);
 #define memzero_valgrind(buf, size)
 #endif
 
+#if SALSA_CHECK_ABI
+#include <assert.h>
+#define check_incompatible_abi(magic, orig) assert(magic == orig)
+#else
+#define check_incompatible_abi(magic, orig)
+#endif
+
 #endif /* __LOCAL_H_INC */

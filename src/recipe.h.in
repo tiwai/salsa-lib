@@ -22,6 +22,10 @@
 /* Support 4bit PCM (IMA ADPCM) */
 #define SALSA_SUPPORT_4BIT_PCM	@SALSA_SUPPORT_4BIT_PCM@
 
+/* Enable library ABI check */
+#define SALSA_CHECK_ABI		@SALSA_CHECK_ABI@
+
+/* Default device path prefix */
 #define SALSA_DEVPATH "@DEVPATH@"
 
 #endif /* __ALSA_RECIPE_H */

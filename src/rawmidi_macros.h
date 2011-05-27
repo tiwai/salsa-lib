@@ -34,6 +34,18 @@ struct _snd_rawmidi {
 /*
  */
 
+#if SALSA_CHECK_ABI
+#define SALSA_RAWMIDI_MAGIC \
+	((sizeof(struct _snd_rawmidi_hw) << 8) | sizeof(struct _snd_rawmidi))
+__SALSA_EXPORT_FUNC
+int snd_rawmidi_open(snd_rawmidi_t **in_rmidi, snd_rawmidi_t **out_rmidi,
+		     const char *name, int mode)
+{
+	return _snd_rawmidi_open(in_rmidi, out_rmidi, name, mode,
+				 SALSA_RAWMIDI_MAGIC);
+}
+#endif
+
 __SALSA_EXPORT_FUNC __SALSA_NOT_IMPLEMENTED
 int snd_rawmidi_open_lconf(snd_rawmidi_t **in_rmidi, snd_rawmidi_t **out_rmidi,
 			   const char *name, int mode, snd_config_t *lconf)

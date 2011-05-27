@@ -49,13 +49,20 @@ static int get_pcm_subdev(int fd)
 	return info.subdevice;
 }
 
+#if SALSA_CHECK_ABI
+int _snd_pcm_open(snd_pcm_t **pcmp, const char *name, 
+		  snd_pcm_stream_t stream, int mode, unsigned int magic)
+#else
 int snd_pcm_open(snd_pcm_t **pcmp, const char *name, 
 		 snd_pcm_stream_t stream, int mode)
+#endif
 {
 	char filename[sizeof(SALSA_DEVPATH) + 24];
 	int card, dev, subdev;
 	int fd, err, fmode, ver;
 	snd_pcm_t *pcm = NULL;
+
+	check_incompatible_abi(magic, SALSA_PCM_MAGIC);
 
 	*pcmp = NULL;
 

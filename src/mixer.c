@@ -33,9 +33,16 @@
 static int hctl_event_handler(snd_hctl_t *hctl, unsigned int mask,
 			      snd_hctl_elem_t *elem);
 
+#if SALSA_CHECK_ABI
+int _snd_mixer_open(snd_mixer_t **mixerp, int mode, unsigned int magic)
+#else
 int snd_mixer_open(snd_mixer_t **mixerp, int mode)
+#endif
 {
 	snd_mixer_t *mixer;
+
+	check_incompatible_abi(magic, SALSA_MIXER_MAGIC);
+
 	mixer = calloc(1, sizeof(*mixer));
 	*mixerp = mixer;
 	if (mixer == NULL)

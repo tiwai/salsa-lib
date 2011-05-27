@@ -102,6 +102,9 @@ It's disabled as default.
 With option --enable-libasound, libasound.so will be created as an
 opt-in ABI-compatible library with the genuine ALSA-lib.
 
+When --enable-abicheck is given, each open function checks the ABI
+compatibility with the installed library.
+
 All these options can be enabled via a single option,
 --enable-everything, for your convenience.
 
