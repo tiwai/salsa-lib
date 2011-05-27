@@ -1004,71 +1004,8 @@ int snd_mixer_selem_set_enum_item(snd_mixer_elem_t *elem,
 
 
 #if SALSA_HAS_TLV_SUPPORT
-
-/* convert to index of integer array */
-#define int_index(size)	(((size) + sizeof(int) - 1) / sizeof(int))
-
-/* max size of a TLV entry for dB information (including compound one) */
-#define MAX_TLV_RANGE_SIZE	256
-
-/* parse TLV stream and retrieve dB information
- * return 0 if successly found and stored to rec,
- * return 1 if no information is found,
- * or return a negative error code
- */
-static int parse_db_range(snd_selem_vol_item_t *item, unsigned int *tlv,
-			  unsigned int tlv_size)
-{
-	unsigned int type;
-	unsigned int size;
-	int err;
-
-	type = tlv[0];
-	size = tlv[1];
-	tlv_size -= 2 * sizeof(int);
-	if (size > tlv_size)
-		return -EINVAL;
-	switch (type) {
-	case SND_CTL_TLVT_CONTAINER:
-		size = int_index(size) * sizeof(int);
-		tlv += 2;
-		while (size > 0) {
-			unsigned int len;
-			err = parse_db_range(item, tlv, size);
-			if (err <= 0)
-				return err; /* error or found dB */
-			len = int_index(tlv[1]) + 2;
-			size -= len * sizeof(int);
-			tlv += len;
-		}
-		break;
-	case SND_CTL_TLVT_DB_SCALE:
-	case SND_CTL_TLVT_DB_RANGE: {
-		unsigned int minsize;
-		if (type == SND_CTL_TLVT_DB_RANGE)
-			minsize = 4 * sizeof(int);
-		else
-			minsize = 2 * sizeof(int);
-		if (size < minsize)
-			return -EINVAL;
-		if (size > MAX_TLV_RANGE_SIZE)
-			return -EINVAL;
-		item->db_info = malloc(size + sizeof(int) * 2);
-		if (!item->db_info)
-			return -ENOMEM;
-		memcpy(item->db_info, tlv, size + sizeof(int) * 2);
-		return 0;
-	}
-	default:
-		break;
-	}
-	return -EINVAL; /* not found */
-}
-
 /*
  * dB conversion
- *
- * For simplicity, we don't support the linear - log conversion
  */
 
 /* initialize dB range information, reading TLV via hcontrol
@@ -1078,6 +1015,7 @@ static int init_db_info(snd_selem_vol_item_t *item)
 	snd_ctl_elem_info_t *info;
 	unsigned int *tlv = NULL;
 	const unsigned int tlv_size = 4096;
+	int size;
 
 	if (!item)
 		return -EINVAL;
@@ -1091,11 +1029,16 @@ static int init_db_info(snd_selem_vol_item_t *item)
 		goto error;
 	tlv = malloc(tlv_size);
 	if (!tlv)
-		return -ENOMEM;
+		goto error;
 	if (snd_hctl_elem_tlv_read(item->head.helem, tlv, tlv_size) < 0)
 		goto error;
-	if (parse_db_range(item, tlv, tlv_size) < 0)
+	size = snd_tlv_parse_dB_info(tlv, tlv_size, &tlv);
+	if (size <= 0)
 		goto error;
+	item->db_info = malloc(size);
+	if (!item->db_info)
+		goto error;
+	memcpy(item->db_info, tlv, size);
 	free(tlv);
 	return 0;
 
@@ -1104,7 +1047,6 @@ static int init_db_info(snd_selem_vol_item_t *item)
 	item->db_info = INVALID_DB_INFO;
 	return -EINVAL;
 }
-
 
 int _snd_selem_vol_get_dB(snd_selem_vol_item_t *item, int channel,
 			  long *value)

@@ -1076,15 +1076,4 @@ snd_ctl_t *snd_async_handler_get_ctl(snd_async_handler_t *handler)
 
 #endif /* SALSA_HAS_ASYNC_SUPPORT */
 
-#if SALSA_HAS_TLV_SUPPORT
-__SALSA_EXPORT_FUNC
-int snd_tlv_parse_dB_info(unsigned int *tlv, unsigned int tlv_size,
-			  unsigned int **db_tlvp)
-{
-	/* just for simplicity */
-	*db_tlvp = tlv;
-	return 0;
-}
-#endif /* SALSA_HAS_TLV_SUPPORT */
-
 #endif /* __ALSA_CTL_MACROS_H */

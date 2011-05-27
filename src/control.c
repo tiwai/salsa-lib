@@ -355,6 +355,48 @@ int snd_async_add_ctl_handler(snd_async_handler_t **handler, snd_ctl_t *ctl,
 /* max size of a TLV entry for dB information (including compound one) */
 #define MAX_TLV_RANGE_SIZE	256
 
+/* parse dB info from the given TLV */
+int snd_tlv_parse_dB_info(unsigned int *tlv,
+			  unsigned int tlv_size,
+			  unsigned int **db_tlvp)
+{
+	unsigned int type;
+	unsigned int size;
+	int err;
+
+	*db_tlvp = NULL;
+	type = tlv[0];
+	size = tlv[1];
+	tlv_size -= 2 * sizeof(int);
+	if (size > tlv_size)
+		return -EINVAL;
+	switch (type) {
+	case SND_CTL_TLVT_CONTAINER:
+		size = int_index(size) * sizeof(int);
+		tlv += 2;
+		while (size > 0) {
+			unsigned int len;
+			err = snd_tlv_parse_dB_info(tlv, size, db_tlvp);
+			if (err != 0)
+				return err;
+			len = int_index(tlv[1]) + 2;
+			size -= len * sizeof(int);
+			tlv += len;
+		}
+		return -EINVAL;
+	case SND_CTL_TLVT_DB_SCALE:
+	case SND_CTL_TLVT_DB_MINMAX:
+	case SND_CTL_TLVT_DB_MINMAX_MUTE:
+#if SALSA_SUPPORT_FLOAT
+	case SND_CTL_TLVT_DB_LINEAR:
+#endif
+	case SND_CTL_TLVT_DB_RANGE:
+		*db_tlvp = tlv;
+		return size + sizeof(int) * 2;
+	}
+	return 0;
+}
+
 /* convert the given raw volume value to a dB gain
  */
 static int tlv_to_dB_range(unsigned int *tlv, long rangemin, long rangemax,
