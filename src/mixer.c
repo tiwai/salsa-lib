@@ -1067,6 +1067,25 @@ int _snd_selem_vol_get_dB(snd_selem_vol_item_t *item, int channel,
 				     item->vol[RAW_IDX(channel)], value);
 }
 
+int _snd_selem_ask_vol_dB(snd_selem_vol_item_t *item, long value, long *dBvalue)
+{
+	if (init_db_info(item) < 0)
+		return -EINVAL;
+	return snd_tlv_convert_to_dB(item->db_info,
+				     item->raw_min, item->raw_max,
+				     value, dBvalue);
+}
+
+int _snd_selem_ask_dB_vol(snd_selem_vol_item_t *item, long dBvalue, long *value,
+                          int xdir)
+{
+	if (init_db_info(item) < 0)
+		return -EINVAL;
+	return snd_tlv_convert_from_dB(item->db_info,
+				     item->raw_min, item->raw_max,
+				     dBvalue, value, xdir);
+}
+
 int _snd_selem_vol_get_dB_range(snd_selem_vol_item_t *item,
 				long *min, long *max)
 {
