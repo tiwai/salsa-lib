@@ -14,8 +14,8 @@ AC_HEADER_STDC
 dnl Compatible version
 AC_ARG_WITH(compat-version,
   AS_HELP_STRING([--with-compat-version=VERSION],
-		 [specify the compatible version with ALSA-lib (default=1.0.24)]),
-  compatver="$withval", compatver="1.0.24")
+		 [specify the compatible version with ALSA-lib (default=1.0.25)]),
+  compatver="$withval", compatver="1.0.25")
 
 SND_LIB_VERSION="$compatver"
 SND_LIB_MAJOR=1
