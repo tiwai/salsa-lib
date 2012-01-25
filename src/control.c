@@ -120,9 +120,9 @@ int snd_ctl_elem_add_integer(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
 	memzero_valgrind(&info, sizeof(info));
 	info.id = *id;
 	info.type = SND_CTL_ELEM_TYPE_INTEGER;
-	info.access = SNDRV_CTL_ELEM_ACCESS_READWRITE;
+	info._access = SNDRV_CTL_ELEM_ACCESS_READWRITE;
 #if SALSA_HAS_TLV_SUPPORT
-	info.access |= SNDRV_CTL_ELEM_ACCESS_TLV_READWRITE;
+	info._access |= SNDRV_CTL_ELEM_ACCESS_TLV_READWRITE;
 #endif
 	info.count = count;
 	info.value.integer.min = min;

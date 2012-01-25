@@ -457,7 +457,7 @@ int snd_pcm_dump_hw_setup(snd_pcm_t *pcm, snd_output_t *out)
 	snd_output_printf(out, "  stream       : %s\n",
 			  snd_pcm_stream_name(pcm->stream));
 	snd_output_printf(out, "  access       : %s\n",
-			  snd_pcm_access_name(pcm->access));
+			  snd_pcm_access_name(pcm->_access));
 	snd_output_printf(out, "  format       : %s\n",
 			  snd_pcm_format_name(pcm->format));
 	snd_output_printf(out, "  subformat    : %s\n",

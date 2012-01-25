@@ -924,7 +924,7 @@ static int _snd_pcm_hw_params(snd_pcm_t *pcm, snd_pcm_hw_params_t *params)
 	pcm->setup = 1;
 	pcm->hw_params = *params;
 	
-	snd_pcm_hw_params_get_access(params, &pcm->access);
+	snd_pcm_hw_params_get_access(params, &pcm->_access);
 	snd_pcm_hw_params_get_format(params, &pcm->format);
 	snd_pcm_hw_params_get_subformat(params, &pcm->subformat);
 	snd_pcm_hw_params_get_channels(params, &pcm->channels);
@@ -940,9 +940,9 @@ static int _snd_pcm_hw_params(snd_pcm_t *pcm, snd_pcm_hw_params_t *params)
 	snd_pcm_sw_params_default(pcm, &sw);
 	snd_pcm_sw_params(pcm, &sw);
 
-	if (pcm->access == SND_PCM_ACCESS_MMAP_INTERLEAVED ||
-	    pcm->access == SND_PCM_ACCESS_MMAP_NONINTERLEAVED ||
-	    pcm->access == SND_PCM_ACCESS_MMAP_COMPLEX) {
+	if (pcm->_access == SND_PCM_ACCESS_MMAP_INTERLEAVED ||
+	    pcm->_access == SND_PCM_ACCESS_MMAP_NONINTERLEAVED ||
+	    pcm->_access == SND_PCM_ACCESS_MMAP_COMPLEX) {
 		err = _snd_pcm_mmap(pcm);
 		if (err < 0) {
 			_snd_pcm_munmap(pcm);

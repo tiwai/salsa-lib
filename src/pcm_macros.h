@@ -38,7 +38,7 @@ struct _snd_pcm {
 	snd_pcm_hw_params_t hw_params;
 	snd_pcm_sw_params_t sw_params;
 
-	snd_pcm_access_t access;	/* access mode */
+	snd_pcm_access_t _access;	/* access mode */
 	snd_pcm_format_t format;	/* SND_PCM_FORMAT_* */
 	snd_pcm_subformat_t subformat;	/* subformat */
 	unsigned int channels;		/* channels */
@@ -797,46 +797,46 @@ __snd_define_type(snd_pcm_hw_params);
 
 __SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_access(const snd_pcm_hw_params_t *params,
-				 snd_pcm_access_t *access)
+				 snd_pcm_access_t *acc)
 {
 	return _snd_pcm_hw_param_get(params, SNDRV_PCM_HW_PARAM_ACCESS,
-				    (unsigned int *)access, NULL);
+				    (unsigned int *)acc, NULL);
 }
 
 __SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_test_access(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
-				  snd_pcm_access_t access)
+				  snd_pcm_access_t acc)
 {
 	return _snd_pcm_hw_param_test(pcm, params, SNDRV_PCM_HW_PARAM_ACCESS,
-				      access, NULL);
+				      acc, NULL);
 }
 
 __SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_access(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
-				 snd_pcm_access_t access)
+				 snd_pcm_access_t acc)
 {
 	return _snd_pcm_hw_param_set(pcm, params, SNDRV_PCM_HW_PARAM_ACCESS,
-				    access, 0);
+				    acc, 0);
 }
 
 __SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_access_first(snd_pcm_t *pcm,
 				       snd_pcm_hw_params_t *params,
-				       snd_pcm_access_t *access)
+				       snd_pcm_access_t *acc)
 {
 	return _snd_pcm_hw_param_set_first(pcm, params,
 					   SNDRV_PCM_HW_PARAM_ACCESS,
-					   (unsigned int *)access, NULL);
+					   (unsigned int *)acc, NULL);
 }
 
 __SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_set_access_last(snd_pcm_t *pcm,
 				      snd_pcm_hw_params_t *params,
-				      snd_pcm_access_t *access)
+				      snd_pcm_access_t *acc)
 {
 	return _snd_pcm_hw_param_set_last(pcm, params,
 					  SNDRV_PCM_HW_PARAM_ACCESS,
-					  (unsigned int *)access, NULL);
+					  (unsigned int *)acc, NULL);
 }
 
 __SALSA_EXPORT_FUNC
@@ -2171,7 +2171,7 @@ snd_pcm_sframes_t snd_pcm_mmap_readn(snd_pcm_t *pcm, void **bufs,
 __SALSA_EXPORT_FUNC __SALSA_NOT_IMPLEMENTED
 int snd_pcm_set_params(snd_pcm_t *pcm,
                        snd_pcm_format_t format,
-                       snd_pcm_access_t access,
+                       snd_pcm_access_t acc,
                        unsigned int channels,
                        unsigned int rate,
                        int soft_resample,

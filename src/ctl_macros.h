@@ -517,50 +517,50 @@ snd_ctl_elem_type_t snd_ctl_elem_info_get_type(const snd_ctl_elem_info_t *obj)
 __SALSA_EXPORT_FUNC
 int snd_ctl_elem_info_is_readable(const snd_ctl_elem_info_t *obj)
 {
-	return !!(obj->access & SNDRV_CTL_ELEM_ACCESS_READ);
+	return !!(obj->_access & SNDRV_CTL_ELEM_ACCESS_READ);
 }
 
 __SALSA_EXPORT_FUNC
 int snd_ctl_elem_info_is_writable(const snd_ctl_elem_info_t *obj)
 {
-	return !!(obj->access & SNDRV_CTL_ELEM_ACCESS_WRITE);
+	return !!(obj->_access & SNDRV_CTL_ELEM_ACCESS_WRITE);
 }
 
 __SALSA_EXPORT_FUNC
 int snd_ctl_elem_info_is_volatile(const snd_ctl_elem_info_t *obj)
 {
-	return !!(obj->access & SNDRV_CTL_ELEM_ACCESS_VOLATILE);
+	return !!(obj->_access & SNDRV_CTL_ELEM_ACCESS_VOLATILE);
 }
 
 __SALSA_EXPORT_FUNC
 int snd_ctl_elem_info_is_inactive(const snd_ctl_elem_info_t *obj)
 {
-	return !!(obj->access & SNDRV_CTL_ELEM_ACCESS_INACTIVE);
+	return !!(obj->_access & SNDRV_CTL_ELEM_ACCESS_INACTIVE);
 }
 
 __SALSA_EXPORT_FUNC
 int snd_ctl_elem_info_is_locked(const snd_ctl_elem_info_t *obj)
 {
-	return !!(obj->access & SNDRV_CTL_ELEM_ACCESS_LOCK);
+	return !!(obj->_access & SNDRV_CTL_ELEM_ACCESS_LOCK);
 }
 
 __SALSA_EXPORT_FUNC
 int snd_ctl_elem_info_is_owner(const snd_ctl_elem_info_t *obj)
 {
-	return !!(obj->access & SNDRV_CTL_ELEM_ACCESS_OWNER);
+	return !!(obj->_access & SNDRV_CTL_ELEM_ACCESS_OWNER);
 }
 
 __SALSA_EXPORT_FUNC
 int snd_ctl_elem_info_is_user(const snd_ctl_elem_info_t *obj)
 {
-	return !!(obj->access & SNDRV_CTL_ELEM_ACCESS_USER);
+	return !!(obj->_access & SNDRV_CTL_ELEM_ACCESS_USER);
 }
 
 __SALSA_EXPORT_FUNC
 int snd_ctl_elem_info_is_tlv_readable(const snd_ctl_elem_info_t *obj)
 {
 #if SALSA_HAS_TLV_SUPPORT
-	return !!(obj->access & SNDRV_CTL_ELEM_ACCESS_TLV_READ);
+	return !!(obj->_access & SNDRV_CTL_ELEM_ACCESS_TLV_READ);
 #else
 	return 0;
 #endif
@@ -570,7 +570,7 @@ __SALSA_EXPORT_FUNC
 int snd_ctl_elem_info_is_tlv_writable(const snd_ctl_elem_info_t *obj)
 {
 #if SALSA_HAS_TLV_SUPPORT
-	return !!(obj->access & SNDRV_CTL_ELEM_ACCESS_TLV_WRITE);
+	return !!(obj->_access & SNDRV_CTL_ELEM_ACCESS_TLV_WRITE);
 #else
 	return 0;
 #endif
@@ -580,7 +580,7 @@ __SALSA_EXPORT_FUNC
 int snd_ctl_elem_info_is_tlv_commandable(const snd_ctl_elem_info_t *obj)
 {
 #if SALSA_HAS_TLV_SUPPORT
-	return !!(obj->access & SNDRV_CTL_ELEM_ACCESS_TLV_COMMAND);
+	return !!(obj->_access & SNDRV_CTL_ELEM_ACCESS_TLV_COMMAND);
 #else
 	return 0;
 #endif

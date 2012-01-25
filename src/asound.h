@@ -731,7 +731,7 @@ typedef struct snd_ctl_elem_list {
 typedef struct snd_ctl_elem_info {
 	snd_ctl_elem_id_t id;
 	int type;
-	unsigned int access;
+	unsigned int _access;
 	unsigned int count;
 	pid_t owner;
 	union {
