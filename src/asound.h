@@ -656,7 +656,7 @@ typedef struct _snd_timer_tread {
 
 /* control interface */
 
-#define SNDRV_CTL_VERSION		SNDRV_PROTOCOL_VERSION(2, 0, 6)
+#define SNDRV_CTL_VERSION		SNDRV_PROTOCOL_VERSION(2, 0, 7)
 
 typedef struct snd_ctl_card_info {
 	int card;
@@ -749,6 +749,8 @@ typedef struct snd_ctl_elem_info {
 			unsigned int items;
 			unsigned int item;
 			char name[64];
+			unsigned long long names_ptr;
+			unsigned int names_length;
 		} enumerated;
 		unsigned char reserved[128];
 	} value;

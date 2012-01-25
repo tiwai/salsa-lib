@@ -189,6 +189,42 @@ int snd_ctl_elem_add_iec958(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id)
 	return snd_ctl_elem_add(ctl, &info);
 }
 
+int snd_ctl_elem_add_enumerated(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
+				unsigned int count, unsigned int items,
+				const char *const names[])
+{
+	snd_ctl_elem_info_t info;
+	unsigned int i, len;
+	char *buf, *p;
+	int err;
+
+	if (ctl->protocol < SNDRV_PROTOCOL_VERSION(2, 0, 7))
+		return -ENXIO;
+	if (!items)
+		return -EINVAL;
+
+	len = 0;
+	for (i = 0; i < items; ++i)
+		len += strlen(names[i]) + 1;
+	buf = malloc(len);
+	if (!buf)
+		return -ENOMEM;
+	p = buf;
+	for (i = 0; i < items; ++i)
+		p = stpcpy(p, names[i]) + 1;
+
+	memzero_valgrind(&info, sizeof(info));
+	info.id = *id;
+	info.type = SND_CTL_ELEM_TYPE_ENUMERATED;
+	info.count = count;
+	info.value.enumerated.items = items;
+	info.value.enumerated.names_ptr = (uintptr_t)buf;
+	info.value.enumerated.names_length = len;
+
+	err = snd_ctl_elem_add(ctl, &info);
+	free(buf);
+	return err;
+}
 
 #if SALSA_HAS_TLV_SUPPORT
 /*
