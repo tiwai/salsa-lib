@@ -731,12 +731,10 @@ int snd_pcm_areas_copy(const snd_pcm_channel_area_t *dst_areas,
 		       unsigned int channels, snd_pcm_uframes_t frames,
 		       snd_pcm_format_t format)
 {
-	int width;
 	if (!channels)
 		return -EINVAL;
 	if (!frames)
 		return -EINVAL;
-	width = snd_pcm_format_physical_width(format);
 	while (channels > 0) {
 		snd_pcm_area_copy(dst_areas, dst_offset,
 				  src_areas, src_offset,
