@@ -112,9 +112,13 @@ int snd_ctl_elem_info(snd_ctl_t *ctl, snd_ctl_elem_info_t *info)
 __SALSA_EXPORT_FUNC
 int snd_ctl_elem_add(snd_ctl_t *ctl, snd_ctl_elem_info_t *info)
 {
+#if SALSA_HAS_USER_ELEM_SUPPORT
 	if (ioctl(ctl->fd, SNDRV_CTL_IOCTL_ELEM_ADD, info) < 0)
 		return -errno;
 	return 0;
+#else
+	return -ENXIO;
+#endif
 }
 
 __SALSA_EXPORT_FUNC
@@ -1018,6 +1022,46 @@ int snd_ctl_convert_from_dB(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
 	return -ENXIO;
 }
 #endif /* !SALSA_HAS_TLV_SUPPORT */
+
+/*
+ */
+#if !SALSA_HAS_USER_ELEM_SUPPORT
+__SALSA_EXPORT_FUNC __SALSA_NOT_IMPLEMENTED
+int snd_ctl_elem_add_integer(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
+			     unsigned int count, long min, long max, long step)
+{
+	return -ENXIO;
+}
+
+__SALSA_EXPORT_FUNC __SALSA_NOT_IMPLEMENTED
+int snd_ctl_elem_add_integer64(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
+			       unsigned int count, long long min, long long max,
+			       long long step)
+{
+	return -ENXIO;
+}
+
+__SALSA_EXPORT_FUNC __SALSA_NOT_IMPLEMENTED
+int snd_ctl_elem_add_boolean(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
+			     unsigned int count)
+{
+	return -ENXIO;
+}
+
+__SALSA_EXPORT_FUNC __SALSA_NOT_IMPLEMENTED
+int snd_ctl_elem_add_iec958(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id)
+{
+	return -ENXIO;
+}
+
+__SALSA_EXPORT_FUNC __SALSA_NOT_IMPLEMENTED
+int snd_ctl_elem_add_enumerated(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
+				unsigned int count, unsigned int items,
+				const char *const names[])
+{
+	return -ENXIO;
+}
+#endif /* !SALSA_HAS_USER_ELEM_SUPPORT */
 
 /*
  * not implemented yet

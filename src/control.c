@@ -104,7 +104,7 @@ int snd_ctl_close(snd_ctl_t *ctl)
 	return 0;
 }
 
-
+#if SALSA_HAS_USER_ELEM_SUPPORT
 /*
  * add/remove user-defined controls
  */
@@ -219,6 +219,7 @@ int snd_ctl_elem_add_enumerated(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
 	info.value.enumerated.names_length = len;
 	return snd_ctl_elem_add(ctl, &info);
 }
+#endif /* USER_ELEM_SUPPORT */
 
 #if SALSA_HAS_TLV_SUPPORT
 /*

@@ -81,6 +81,12 @@ AC_ARG_ENABLE(tlv,
   AS_HELP_STRING([--enable-tlv],
 	 	 [enable TLV (dB) support]),
   tlv="$enableval", tlv="no")
+
+AC_ARG_ENABLE(user-elem,
+  AS_HELP_STRING([--disable-user-elem],
+	 	 [disable user-space control element support]),
+  user_elem="$enableval", user_elem="yes")
+
 AC_ARG_ENABLE(async,
   AS_HELP_STRING([--enable-async],
 		 [enable async handler support]),
@@ -140,6 +146,7 @@ if test "$everything" = "yes"; then
   sndconf="yes"
   sndseq="yes"
   tlv="yes"
+  user_elem="yes"
   async="yes"
   libasound="yes"
   symfuncs="yes"
@@ -166,6 +173,13 @@ else
   SALSA_HAS_TLV_SUPPORT=0
 fi
 AC_SUBST(SALSA_HAS_TLV_SUPPORT)
+
+if test "$user_elem" = "yes"; then
+  SALSA_HAS_USER_ELEM_SUPPORT=1
+else
+  SALSA_HAS_USER_ELEM_SUPPORT=0
+fi
+AC_SUBST(SALSA_HAS_USER_ELEM_SUPPORT)
 
 if test "$async" = "yes"; then
   SALSA_HAS_ASYNC_SUPPORT=1
@@ -270,6 +284,7 @@ echo "  - Timer interface: $timer"
 echo "  - ALSA-config dummy interface: $sndconf"
 echo "  - ALSA-sequencer dummy interface: $sndseq"
 echo "  - TLV (dB) support: $tlv"
+echo "  - User-space control element support: $user_elem"
 echo "  - Async handler support: $async"
 echo "  - Make ABI-compatible libasound.so: $libasound"
 echo "  - Mark deprecated attribute: $markdeprecated"

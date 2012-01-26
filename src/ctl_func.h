@@ -51,6 +51,7 @@ int snd_async_add_ctl_handler(snd_async_handler_t **handler, snd_ctl_t *ctl,
 			      void *private_data);
 #endif
 
+#if SALSA_HAS_USER_ELEM_SUPPORT
 int snd_ctl_elem_add_integer(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
 			     unsigned int count, long min, long max, long step);
 int snd_ctl_elem_add_integer64(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
@@ -62,6 +63,7 @@ int snd_ctl_elem_add_iec958(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id);
 int snd_ctl_elem_add_enumerated(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
 				unsigned int count, unsigned int items,
 				const char *const names[]);
+#endif
 
 #if SALSA_HAS_TLV_SUPPORT
 int snd_tlv_parse_dB_info(unsigned int *tlv,

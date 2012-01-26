@@ -96,6 +96,10 @@ disabled as default.  For enabling the floating-point math calculation
 used in dB <-> linear conversion for the mixer, pass --enable-float
 option as well.
 
+The support for user-space control elements is enabled as default
+to keep the compatibility with the older salsa-lib releases.  But now
+it can be disabled via --disable-user-elem configure option, too.
+
 The async handler support can be enabled via --enable-async option.
 It's disabled as default.
 
