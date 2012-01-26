@@ -194,36 +194,30 @@ int snd_ctl_elem_add_enumerated(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
 				const char *const names[])
 {
 	snd_ctl_elem_info_t info;
-	unsigned int i, len;
-	char *buf, *p;
-	int err;
+	char buf[256];
+	int len;
 
 	if (ctl->protocol < SNDRV_PROTOCOL_VERSION(2, 0, 7))
 		return -ENXIO;
 	if (!items)
 		return -EINVAL;
 
-	len = 0;
-	for (i = 0; i < items; ++i)
-		len += strlen(names[i]) + 1;
-	buf = malloc(len);
-	if (!buf)
-		return -ENOMEM;
-	p = buf;
-	for (i = 0; i < items; ++i)
-		p = stpcpy(p, names[i]) + 1;
-
 	memzero_valgrind(&info, sizeof(info));
 	info.id = *id;
 	info.type = SND_CTL_ELEM_TYPE_ENUMERATED;
 	info.count = count;
 	info.value.enumerated.items = items;
+	/* flatten item strings to a temp buffer */
+	for (len = 0; items; items--, names++) {
+		int l = strlen(*names) + 1;
+		if (len + l >= sizeof(buf))
+			return -ENOMEM;
+		memcpy(buf + len, *names, l);
+		len += l;
+	}
 	info.value.enumerated.names_ptr = (uintptr_t)buf;
 	info.value.enumerated.names_length = len;
-
-	err = snd_ctl_elem_add(ctl, &info);
-	free(buf);
-	return err;
+	return snd_ctl_elem_add(ctl, &info);
 }
 
 #if SALSA_HAS_TLV_SUPPORT
