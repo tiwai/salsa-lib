@@ -1,7 +1,7 @@
 /*
  * ALSA kernel API and common-type definitions
  *
- *  Copyright (c) 2011 by Takashi Iwai <tiwai@suse.de>
+ *  Copyright (c) 2011-2012 by Takashi Iwai <tiwai@suse.de>
  *
  *   This library is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU Lesser General Public License as
