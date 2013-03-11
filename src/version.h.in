@@ -1,6 +1,8 @@
 #ifndef __ALSA_VERSION_H
 #define __ALSA_VERSION_H
 
+#include "global.h"
+
 #define SND_LIB_MAJOR		@SND_LIB_MAJOR@
 #define SND_LIB_MINOR		@SND_LIB_MINOR@
 #define SND_LIB_SUBMINOR	@SND_LIB_SUBMINOR@
