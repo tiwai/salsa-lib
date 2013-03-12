@@ -39,8 +39,8 @@ extern "C" {
 
 #include "recipe.h"
 #include "asoundef.h"
-#include "version.h"
 #include "global.h"
+#include "version.h"
 #include "input.h"
 #include "output.h"
 #include "error.h"

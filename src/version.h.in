@@ -1,8 +1,6 @@
 #ifndef __ALSA_VERSION_H
 #define __ALSA_VERSION_H
 
-#include "global.h"
-
 #define SND_LIB_MAJOR		@SND_LIB_MAJOR@
 #define SND_LIB_MINOR		@SND_LIB_MINOR@
 #define SND_LIB_SUBMINOR	@SND_LIB_SUBMINOR@
@@ -14,10 +12,12 @@
 /* library version (string) */
 #define SND_LIB_VERSION_STR	"@SND_LIB_VERSION@"
 
+#ifdef __SALSA_EXPORT_FUNC
 __SALSA_EXPORT_FUNC
 const char *snd_asoundlib_version(void)
 {
 	return SND_LIB_VERSION_STR;
 }
+#endif /* __SALSA_EXPORT_FUNC */
 
 #endif /* __ALSA_VERSION_H */
