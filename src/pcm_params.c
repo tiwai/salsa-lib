@@ -590,11 +590,9 @@ int _snd_pcm_hw_param_set_max(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 
 	save = *params;
 	err = hw_param_set_max(params, var, *val, dir ? *dir : 0);
-	if (!err) {
-		err = hw_param_update_var(pcm, params, var, err);
-		if (!err)
-			return _snd_pcm_hw_param_get_max(params, var, val, dir);
-	}
+	err = hw_param_update_var(pcm, params, var, err);
+	if (!err)
+		return _snd_pcm_hw_param_get_max(params, var, val, dir);
 	*params = save;
 	return err;
 }
@@ -683,7 +681,7 @@ int _snd_pcm_hw_param_set(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 	snd_pcm_hw_params_t save = *params;
 	int err = hw_param_set(params, var, val, dir);
 	err = hw_param_update_var(pcm, params, var, err);
-	if (err)
+	if (err < 0)
 		*params = save;
 	return err;
 }
@@ -712,7 +710,7 @@ int _snd_pcm_hw_param_set_integer(snd_pcm_t *pcm,
 	save = *params;
 	i->integer = 1;
 	err = hw_param_update_var(pcm, params, var, 1);
-	if (err)
+	if (err < 0)
 		*params = save;
 	return err;
 }
@@ -827,7 +825,7 @@ int _snd_pcm_hw_param_set_near(snd_pcm_t *pcm, snd_pcm_hw_params_t *params,
 	else if (valdir == 0)
 		maxdir = -1;
 	else {
-		valdir = 1;
+		maxdir = 1;
 		max--;
 	}
 	save = *params;
