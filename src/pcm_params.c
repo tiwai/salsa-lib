@@ -436,6 +436,7 @@ static void _snd_pcm_hw_params_any(snd_pcm_hw_params_t *params)
 	params->rmask = ~0U;
 	params->cmask = 0;
 	params->info = ~0U;
+	params->flags = SNDRV_PCM_HW_PARAMS_NORESAMPLE;
 }
 
 int snd_pcm_hw_params_any(snd_pcm_t *pcm, snd_pcm_hw_params_t *params)
