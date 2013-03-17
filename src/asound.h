@@ -133,7 +133,7 @@ typedef enum _snd_pcm_access {
 	SND_PCM_ACCESS_LAST = SND_PCM_ACCESS_RW_NONINTERLEAVED,
 } snd_pcm_access_t;
 
-typedef enum _sndrv_pcm_format {
+typedef enum _snd_pcm_format {
 	SND_PCM_FORMAT_UNKNOWN = -1,
 	SND_PCM_FORMAT_S8 = 0,	/* signed */
 	SND_PCM_FORMAT_U8,	/* unsigned */
