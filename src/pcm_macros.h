@@ -463,6 +463,12 @@ int snd_pcm_hw_params_can_sync_start(const snd_pcm_hw_params_t *params)
 }
 
 __SALSA_EXPORT_FUNC
+int snd_pcm_hw_params_supports_audio_wallclock_ts(const snd_pcm_hw_params_t *params)
+{
+	return !!(params->info & SNDRV_PCM_INFO_HAS_WALL_CLOCK);
+}
+
+__SALSA_EXPORT_FUNC
 int snd_pcm_hw_params_get_rate_numden(const snd_pcm_hw_params_t *params,
 				      unsigned int *rate_num,
 				      unsigned int *rate_den)
@@ -1983,6 +1989,12 @@ __SALSA_EXPORT_FUNC
 void snd_pcm_status_get_htstamp(const snd_pcm_status_t *obj, snd_htimestamp_t *ptr)
 {
 	*ptr = obj->tstamp;
+}
+
+__SALSA_EXPORT_FUNC
+void snd_pcm_status_get_audio_htstamp(const snd_pcm_status_t *obj, snd_htimestamp_t *ptr)
+{
+	*ptr = obj->audio_tstamp;
 }
 
 __SALSA_EXPORT_FUNC

@@ -99,7 +99,7 @@ enum {
 
 /* PCM interface */
 
-#define SNDRV_PCM_VERSION		SNDRV_PROTOCOL_VERSION(2, 0, 9)
+#define SNDRV_PCM_VERSION		SNDRV_PROTOCOL_VERSION(2, 0, 11)
 
 typedef unsigned long snd_pcm_uframes_t;
 typedef long snd_pcm_sframes_t;
@@ -219,6 +219,7 @@ typedef enum _snd_pcm_subformat {
 #define SNDRV_PCM_INFO_JOINT_DUPLEX	0x00200000
 #define SNDRV_PCM_INFO_SYNC_START	0x00400000
 #define SNDRV_PCM_INFO_NO_PERIOD_WAKEUP	0x00800000
+#define SNDRV_PCM_INFO_HAS_WALL_CLOCK   0x01000000
 
 typedef enum _snd_pcm_state {
 	SND_PCM_STATE_OPEN = 0,
@@ -361,7 +362,8 @@ typedef struct snd_pcm_status {
 	snd_pcm_uframes_t avail_max;
 	snd_pcm_uframes_t overrange;
 	int suspended_state;
-	unsigned char reserved[60];
+	struct timespec audio_tstamp;
+	unsigned char reserved[60 - sizeof(struct timespec)];
 } snd_pcm_status_t;
 
 struct snd_pcm_mmap_status {
@@ -370,6 +372,7 @@ struct snd_pcm_mmap_status {
 	snd_pcm_uframes_t hw_ptr;
 	struct timespec tstamp;
 	int suspended_state;
+	struct timespec audio_tstamp;
 };
 
 struct snd_pcm_mmap_control {
