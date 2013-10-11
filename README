@@ -103,6 +103,9 @@ it can be disabled via --disable-user-elem configure option, too.
 The async handler support can be enabled via --enable-async option.
 It's disabled as default.
 
+The PCM chmap API support is also optional, can be enabled via
+--enable-chmap option.
+
 With option --enable-libasound, libasound.so will be created as an
 opt-in ABI-compatible library with the genuine ALSA-lib.
 

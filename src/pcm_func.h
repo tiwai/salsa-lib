@@ -153,3 +153,15 @@ int snd_async_add_pcm_handler(snd_async_handler_t **handler, snd_pcm_t *pcm,
 			      snd_async_callback_t callback,
 			      void *private_data);
 #endif
+
+#if SALSA_HAS_CHMAP_SUPPORT
+void snd_pcm_free_chmaps(snd_pcm_chmap_query_t **maps);
+snd_pcm_chmap_query_t **
+snd_pcm_query_chmaps_from_hw(int card, int dev, int subdev,
+			     snd_pcm_stream_t stream);
+snd_pcm_chmap_t *snd_pcm_get_chmap(snd_pcm_t *pcm);
+int snd_pcm_set_chmap(snd_pcm_t *pcm, const snd_pcm_chmap_t *map);
+int snd_pcm_chmap_print(const snd_pcm_chmap_t *map, size_t maxlen, char *buf);
+unsigned int snd_pcm_chmap_from_string(const char *str);
+snd_pcm_chmap_t *snd_pcm_chmap_parse_string(const char *str);
+#endif

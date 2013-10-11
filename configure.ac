@@ -92,6 +92,11 @@ AC_ARG_ENABLE(async,
 		 [enable async handler support]),
   async="$enableval", async="no")
 
+AC_ARG_ENABLE(chmap,
+  AS_HELP_STRING([--enable-chmap],
+		 [enable chmap API support]),
+  chmap="$enableval", chmap="no")
+
 AC_ARG_ENABLE(libasound,
   AS_HELP_STRING([--enable-libasound],
 		 [build a ABI-compatible libasound.so]),
@@ -148,6 +153,7 @@ if test "$everything" = "yes"; then
   tlv="yes"
   user_elem="yes"
   async="yes"
+  chmap="yes"
   libasound="yes"
   symfuncs="yes"
   output_buffer="yes"
@@ -187,6 +193,13 @@ else
   SALSA_HAS_ASYNC_SUPPORT=0
 fi
 AC_SUBST(SALSA_HAS_ASYNC_SUPPORT)
+
+if test "$chmap" = "yes"; then
+  SALSA_HAS_CHMAP_SUPPORT=1
+else
+  SALSA_HAS_CHMAP_SUPPORT=0
+fi
+AC_SUBST(SALSA_HAS_CHMAP_SUPPORT)
 
 if test "$sndconf" = "yes"; then
   SALSA_HAS_DUMMY_CONF=1
@@ -286,6 +299,7 @@ echo "  - ALSA-sequencer dummy interface: $sndseq"
 echo "  - TLV (dB) support: $tlv"
 echo "  - User-space control element support: $user_elem"
 echo "  - Async handler support: $async"
+echo "  - PCM chmap API support: $chmap"
 echo "  - Make ABI-compatible libasound.so: $libasound"
 echo "  - Mark deprecated attribute: $markdeprecated"
 echo "  - Support string-output via snd_output: $output_buffer"

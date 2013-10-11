@@ -10,6 +10,9 @@
 /* Build with user-space control element support */
 #define SALSA_HAS_USER_ELEM_SUPPORT	@SALSA_HAS_USER_ELEM_SUPPORT@
 
+/* Build with chmap API support */
+#define SALSA_HAS_CHMAP_SUPPORT	@SALSA_HAS_CHMAP_SUPPORT@
+
 /* Build with dummy conf support */
 #define SALSA_HAS_DUMMY_CONF	@SALSA_HAS_DUMMY_CONF@
 

@@ -2335,4 +2335,35 @@ u_int8_t snd_pcm_format_silence(snd_pcm_format_t format)
 	return (u_int8_t)snd_pcm_format_silence_64(format);
 }
 
+#if SALSA_HAS_CHMAP_SUPPORT
+__SALSA_EXPORT_FUNC
+snd_pcm_chmap_query_t **snd_pcm_query_chmaps(snd_pcm_t *pcm)
+{
+	return snd_pcm_query_chmaps_from_hw(pcm->card, pcm->device,
+					    pcm->subdevice, pcm->stream);
+}
+
+extern const char *_snd_chmap_type_names[];
+extern const char *_snd_chmap_names[];
+extern const char *_snd_chmap_long_names[];
+
+__SALSA_EXPORT_FUNC
+const char *snd_pcm_chmap_type_name(enum snd_pcm_chmap_type val)
+{
+	return _snd_chmap_type_names[val];
+}
+
+__SALSA_EXPORT_FUNC
+const char *snd_pcm_chmap_name(enum snd_pcm_chmap_position val)
+{
+	return _snd_chmap_names[val];
+}
+
+__SALSA_EXPORT_FUNC
+const char *snd_pcm_chmap_long_name(enum snd_pcm_chmap_position val)
+{
+	return _snd_chmap_long_names[val];
+}
+#endif /* SALSA_HAS_CHMAP_SUPPORT */
+
 #endif /* __ALSA_PCM_MACROS_H */

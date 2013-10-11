@@ -27,6 +27,7 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <fcntl.h>
+#include <ctype.h>
 #include "pcm.h"
 #include "control.h"
 #include "local.h"
@@ -1106,3 +1107,349 @@ int snd_pcm_recover(snd_pcm_t *pcm, int err, int silent)
         return err;
 }
 
+#if SALSA_HAS_CHMAP_SUPPORT
+/*
+ * channel mapping API
+ */
+
+static int do_ctl_chmap(int card, int dev, int subdev, int stream,
+			int (*func)(snd_ctl_t *, snd_ctl_elem_id_t *, void *),
+			void *arg)
+{
+	char ctlname[32];
+	snd_ctl_t *ctl;
+	snd_ctl_elem_id_t id = {
+		.iface = SND_CTL_ELEM_IFACE_PCM,
+		.device = dev,
+		.index = subdev,
+	};
+	int ret;
+
+	sprintf(ctlname, "hw:%d", card);
+	ret = snd_ctl_open(&ctl, ctlname, 0);
+	if (ret < 0)
+		return ret;
+
+	if (stream == SND_PCM_STREAM_PLAYBACK)
+		strcpy((char *)id.name, "Playback Channel Map");
+	else
+		strcpy((char *)id.name, "Capture Channel Map");
+	ret = func(ctl, &id, arg);
+	snd_ctl_close(ctl);
+	if (ret < 0)
+		return ret;
+	return 0;
+}
+
+#define TLV_SIZE	256
+
+static int do_read_tlv(snd_ctl_t *ctl, snd_ctl_elem_id_t *id, void *tlv)
+{
+	return snd_ctl_elem_tlv_read(ctl, id, tlv, TLV_SIZE * 4);
+}
+
+static inline int is_chmap_type(int type)
+{
+	return (type >= SND_CTL_TLVT_CHMAP_FIXED &&
+		type <= SND_CTL_TLVT_CHMAP_PAIRED);
+}
+
+snd_pcm_chmap_query_t **
+snd_pcm_query_chmaps_from_hw(int card, int dev, int subdev,
+			     snd_pcm_stream_t stream)
+{
+	unsigned int tlv[TLV_SIZE], *start;
+	snd_pcm_chmap_query_t **map;
+	int i, nums;
+
+	if (do_ctl_chmap(card, dev, subdev, stream, do_read_tlv, tlv) < 0)
+		return NULL;
+
+	if (tlv[0] != SND_CTL_TLVT_CONTAINER) {
+		if (!is_chmap_type(tlv[0]))
+			return NULL;
+		start = tlv;
+		nums = 1;
+	} else {
+		unsigned int *p;
+		int size;
+		start = tlv + 2;
+		size = tlv[1];
+		nums = 0;
+		for (p = start; size > 0; ) {
+			if (!is_chmap_type(p[0]))
+				return NULL;
+			nums++;
+			size -= p[1] + 8;
+			p += p[1] / 4 + 2;
+		}
+	}
+	map = calloc(nums + 1, sizeof(int *));
+	if (!map)
+		return NULL;
+	for (i = 0; i < nums; i++) {
+		map[i] = malloc(start[1] + 8);
+		if (!map[i]) {
+			snd_pcm_free_chmaps(map);
+			return NULL;
+		}
+		map[i]->type = start[0] - 0x100;
+		map[i]->map.channels = start[1] / 4;
+		memcpy(map[i]->map.pos, start + 2, start[1]);
+		start += start[1] / 4 + 2;
+	}
+	return map;
+}
+
+void snd_pcm_free_chmaps(snd_pcm_chmap_query_t **maps)
+{
+	snd_pcm_chmap_query_t **p = maps;
+	if (!maps)
+		return;
+	for (p = maps; *p; p++)
+		free(*p);
+	free(maps);
+}
+
+static int do_get_chmap(snd_ctl_t *ctl, snd_ctl_elem_id_t *id, void *arg)
+{
+	snd_ctl_elem_value_t val = { .id = *id };
+	snd_pcm_chmap_t *map = arg;
+	int i, ret;
+
+	ret = snd_ctl_elem_read(ctl, &val);
+	if (ret < 0)
+		return ret;
+
+	for (i = 0; i < map->channels; i++)
+		map->pos[i] = snd_ctl_elem_value_get_integer(&val, i);
+	return 0;
+}
+
+snd_pcm_chmap_t *snd_pcm_get_chmap(snd_pcm_t *pcm)
+{
+	snd_pcm_chmap_t *map;
+
+	map = malloc(pcm->channels * sizeof(map->pos[0]) + sizeof(*map));
+	if (!map)
+		return NULL;
+	map->channels = pcm->channels;
+
+	if (do_ctl_chmap(pcm->card, pcm->device, pcm->subdevice, pcm->stream,
+			 do_get_chmap, map) < 0) {
+		free(map);
+		return NULL;
+	}
+	return map;
+}
+
+static int do_set_chmap(snd_ctl_t *ctl, snd_ctl_elem_id_t *id, void *arg)
+{
+	snd_ctl_elem_value_t val = { .id = *id };
+	snd_pcm_chmap_t *map = arg;
+	int i;
+
+	for (i = 0; i < map->channels; i++)
+		snd_ctl_elem_value_set_integer(&val, i, map->pos[i]);
+	return snd_ctl_elem_write(ctl, &val);
+}
+
+int snd_pcm_set_chmap(snd_pcm_t *pcm, const snd_pcm_chmap_t *map)
+{
+	int ret;
+
+	if (map->channels > 128)
+		return -EINVAL;
+
+	ret = do_ctl_chmap(pcm->card, pcm->device, pcm->subdevice, pcm->stream,
+			   do_set_chmap, (void *)map);
+	if (ret == -ENOENT || ret == -EPERM )
+		ret = -ENXIO;
+	return ret;
+}
+
+#define _NAME(n) [SND_CHMAP_TYPE_##n] = #n
+const char *_snd_chmap_type_names[SND_CHMAP_TYPE_LAST + 1] = {
+	_NAME(NONE), _NAME(FIXED), _NAME(VAR), _NAME(PAIRED),
+};
+#undef _NAME
+
+#define _NAME(n) [SND_CHMAP_##n] = #n
+const char *_snd_chmap_names[SND_CHMAP_LAST + 1] = {
+	_NAME(UNKNOWN), _NAME(NA), _NAME(MONO),
+	_NAME(FL), _NAME(FR),
+	_NAME(RL), _NAME(RR),
+	_NAME(FC), _NAME(LFE),
+	_NAME(SL), _NAME(SR),
+	_NAME(RC), _NAME(FLC), _NAME(FRC), _NAME(RLC), _NAME(RRC),
+	_NAME(FLW), _NAME(FRW),
+	_NAME(FLH), _NAME(FCH), _NAME(FRH), _NAME(TC),
+	_NAME(TFL), _NAME(TFR), _NAME(TFC),
+	_NAME(TRL), _NAME(TRR), _NAME(TRC),
+	_NAME(TFLC), _NAME(TFRC), _NAME(TSL), _NAME(TSR),
+	_NAME(LLFE), _NAME(RLFE),
+	_NAME(BC), _NAME(BLC), _NAME(BRC),
+};
+#undef _NAME
+
+const char *_snd_chmap_long_names[SND_CHMAP_LAST + 1] = {
+	[SND_CHMAP_UNKNOWN] = "Unknown",
+	[SND_CHMAP_NA] = "Unused",
+	[SND_CHMAP_MONO] = "Mono",
+	[SND_CHMAP_FL] = "Front Left",
+	[SND_CHMAP_FR] = "Front Right",
+	[SND_CHMAP_RL] = "Rear Left",
+	[SND_CHMAP_RR] = "Rear Right",
+	[SND_CHMAP_FC] = "Front Center",
+	[SND_CHMAP_LFE] = "LFE",
+	[SND_CHMAP_SL] = "Side Left",
+	[SND_CHMAP_SR] = "Side Right",
+	[SND_CHMAP_RC] = "Rear Center",
+	[SND_CHMAP_FLC] = "Front Left Center",
+	[SND_CHMAP_FRC] = "Front Right Center",
+	[SND_CHMAP_RLC] = "Rear Left Center",
+	[SND_CHMAP_RRC] = "Rear Right Center",
+	[SND_CHMAP_FLW] = "Front Left Wide",
+	[SND_CHMAP_FRW] = "Front Right Wide",
+	[SND_CHMAP_FLH] = "Front Left High",
+	[SND_CHMAP_FCH] = "Front Center High",
+	[SND_CHMAP_FRH] = "Front Right High",
+	[SND_CHMAP_TC] = "Top Center",
+	[SND_CHMAP_TFL] = "Top Front Left",
+	[SND_CHMAP_TFR] = "Top Front Right",
+	[SND_CHMAP_TFC] = "Top Front Center",
+	[SND_CHMAP_TRL] = "Top Rear Left",
+	[SND_CHMAP_TRR] = "Top Rear Right",
+	[SND_CHMAP_TRC] = "Top Rear Center",
+	[SND_CHMAP_TFLC] = "Top Front Left Center",
+	[SND_CHMAP_TFRC] = "Top Front Right Center",
+	[SND_CHMAP_TSL] = "Top Side Left",
+	[SND_CHMAP_TSR] = "Top Side Right",
+	[SND_CHMAP_LLFE] = "Left LFE",
+	[SND_CHMAP_RLFE] = "Right LFE",
+	[SND_CHMAP_BC] = "Bottom Center",
+	[SND_CHMAP_BLC] = "Bottom Left Center",
+	[SND_CHMAP_BRC] = "Bottom Right Center",
+};
+
+int snd_pcm_chmap_print(const snd_pcm_chmap_t *map, size_t maxlen, char *buf)
+{
+	unsigned int i, len = 0;
+
+	for (i = 0; i < map->channels; i++) {
+		unsigned int p = map->pos[i] & SND_CHMAP_POSITION_MASK;
+		if (i > 0) {
+			len += snprintf(buf + len, maxlen - len, " ");
+			if (len >= maxlen)
+				return -ENOMEM;
+		}
+		if (map->pos[i] & SND_CHMAP_DRIVER_SPEC)
+			len += snprintf(buf + len, maxlen, "%d", p);
+		else {
+			const char *name = _snd_chmap_names[p];
+			if (name)
+				len += snprintf(buf + len, maxlen - len,
+						"%s", name);
+			else
+				len += snprintf(buf + len, maxlen - len,
+						"Ch%d", p);
+		}
+		if (len >= maxlen)
+			return -ENOMEM;
+		if (map->pos[i] & SND_CHMAP_PHASE_INVERSE) {
+			len += snprintf(buf + len, maxlen - len, "[INV]");
+			if (len >= maxlen)
+				return -ENOMEM;
+		}
+	}
+	return len;
+}
+
+static int str_to_chmap(const char *str, int len)
+{
+	int val;
+	unsigned long v;
+	char *p;
+
+	if (isdigit(*str)) {
+		v = strtoul(str, &p, 0);
+		if (v == (unsigned long)-1)
+			return -1;
+		val = v;
+		val |= SND_CHMAP_DRIVER_SPEC;
+		str = p;
+	} else if (!strncasecmp(str, "ch", 2)) {
+		v = strtoul(str + 2, &p, 0);
+		if (v == (unsigned long)-1)
+			return -1;
+		val = v;
+		str = p;
+	} else {
+		for (val = 0; val <= SND_CHMAP_LAST; val++) {
+			int slen;
+			slen = strlen(_snd_chmap_names[val]);
+			if (slen > len)
+				continue;
+			if (!strncasecmp(str, _snd_chmap_names[val], slen) &&
+			    !isalpha(str[slen])) {
+				str += slen;
+				break;
+			}
+		}
+		if (val > SND_CHMAP_LAST)
+			return -1;
+	}
+	if (str && !strncasecmp(str, "[INV]", 5))
+		val |= SND_CHMAP_PHASE_INVERSE;
+	return val;
+}
+
+unsigned int snd_pcm_chmap_from_string(const char *str)
+{
+	return str_to_chmap(str, strlen(str));
+}
+
+snd_pcm_chmap_t *snd_pcm_chmap_parse_string(const char *str)
+{
+	int i, ch = 0;
+	int tmp_map[64];
+	snd_pcm_chmap_t *map;
+
+	for (;;) {
+		const char *p;
+		int len, val;
+
+		if (ch >= (int)(sizeof(tmp_map) / sizeof(tmp_map[0])))
+			return NULL;
+		for (p = str; *p && isalnum(*p); p++)
+			;
+		len = p - str;
+		if (!len)
+			return NULL;
+		val = str_to_chmap(str, len);
+		if (val < 0)
+			return NULL;
+		str += len;
+		if (*str == '[') {
+			if (!strncmp(str, "[INV]", 5)) {
+				val |= SND_CHMAP_PHASE_INVERSE;
+				str += 5;
+			}
+		}
+		tmp_map[ch] = val;
+		ch++;
+		for (; *str && !isalnum(*str); str++)
+			;
+		if (!*str)
+			break;
+	}
+	map = malloc(sizeof(*map) + ch * sizeof(int));
+	if (!map)
+		return NULL;
+	map->channels = ch;
+	for (i = 0; i < ch; i++)
+		map->pos[i] = tmp_map[i];
+	return map;
+}
+
+#endif /* SALSA_HAS_CHMAP_SUPPORT */

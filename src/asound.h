@@ -450,6 +450,74 @@ enum {
 /* Trick to make alsa-lib/acinclude.m4 happy */
 #define SNDRV_PCM_IOCTL_REWIND SNDRV_PCM_IOCTL_REWIND
 
+#if SALSA_HAS_CHMAP_SUPPORT
+#define SND_CHMAP_API_VERSION	((1 << 16) | (0 << 8) | 1)
+
+enum snd_pcm_chmap_type {
+	SND_CHMAP_TYPE_NONE = 0,
+	SND_CHMAP_TYPE_FIXED,
+	SND_CHMAP_TYPE_VAR,
+	SND_CHMAP_TYPE_PAIRED,
+	SND_CHMAP_TYPE_LAST = SND_CHMAP_TYPE_PAIRED,
+};
+
+enum snd_pcm_chmap_position {
+	SND_CHMAP_UNKNOWN = 0,
+	SND_CHMAP_NA,
+	SND_CHMAP_MONO,
+	SND_CHMAP_FL,
+	SND_CHMAP_FR,
+	SND_CHMAP_RL,
+	SND_CHMAP_RR,
+	SND_CHMAP_FC,
+	SND_CHMAP_LFE,
+	SND_CHMAP_SL,
+	SND_CHMAP_SR,
+	SND_CHMAP_RC,
+	SND_CHMAP_FLC,
+	SND_CHMAP_FRC,
+	SND_CHMAP_RLC,
+	SND_CHMAP_RRC,
+	SND_CHMAP_FLW,
+	SND_CHMAP_FRW,
+	SND_CHMAP_FLH,
+	SND_CHMAP_FCH,
+	SND_CHMAP_FRH,
+	SND_CHMAP_TC,
+	SND_CHMAP_TFL,
+	SND_CHMAP_TFR,
+	SND_CHMAP_TFC,
+	SND_CHMAP_TRL,
+	SND_CHMAP_TRR,
+	SND_CHMAP_TRC,
+	SND_CHMAP_TFLC,
+	SND_CHMAP_TFRC,
+	SND_CHMAP_TSL,
+	SND_CHMAP_TSR,
+	SND_CHMAP_LLFE,
+	SND_CHMAP_RLFE,
+	SND_CHMAP_BC,
+	SND_CHMAP_BLC,
+	SND_CHMAP_BRC,
+	SND_CHMAP_LAST = SND_CHMAP_BRC,
+};
+
+#define SND_CHMAP_POSITION_MASK		0xffff
+
+#define SND_CHMAP_PHASE_INVERSE		(0x01 << 16)
+#define SND_CHMAP_DRIVER_SPEC		(0x02 << 16)
+
+typedef struct snd_pcm_chmap {
+	unsigned int channels;
+	unsigned int pos[0];
+} snd_pcm_chmap_t;
+
+typedef struct snd_pcm_chmap_query {
+	enum snd_pcm_chmap_type type;
+	snd_pcm_chmap_t map;
+} snd_pcm_chmap_query_t;
+#endif /* SALSA_HAS_CHMAP_SUPPORT */
+
 /* RAW MIDI inteface */
 
 #define SNDRV_RAWMIDI_VERSION		SNDRV_PROTOCOL_VERSION(2, 0, 0)
@@ -869,6 +937,9 @@ typedef struct snd_ctl_event {
 #define SND_CTL_TLVT_DB_RANGE		3
 #define SND_CTL_TLVT_DB_MINMAX		4
 #define SND_CTL_TLVT_DB_MINMAX_MUTE	5
+#define SND_CTL_TLVT_CHMAP_FIXED	0x101	/* fixed channel position */
+#define SND_CTL_TLVT_CHMAP_VAR	0x102	/* channels freely swappable */
+#define SND_CTL_TLVT_CHMAP_PAIRED	0x103	/* pair-wise swappable */
 
 /* Mute state */
 #define SND_CTL_TLV_DB_GAIN_MUTE	-9999999
