@@ -173,6 +173,34 @@ const struct snd_pcm_format_data _snd_pcm_formats[SND_PCM_FORMAT_LAST+1] = {
 		.width = 18, .phys = 24, .le = 0, .signd = 0,
 		.silence = { 0x02, 0x00, 0x00 },
 	},
+	[SND_PCM_FORMAT_G723_24] = {
+		.width = 3, .phys = 3, .le = -1, .signd = -1,
+		.silence = {},
+	},
+	[SND_PCM_FORMAT_G723_40] = {
+		.width = 5, .phys = 5, .le = -1, .signd = -1,
+		.silence = {},
+	},
+	[SND_PCM_FORMAT_DSD_U8] = {
+		.width = 8, .phys = 8, .le = 1, .signd = 0,
+		.silence = { 0x69 },
+	},
+	[SND_PCM_FORMAT_DSD_U16_LE] = {
+		.width = 16, .phys = 16, .le = 1, .signd = 0,
+		.silence = { 0x69, 0x69 },
+	},
+	[SND_PCM_FORMAT_DSD_U32_LE] = {
+		.width = 32, .phys = 32, .le = 1, .signd = 0,
+		.silence = { 0x69, 0x69, 0x69, 0x69 },
+	},
+	[SND_PCM_FORMAT_DSD_U16_BE] = {
+		.width = 16, .phys = 16, .le = 0, .signd = 0,
+		.silence = { 0x69, 0x69 },
+	},
+	[SND_PCM_FORMAT_DSD_U32_BE] = {
+		.width = 32, .phys = 32, .le = 0, .signd = 0,
+		.silence = { 0x69, 0x69, 0x69, 0x69 },
+	},
 };
 
 u_int64_t snd_pcm_format_silence_64(snd_pcm_format_t format)

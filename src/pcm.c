@@ -330,6 +330,15 @@ const char * const _snd_pcm_format_names[SND_PCM_FORMAT_LAST + 1] = {
 	FORMAT(S18_3BE),
 	FORMAT(U18_3LE),
 	FORMAT(U18_3BE),
+	FORMAT(G723_24),
+	FORMAT(G723_24_1B),
+	FORMAT(G723_40),
+	FORMAT(G723_40_1B),
+	FORMAT(DSD_U8),
+	FORMAT(DSD_U16_LE),
+	FORMAT(DSD_U32_LE),
+	FORMAT(DSD_U16_BE),
+	FORMAT(DSD_U32_BE),
 };
 
 static const char * const _snd_pcm_format_aliases[SND_PCM_FORMAT_LAST + 1] = {
@@ -383,6 +392,15 @@ const char * const _snd_pcm_format_descriptions[SND_PCM_FORMAT_LAST + 1] = {
 	FORMATD(S18_3BE, "Signed 18 bit Big Endian in 3bytes"),
 	FORMATD(U18_3LE, "Unsigned 18 bit Little Endian in 3bytes"),
 	FORMATD(U18_3BE, "Unsigned 18 bit Big Endian in 3bytes"),
+	FORMATD(G723_24, "G.723 (ADPCM) 24 kbit/s, 8 samples in 3 bytes"),
+	FORMATD(G723_24_1B, "G.723 (ADPCM) 24 kbit/s, 1 sample in 1 byte"),
+	FORMATD(G723_40, "G.723 (ADPCM) 40 kbit/s, 8 samples in 3 bytes"),
+	FORMATD(G723_40_1B, "G.723 (ADPCM) 40 kbit/s, 1 sample in 1 byte"),
+	FORMATD(DSD_U8, "Direct Stream Digital (DSD) in 1-byte samples (x8)"),
+	FORMATD(DSD_U16_LE, "Direct Stream Digital (DSD) in 2-byte samples (x16)"),
+	FORMATD(DSD_U32_LE, "Direct Stream Digital (DSD) in 4-byte samples (x32)"),
+	FORMATD(DSD_U16_BE, "Direct Stream Digital (DSD) in 2-byte samples (x16)"),
+	FORMATD(DSD_U32_BE, "Direct Stream Digital (DSD) in 4-byte samples (x32)"),
 };
 
 const char * const _snd_pcm_type_names[] = {
