@@ -1814,6 +1814,22 @@ int snd_pcm_sw_params_get_tstamp_mode(const snd_pcm_sw_params_t *params,
 }
 
 __SALSA_EXPORT_FUNC
+int snd_pcm_sw_params_set_tstamp_type(snd_pcm_t *pcm, snd_pcm_sw_params_t *params,
+				      snd_pcm_tstamp_type_t val)
+{
+	params->tstamp_type = val;
+	return 0;
+}
+
+__SALSA_EXPORT_FUNC
+int snd_pcm_sw_params_get_tstamp_type(const snd_pcm_sw_params_t *params,
+				      snd_pcm_tstamp_type_t *val)
+{
+	*val = (snd_pcm_tstamp_type_t) params->tstamp_type;
+	return 0;
+}
+
+__SALSA_EXPORT_FUNC
 __SALSA_DEPRECATED
 int snd_pcm_sw_params_set_sleep_min(snd_pcm_t *pcm, snd_pcm_sw_params_t *params,
 				    unsigned int val)

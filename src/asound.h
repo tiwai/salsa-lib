@@ -99,7 +99,7 @@ enum {
 
 /* PCM interface */
 
-#define SNDRV_PCM_VERSION		SNDRV_PROTOCOL_VERSION(2, 0, 11)
+#define SNDRV_PCM_VERSION		SNDRV_PROTOCOL_VERSION(2, 0, 12)
 
 typedef unsigned long snd_pcm_uframes_t;
 typedef long snd_pcm_sframes_t;
@@ -337,6 +337,13 @@ typedef enum _snd_pcm_tstamp {
 	SND_PCM_TSTAMP_LAST = SND_PCM_TSTAMP_MMAP
 } snd_pcm_tstamp_t;
 
+typedef enum _snd_pcm_tstamp_type {
+	SND_PCM_TSTAMP_TYPE_GETTIMEOFDAY = 0,
+	SND_PCM_TSTAMP_TYPE_MONOTONIC,
+	SND_PCM_TSTAMP_TYPE_MONOTONIC_RAW,
+	SND_PCM_TSTAMP_TYPE_LAST = SND_PCM_TSTAMP_TYPE_MONOTONIC_RAW,
+} snd_pcm_tstamp_type_t;
+
 typedef struct snd_pcm_sw_params {
 	int tstamp_mode;
 	unsigned int period_step;
@@ -348,7 +355,9 @@ typedef struct snd_pcm_sw_params {
 	snd_pcm_uframes_t silence_threshold;
 	snd_pcm_uframes_t silence_size;
 	snd_pcm_uframes_t boundary;
-	unsigned char reserved[60];
+	unsigned int tstamp_type;
+	int pads;
+	unsigned char reserved[54];
 	unsigned int period_event;
 } snd_pcm_sw_params_t;
 
@@ -415,13 +424,6 @@ struct snd_xfern {
 	snd_pcm_sframes_t result;
 	void **bufs;
 	snd_pcm_uframes_t frames;
-};
-
-
-enum {
-        SNDRV_PCM_TSTAMP_TYPE_GETTIMEOFDAY = 0,
-        SNDRV_PCM_TSTAMP_TYPE_MONOTONIC,
-        SNDRV_PCM_TSTAMP_TYPE_LAST = SNDRV_PCM_TSTAMP_TYPE_MONOTONIC,
 };
 
 enum {
