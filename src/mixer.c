@@ -58,29 +58,27 @@ int snd_mixer_attach(snd_mixer_t *mixer, const char *name)
 	err = snd_hctl_open(&hctl, name, 0);
 	if (err < 0)
 		return err;
-	err = snd_mixer_attach_hctl(mixer, hctl);
-	if (err < 0) {
-		snd_hctl_close(hctl);
-		return err;
-	}
-	return 0;
+	return snd_mixer_attach_hctl(mixer, hctl);
 }
 
 int snd_mixer_attach_hctl(snd_mixer_t *mixer, snd_hctl_t *hctl)
 {
 	int err;
 
-	if (mixer->hctl)
-		return -EBUSY;
-	err = snd_hctl_nonblock(hctl, 1);
-	if (err < 0) {
-		snd_hctl_close(hctl);
-		return err;
+	if (mixer->hctl) {
+		err = -EBUSY;
+		goto error;
 	}
+	err = snd_hctl_nonblock(hctl, 1);
+	if (err < 0)
+		goto error;
 	snd_hctl_set_callback(hctl, hctl_event_handler);
 	snd_hctl_set_callback_private(hctl, mixer);
 	mixer->hctl = hctl;
 	return 0;
+ error:
+	snd_hctl_close(hctl);
+	return err;
 }
 
 int snd_mixer_detach(snd_mixer_t *mixer, const char *name)
