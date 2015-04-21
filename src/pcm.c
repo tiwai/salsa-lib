@@ -1344,7 +1344,7 @@ int snd_pcm_chmap_print(const snd_pcm_chmap_t *map, size_t maxlen, char *buf)
 				return -ENOMEM;
 		}
 		if (map->pos[i] & SND_CHMAP_DRIVER_SPEC)
-			len += snprintf(buf + len, maxlen, "%d", p);
+			len += snprintf(buf + len, maxlen - len, "%d", p);
 		else {
 			const char *name = _snd_chmap_names[p];
 			if (name)
