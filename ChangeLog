@@ -1,3 +1,11 @@
+Version 0.1.4:
+	* Fix a regression in PCM hw_params setup
+	* Add wallclock timestamp API
+	* Add chmap support, enabled via --enable-chmap configure option
+	* Add G723 and DSD formats
+	* Add PCM timestamp type support
+	* Set the default alsa-lib version to 1.0.28
+
 Version 0.1.3:
 	* Add --enable-abicheck configure option
 	* Add --disable-user-elem configure option

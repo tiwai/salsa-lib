@@ -44,7 +44,7 @@ MIXER
   o "Capture Source" isn't split to switches but handled as an enum
     (I personally like this better :)
   o dB support can be selected via configure option
-  o No linear <-> log dB conversion
+  o Linear <-> log dB conversion enabled via configure option
 
 TIMER
   o No query interface (returns errors)
