@@ -357,7 +357,7 @@ typedef struct snd_pcm_sw_params {
 	snd_pcm_uframes_t boundary;
 	unsigned int tstamp_type;
 	int pads;
-	unsigned char reserved[54];
+	unsigned char reserved[52];
 	unsigned int period_event;
 } snd_pcm_sw_params_t;
 
