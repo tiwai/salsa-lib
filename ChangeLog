@@ -1,3 +1,6 @@
+Version 0.1.5:
+	* Fix a regression of PCM sw_params size incompatibility
+
 Version 0.1.4:
 	* Fix a regression in PCM hw_params setup
 	* Add wallclock timestamp API
