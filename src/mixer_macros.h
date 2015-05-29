@@ -478,6 +478,38 @@ int snd_mixer_selem_get_capture_switch(snd_mixer_elem_t *elem,
 					   channel, value);
 }
 
+extern int _snd_selem_update_volume(snd_selem_vol_item_t *str, int channel,
+				    long value);
+extern int _snd_selem_update_volume_all(snd_selem_vol_item_t *str, long value);
+
+__SALSA_EXPORT_FUNC
+int snd_mixer_selem_set_playback_volume(snd_mixer_elem_t *elem,
+					snd_mixer_selem_channel_id_t channel,
+					long value)
+{
+	return _snd_selem_update_volume(elem->items[SND_SELEM_ITEM_PVOLUME], channel, value);
+}
+
+__SALSA_EXPORT_FUNC
+int snd_mixer_selem_set_capture_volume(snd_mixer_elem_t *elem,
+				       snd_mixer_selem_channel_id_t channel,
+				       long value)
+{
+	return _snd_selem_update_volume(elem->items[SND_SELEM_ITEM_CVOLUME], channel, value);
+}
+
+__SALSA_EXPORT_FUNC
+int snd_mixer_selem_set_playback_volume_all(snd_mixer_elem_t *elem, long value)
+{
+	return _snd_selem_update_volume_all(elem->items[SND_SELEM_ITEM_PVOLUME], value);
+}
+
+__SALSA_EXPORT_FUNC
+int snd_mixer_selem_set_capture_volume_all(snd_mixer_elem_t *elem, long value)
+{
+	return _snd_selem_update_volume_all(elem->items[SND_SELEM_ITEM_CVOLUME], value);
+}
+
 __SALSA_EXPORT_FUNC
 int snd_mixer_selem_is_enumerated(snd_mixer_elem_t *elem)
 {
@@ -562,8 +594,9 @@ extern int _snd_selem_vol_get_dB_range(snd_selem_vol_item_t *item,
 extern int _snd_selem_vol_get_dB(snd_selem_vol_item_t *item, int channel,
 				 long *value);
 extern int _snd_selem_vol_set_dB(snd_selem_vol_item_t *item,
-				 snd_mixer_selem_channel_id_t channel,
-				 long db_gain, int xdir);
+				 int channel, long db_gain, int xdir);
+extern int _snd_selem_vol_set_dB_all(snd_selem_vol_item_t *item,
+				     long db_gain, int xdir);
 extern int _snd_selem_ask_vol_dB(snd_selem_vol_item_t *item, long value,
 				 long *dBvalue);
 extern int _snd_selem_ask_dB_vol(snd_selem_vol_item_t *item, long dBvalue,
@@ -608,27 +641,14 @@ int snd_mixer_selem_set_playback_dB(snd_mixer_elem_t *elem,
 				    long value, int dir)
 {
 	return _snd_selem_vol_set_dB((snd_selem_vol_item_t *)elem->items[SND_SELEM_ITEM_PVOLUME],
-				     channel, value, dir);
+				     (int)channel, value, dir);
 }
 
 __SALSA_EXPORT_FUNC
 int snd_mixer_selem_set_playback_dB_all(snd_mixer_elem_t *elem, long value,
 					int dir)
 {
-	unsigned int i;
-	int err;
-	snd_selem_vol_item_t *vol =
-		(snd_selem_vol_item_t *) elem->items[SND_SELEM_ITEM_PVOLUME];
-	if (!vol)
-		return -EINVAL;
-	for (i = 0; i < vol->head.channels; i++) {
-		err = _snd_selem_vol_set_dB(vol,
-					    (snd_mixer_selem_channel_id_t)i,
-					    value, dir);
-		if (err < 0)
-			return err;
-	}
-	return 0;
+	return _snd_selem_vol_set_dB_all(elem->items[SND_SELEM_ITEM_PVOLUME], value, dir);
 }
 
 __SALSA_EXPORT_FUNC
@@ -677,20 +697,7 @@ __SALSA_EXPORT_FUNC
 int snd_mixer_selem_set_capture_dB_all(snd_mixer_elem_t *elem, long value,
 				       int dir)
 {
-	unsigned int i;
-	int err;
-	snd_selem_vol_item_t *vol =
-		(snd_selem_vol_item_t *) elem->items[SND_SELEM_ITEM_CVOLUME];
-	if (!vol)
-		return -EINVAL;
-	for (i = 0; i < vol->head.channels; i++) {
-		err = _snd_selem_vol_set_dB(vol,
-					    (snd_mixer_selem_channel_id_t)i,
-					    value, dir);
-		if (err < 0)
-			return err;
-	}
-	return 0;
+	return _snd_selem_vol_set_dB_all(elem->items[SND_SELEM_ITEM_CVOLUME], value, dir);
 }
 
 #else /* SALSA_HAS_TLV_SUPPORT */

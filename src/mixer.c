@@ -778,10 +778,8 @@ const char * const _snd_mixer_selem_channels[SND_MIXER_SCHN_LAST + 1] = {
 
 /*
  */
-static int update_volume(snd_mixer_elem_t *elem,
-			 int type, int channel, long value)
+int _snd_selem_update_volume(snd_selem_vol_item_t *str, int channel, long value)
 {
-	snd_selem_vol_item_t *str = elem->items[type];
 	snd_ctl_elem_value_t *ctl;
 	int err;
 
@@ -805,43 +803,18 @@ static int update_volume(snd_mixer_elem_t *elem,
 	return snd_hctl_elem_write(str->head.helem, ctl);
 }
 
-int snd_mixer_selem_set_playback_volume(snd_mixer_elem_t *elem,
-					snd_mixer_selem_channel_id_t channel,
-					long value)
+int _snd_selem_update_volume_all(snd_selem_vol_item_t *str, long value)
 {
-	return update_volume(elem, SND_SELEM_ITEM_PVOLUME, channel, value);
-}
-
-static int update_volume_all(snd_mixer_elem_t *elem, int type, long value)
-{
-	snd_selem_vol_item_t *str = elem->items[type];
 	int i, err;
 
 	if (!str)
 		return -EINVAL;
 	for (i = 0; i < str->head.channels; i++) {
-		err = update_volume(elem, type, i, value);
+		err = _snd_selem_update_volume(str, i, value);
 		if (err < 0)
 			return err;
 	}
 	return 0;
-}
-
-int snd_mixer_selem_set_playback_volume_all(snd_mixer_elem_t *elem, long value)
-{
-	return update_volume_all(elem, SND_SELEM_ITEM_PVOLUME, value);
-}
-
-int snd_mixer_selem_set_capture_volume(snd_mixer_elem_t *elem,
-				       snd_mixer_selem_channel_id_t channel,
-				       long value)
-{
-	return update_volume(elem, SND_SELEM_ITEM_CVOLUME, channel, value);
-}
-
-int snd_mixer_selem_set_capture_volume_all(snd_mixer_elem_t *elem, long value)
-{
-	return update_volume_all(elem, SND_SELEM_ITEM_CVOLUME, value);
 }
 
 static int set_volume_range(snd_mixer_elem_t *elem, int type,
@@ -1109,7 +1082,21 @@ int _snd_selem_vol_set_dB(snd_selem_vol_item_t *item,
 				      db_gain, &value, xdir);
 	if (err < 0)
 		return err;
-	item->vol[USR_IDX(channel)] = convert_to_user(item, value);
+	return _snd_selem_update_volume(item, channel, convert_to_user(item, value));
+}
+
+int _snd_selem_vol_set_dB_all(snd_selem_vol_item_t *vol, long db_gain, int xdir)
+{
+	unsigned int i;
+	int err;
+
+	if (!vol)
+		return -EINVAL;
+	for (i = 0; i < vol->head.channels; i++) {
+		err = _snd_selem_vol_set_dB(vol, i, db_gain, xdir);
+		if (err < 0)
+			return err;
+	}
 	return 0;
 }
 
