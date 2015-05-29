@@ -192,12 +192,15 @@ int _snd_dev_get_device(const char *name, int *cardp, int *devp, int *subdevp)
 		*devp = 0;
 	if (subdevp)
 		*subdevp = -1;
-	if (!strcmp(name, "hw") || !strcmp(name, "default"))
+	if (!strcmp(name, "hw") || !strcmp(name, "default") ||
+	    !strcmp(name, "sysdefault"))
 		return 0;
 	if (!strncmp(name, "hw:", 3))
 		name += 3;
 	else if (!strncmp(name, "default:", 8))
 		name += 8;
+	else if (!strncmp(name, "sysdefault:", 11))
+		name += 11;
 	else
 		return -EINVAL;
 	card = snd_card_get_index(name);
