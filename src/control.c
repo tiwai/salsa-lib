@@ -763,6 +763,67 @@ int snd_tlv_convert_from_dB(unsigned int *tlv, long rangemin, long rangemax,
 	return -EINVAL;
 }
 
+#define TEMP_TLV_SIZE		4096
+struct tlv_info {
+	long minval, maxval;
+	unsigned int *tlv;
+	unsigned int buf[TEMP_TLV_SIZE];
+};
+
+static int get_tlv_info(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
+			struct tlv_info *rec)
+{
+	snd_ctl_elem_info_t info;
+	int err;
+
+	memzero_valgrind(&info, sizeof(info));
+	info.id = *id;
+	err = snd_ctl_elem_info(ctl, &info);
+	if (err < 0)
+		return err;
+	rec->minval = info.value.integer.min;
+	rec->maxval = info.value.integer.max;
+	return snd_tlv_parse_dB_info(rec->buf, sizeof(rec->buf), &rec->tlv);
+}
+
+int snd_ctl_get_dB_range(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
+			 long *min, long *max)
+{
+	struct tlv_info info;
+	int err;
+
+	err = get_tlv_info(ctl, id, &info);
+	if (err < 0)
+		return err;
+	return snd_tlv_get_dB_range(info.tlv, info.minval, info.maxval,
+				    min, max);
+}
+
+int snd_ctl_convert_to_dB(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
+			  long volume, long *db_gain)
+{
+	struct tlv_info info;
+	int err;
+
+	err = get_tlv_info(ctl, id, &info);
+	if (err < 0)
+		return err;
+	return snd_tlv_convert_to_dB(info.tlv, info.minval, info.maxval,
+				     volume, db_gain);
+}
+
+int snd_ctl_convert_from_dB(snd_ctl_t *ctl, const snd_ctl_elem_id_t *id,
+			    long db_gain, long *value, int xdir)
+{
+	struct tlv_info info;
+	int err;
+
+	err = get_tlv_info(ctl, id, &info);
+	if (err < 0)
+		return err;
+	return snd_tlv_convert_from_dB(info.tlv, info.minval, info.maxval,
+				       db_gain, value, xdir);
+}
 #endif /* TLV */
 
 #if SALSA_CTL_ASCII_PARSER
