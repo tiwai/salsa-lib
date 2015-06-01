@@ -1,3 +1,12 @@
+Version 0.1.6:
+	* Fix the buggy behavior of snd_mixer_selem_set_*_dB()
+	* Allow "sysdefault" to be passed as a device name
+	* Add snd_ctl_ascii_elem_id_get(), snd_ctl_ascii_elem_id_parse()
+	  and snd_ctl_ascii_value_parse() that are used by amixer;
+	  they are enabled via --enable-ctlasciiparser configure option
+	* Add missing ABI-compatible snd_ctl_elem_*_name()
+	* Add snd_ctl_convert_{from|to}_dB() and snd_ctl_get_dB_range()
+
 Version 0.1.5:
 	* Fix a regression of PCM sw_params size incompatibility
 
