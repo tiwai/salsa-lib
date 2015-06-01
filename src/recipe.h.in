@@ -31,6 +31,9 @@
 /* Enable library ABI check */
 #define SALSA_CHECK_ABI		@SALSA_CHECK_ABI@
 
+/* Support ASCII value parser for ctl */
+#define SALSA_CTL_ASCII_PARSER	@SALSA_CTL_ASCII_PARSER@
+
 /* Default device path prefix */
 #define SALSA_DEVPATH "@DEVPATH@"
 

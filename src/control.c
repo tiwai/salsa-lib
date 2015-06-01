@@ -764,3 +764,126 @@ int snd_tlv_convert_from_dB(unsigned int *tlv, long rangemin, long rangemax,
 }
 
 #endif /* TLV */
+
+#if SALSA_CTL_ASCII_PARSER
+char *snd_ctl_ascii_elem_id_get(snd_ctl_elem_id_t *id)
+{
+	char buf[256];
+	int len;
+
+	len = snprintf(buf, sizeof(buf), "numid=%u,iface=%s,name='%s'",
+		       id->numid, _snd_ctl_elem_iface_names[id->iface],
+		       id->name);
+	if (len < sizeof(buf) && id->index > 0)
+		len += snprintf(buf + len, sizeof(buf) - len,
+				",index=%d", id->index);
+	if (len < sizeof(buf) && id->device > 0)
+		len += snprintf(buf + len, sizeof(buf) - len,
+				",device=%d", id->device);
+	if (len < sizeof(buf) && id->subdevice > 0)
+		len += snprintf(buf + len, sizeof(buf) - len,
+				",subdevice=%d", id->subdevice);
+	return strdup(buf);
+}
+
+int snd_ctl_ascii_elem_id_parse(snd_ctl_elem_id_t *dst, const char *str)
+{
+	char iface[20];
+	char *p, *s = (char *)str;
+	int i;
+
+	while ((p = strsep(&s, ",")) != NULL) {
+		if (sscanf(p, "iface=%20[^,]", iface) == 1) {
+			for (i = 0; i <= SND_CTL_ELEM_IFACE_LAST; i++) {
+				if (!strcmp(iface,
+					    _snd_ctl_elem_iface_names[i])) {
+					dst->iface = i;
+					break;
+				}
+			}
+			if (i > SND_CTL_ELEM_IFACE_LAST)
+				return -EINVAL;
+			continue;
+		}
+		if (sscanf(p, "name='%42[^']", dst->name) == 1)
+			continue;
+		if (sscanf(p, "numid=%d", &dst->numid) == 1)
+			continue;
+		if (sscanf(p, "index=%d", &dst->index) == 1)
+			continue;
+		if (sscanf(p, "device=%d", &dst->device) == 1)
+			continue;
+		if (sscanf(p, "subdevice=%d", &dst->subdevice) == 1)
+			continue;
+		return -EINVAL;
+	}
+	return 0;
+}
+
+static int match_yes(const char *ptr)
+{
+	static const char * const yes[] = {
+		"on", "up", "yes", "true", NULL,
+	};
+	const char * const *p;
+
+	for (p = yes; *p; p++)
+		if (strncasecmp(ptr, *p, strlen(*p)))
+			return 1;
+	return 0;
+}
+
+static int get_enum_index(snd_ctl_t *handle, snd_ctl_elem_info_t *info,
+			  const char *ptr)
+{
+	int i;
+
+	for (i = 0; i < info->value.enumerated.items; i++) {
+		info->value.enumerated.item = i;
+		if (snd_ctl_elem_info(handle, info) < 0)
+			return -1;
+		if (!strncmp(ptr, info->value.enumerated.name,
+			     strlen(info->value.enumerated.name)))
+			return i;
+	}
+	return -1;
+}
+
+int snd_ctl_ascii_value_parse(snd_ctl_t *handle,
+			      snd_ctl_elem_value_t *dst,
+			      snd_ctl_elem_info_t *info,
+			      const char *ptr)
+{
+	int idx = 0;
+	int tmp;
+
+	for (idx = 0; idx < info->count && idx < 128 && *ptr; idx++) {
+		switch (info->type) {
+		case SND_CTL_ELEM_TYPE_BOOLEAN:
+			if (!strncasecmp(ptr, "toggle", 6))
+				tmp = !dst->value.integer.value[idx];
+			else if (match_yes(ptr) || *ptr == '1')
+				tmp = 1;
+			else
+				tmp = 0;
+			dst->value.integer.value[idx] = tmp;
+			break;
+		case SND_CTL_ELEM_TYPE_INTEGER:
+			dst->value.integer.value[idx] = strtol(ptr, NULL, 0);
+			break;
+		case SND_CTL_ELEM_TYPE_INTEGER64:
+			dst->value.integer.value[idx] = strtoll(ptr, NULL, 0);
+			break;
+		case SND_CTL_ELEM_TYPE_ENUMERATED:
+			tmp = get_enum_index(handle, info, ptr);
+			if (tmp < 0)
+				return -EINVAL;
+			dst->value.enumerated.item[idx] = tmp;
+			break;
+		}
+		while (*ptr && *ptr != ',')
+			ptr++;
+	}
+	return 0;
+}
+#endif /* SALSA_CTL_ASCII_PARSER */

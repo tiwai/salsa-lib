@@ -137,6 +137,11 @@ AC_ARG_ENABLE(abicheck,
 		 [enable library ABI check]),
   abicheck="$enableval", abicheck="no")
 
+AC_ARG_ENABLE(ctlasciiparser,
+  AS_HELP_STRING([--enable-ctlasciiparser],
+		 [enable ctl ASCII parser (for amixer)]),
+  ctlasciiparser="$enableval", ctlasciiparser="no")
+
 AC_ARG_ENABLE(everything,
   AS_HELP_STRING([--enable-everything],
 		 [enable everything :)]),
@@ -160,6 +165,7 @@ if test "$everything" = "yes"; then
   support_float="yes"
   support_4bit="yes"
   abicheck="yes"
+  ctlasciiparser="yes"
 fi
 
 SALSA_DEPLIBS=""
@@ -246,6 +252,13 @@ else
 fi
 AC_SUBST(SALSA_CHECK_ABI)
 
+if test "$ctlasciiparser" = "yes"; then
+  SALSA_CTL_ASCII_PARSER=1
+else
+  SALSA_CTL_ASCII_PARSER=0
+fi
+AC_SUBST(SALSA_CTL_ASCII_PARSER)
+
 if test "$delight_valgrind" = "yes"; then
   AC_DEFINE(DELIGHT_VALGRIND)
 fi
@@ -305,3 +318,4 @@ echo "  - Mark deprecated attribute: $markdeprecated"
 echo "  - Support string-output via snd_output: $output_buffer"
 echo "  - Support floating-point: $support_float"
 echo "  - Enable library ABI check: $abicheck"
+echo "  - Support ctl ASCII parser: $ctlasciiparser"
