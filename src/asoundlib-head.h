@@ -29,7 +29,7 @@
 #include <fcntl.h>
 #include <assert.h>
 #include <endian.h>
-#include <sys/poll.h>
+#include <poll.h>
 #include <errno.h>
 #include <stdarg.h>
 

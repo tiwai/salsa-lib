@@ -26,7 +26,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <signal.h>
-#include <sys/poll.h>
+#include <poll.h>
 #include "hwdep.h"
 #include "local.h"
 

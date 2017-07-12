@@ -13,7 +13,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
-#include <sys/poll.h>
+#include <poll.h>
 
 typedef struct _snd_rawmidi_hw {
 	char *name;
