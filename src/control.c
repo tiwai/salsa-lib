@@ -26,7 +26,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <signal.h>
-#include <sys/poll.h>
+#include <poll.h>
 #include "control.h"
 #include "local.h"
 #if SALSA_SUPPORT_FLOAT
