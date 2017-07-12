@@ -12,7 +12,7 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/ioctl.h>
-#include <sys/poll.h>
+#include <poll.h>
 
 typedef struct {
 	struct sndrv_pcm_channel_info info;
