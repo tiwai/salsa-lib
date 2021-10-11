@@ -2158,6 +2158,14 @@ int snd_pcm_get_params(snd_pcm_t *pcm,
 	return 0;
 }
 
+static inline
+void *snd_pcm_channel_area_addr(const snd_pcm_channel_area_t *area,
+				snd_pcm_uframes_t offset)
+{
+	unsigned int bitofs = area->first + area->step * offset;
+	return (char *) area->addr + bitofs / 8;
+}
+
 /*
  * not implemented yet
  */
@@ -2170,23 +2178,35 @@ int snd_pcm_open_lconf(snd_pcm_t **pcm, const char *name,
 	return -ENXIO;
 }
 
-__SALSA_EXPORT_FUNC __SALSA_NOT_IMPLEMENTED
+__SALSA_EXPORT_FUNC
 snd_pcm_sframes_t snd_pcm_mmap_writei(snd_pcm_t *pcm, const void *buffer,
 				      snd_pcm_uframes_t size)
 {
-	return -ENXIO;
+	const snd_pcm_channel_area_t *areas;
+	snd_pcm_uframes_t offset;
+
+	snd_pcm_mmap_begin(pcm, &areas, &offset, &size);
+	memcpy(snd_pcm_channel_area_addr(areas, offset), buffer,
+	       snd_pcm_frames_to_bytes(pcm, size));
+	return snd_pcm_mmap_commit(pcm, offset, size);
+}
+
+__SALSA_EXPORT_FUNC
+snd_pcm_sframes_t snd_pcm_mmap_readi(snd_pcm_t *pcm, void *buffer,
+				     snd_pcm_uframes_t size)
+{
+	const snd_pcm_channel_area_t *areas;
+	snd_pcm_uframes_t offset;
+
+	snd_pcm_mmap_begin(pcm, &areas, &offset, &size);
+	memcpy(buffer, snd_pcm_channel_area_addr(areas, offset),
+	       snd_pcm_frames_to_bytes(pcm, size));
+	return snd_pcm_mmap_commit(pcm, offset, size);
 }
 
 __SALSA_EXPORT_FUNC __SALSA_NOT_IMPLEMENTED
 snd_pcm_sframes_t snd_pcm_mmap_writen(snd_pcm_t *pcm, void **bufs,
 				      snd_pcm_uframes_t size)
-{
-	return -ENXIO;
-}
-
-__SALSA_EXPORT_FUNC __SALSA_NOT_IMPLEMENTED
-snd_pcm_sframes_t snd_pcm_mmap_readi(snd_pcm_t *pcm, void *buffer,
-				     snd_pcm_uframes_t size)
 {
 	return -ENXIO;
 }

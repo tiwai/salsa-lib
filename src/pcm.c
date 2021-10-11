@@ -577,14 +577,6 @@ int snd_pcm_dump(snd_pcm_t *pcm, snd_output_t *out)
  * SILENCE AND COPY AREAS
  */
 
-static inline
-void *snd_pcm_channel_area_addr(const snd_pcm_channel_area_t *area,
-				snd_pcm_uframes_t offset)
-{
-	unsigned int bitofs = area->first + area->step * offset;
-	return (char *) area->addr + bitofs / 8;
-}
-
 #if SALSA_SUPPORT_4BIT_PCM
 static int area_silence_4bit(const snd_pcm_channel_area_t *dst_area,
 			     snd_pcm_uframes_t dst_offset,
