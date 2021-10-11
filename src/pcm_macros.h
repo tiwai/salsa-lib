@@ -151,7 +151,9 @@ int snd_pcm_hw_params_current(snd_pcm_t *pcm, snd_pcm_hw_params_t *params)
 __SALSA_EXPORT_FUNC
 int snd_pcm_status(snd_pcm_t *pcm, snd_pcm_status_t *status)
 {
-	if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_STATUS, status) < 0)
+	int cmd = pcm->protocol < SNDRV_PROTOCOL_VERSION(2, 0, 13) ?
+		SNDRV_PCM_IOCTL_STATUS : SNDRV_PCM_IOCTL_STATUS_EXT;
+	if (ioctl(pcm->fd, cmd, status) < 0)
 		return -errno;
 	return 0;
 }
@@ -1991,7 +1993,7 @@ __SALSA_EXPORT_FUNC
 void snd_pcm_status_get_trigger_htstamp(const snd_pcm_status_t *obj,
 					snd_htimestamp_t *ptr)
 {
-	*ptr = obj->trigger_tstamp;
+	__copy_to_snd_htimestamp(&obj->trigger_tstamp, ptr);
 }
 
 __SALSA_EXPORT_FUNC
@@ -2004,13 +2006,13 @@ void snd_pcm_status_get_tstamp(const snd_pcm_status_t *obj, snd_timestamp_t *ptr
 __SALSA_EXPORT_FUNC
 void snd_pcm_status_get_htstamp(const snd_pcm_status_t *obj, snd_htimestamp_t *ptr)
 {
-	*ptr = obj->tstamp;
+	__copy_to_snd_htimestamp(&obj->tstamp, ptr);
 }
 
 __SALSA_EXPORT_FUNC
 void snd_pcm_status_get_audio_htstamp(const snd_pcm_status_t *obj, snd_htimestamp_t *ptr)
 {
-	*ptr = obj->audio_tstamp;
+	__copy_to_snd_htimestamp(&obj->audio_tstamp, ptr);
 }
 
 __SALSA_EXPORT_FUNC
@@ -2136,7 +2138,7 @@ int snd_pcm_htimestamp(snd_pcm_t *pcm, snd_pcm_uframes_t *avail,
 		       snd_htimestamp_t *tstamp)
 {
 	*avail = snd_pcm_avail_update(pcm);
-	*tstamp = pcm->mmap_status->tstamp;
+	__copy_to_snd_htimestamp(&pcm->mmap_status->tstamp, tstamp);
 	return 0;
 }
 

@@ -142,6 +142,11 @@ AC_ARG_ENABLE(ctlasciiparser,
 		 [enable ctl ASCII parser (for amixer)]),
   ctlasciiparser="$enableval", ctlasciiparser="no")
 
+AC_ARG_ENABLE(time64,
+  AS_HELP_STRING([--enable-time64],
+		 [enforce 64bit timespec for ioctls]),
+  struct_time64="$enableval", struct_time64="no")
+
 AC_ARG_ENABLE(everything,
   AS_HELP_STRING([--enable-everything],
 		 [enable everything :)]),
@@ -166,6 +171,7 @@ if test "$everything" = "yes"; then
   support_4bit="yes"
   abicheck="yes"
   ctlasciiparser="yes"
+  struct_time64="yes"
 fi
 
 SALSA_DEPLIBS=""
@@ -259,6 +265,13 @@ else
 fi
 AC_SUBST(SALSA_CTL_ASCII_PARSER)
 
+if test "$struct_time64" = "yes"; then
+  SALSA_STRUCT_TIME64=1
+else
+  SALSA_STRUCT_TIME64=0
+fi
+AC_SUBST(SALSA_STRUCT_TIME64)
+
 if test "$delight_valgrind" = "yes"; then
   AC_DEFINE(DELIGHT_VALGRIND)
 fi
@@ -319,3 +332,4 @@ echo "  - Support string-output via snd_output: $output_buffer"
 echo "  - Support floating-point: $support_float"
 echo "  - Enable library ABI check: $abicheck"
 echo "  - Support ctl ASCII parser: $ctlasciiparser"
+echo "  - Enforce 64bit timespec: $struct_time64"

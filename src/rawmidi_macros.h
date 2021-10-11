@@ -243,7 +243,7 @@ __SALSA_EXPORT_FUNC
 void snd_rawmidi_status_get_tstamp(const snd_rawmidi_status_t *obj,
 				   snd_htimestamp_t *ptr)
 {
-	*ptr = obj->tstamp;
+	__copy_to_snd_htimestamp(&obj->tstamp, ptr);
 }
 
 __SALSA_EXPORT_FUNC

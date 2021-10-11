@@ -368,7 +368,7 @@ __snd_define_type(snd_timer_status);
 __SALSA_EXPORT_FUNC
 snd_htimestamp_t snd_timer_status_get_timestamp(snd_timer_status_t * status)
 {
-	return status->tstamp;
+	return __to_snd_htimestamp(&status->tstamp);
 }
 
 __SALSA_EXPORT_FUNC

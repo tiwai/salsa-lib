@@ -107,6 +107,14 @@ int snd_pcm_open(snd_pcm_t **pcmp, const char *name,
 		goto error;
 	}
 
+	if (SNDRV_PROTOCOL_VERSION(2, 0, 14) <= ver) {
+		unsigned int user_ver = SNDRV_PCM_VERSION;
+		if (ioctl(fd, SNDRV_PCM_IOCTL_USER_PVERSION, &user_ver) < 0) {
+			err = -errno;
+			goto error;
+		}
+	}
+
 	pcm = calloc(1, sizeof(*pcm));
 	if (!pcm) {
 		err = -ENOMEM;
