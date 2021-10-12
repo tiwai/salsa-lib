@@ -46,7 +46,7 @@ The current features are found in the sections below.
 * No sort with weight as default, sorted in the order of numid
 * Simple-none layer only
 * "Capture Source" isn't split to switches but handled as an enum
-   (I personally like this better :)
+   (I personally like this better :-)
 * dB support can be selected via configure option
 * Linear <-> log dB conversion enabled via configure option
 
@@ -83,7 +83,7 @@ The current features are found in the sections below.
 ### MISC
 
 * The API functions that are not supported but defined have
-  "deprecated" attribute.  You'll get compile warnings when compiling
+  *deprecated* attribute.  You'll get compile warnings when compiling
   the code using such functions.  (The same is true for the all
   components below.)  They are just warnings that you can usually
   ignore.  The warnings are given so that you can find the
@@ -121,6 +121,10 @@ opt-in ABI-compatible library with the genuine ALSA-lib.
 
 When ``--enable-abicheck`` is given, each open function checks the ABI
 compatibility with the installed library.
+
+When ``--enable-time64`` is passed, the library enforces to use the
+64bit timespec and 64bit-compatible PCM ioctls even if the libc is
+still with 32bit time.  It's good for testing the 64bit time support.
 
 All these options can be enabled via a single option,
 ``--enable-everything``, for your convenience.
@@ -175,9 +179,9 @@ KNOWN PROBLEMS
   ``snd_pcm_mmap_*()`` are only partially implemented, and the mmap-mode
   is less tested, so far.
 
-* When built without --enable-output-buffer, the buffer output via
-  snd_output_*() functions doesn't work.  And, the last "close"
-  argument in snd_input_stdio_attach() and snd_output_stdio_attach()
+* When built without ``--enable-output-buffer``, the buffer output via
+  ``snd_output_*()`` functions doesn't work.  And, the last ``close``
+  argument in ``snd_input_stdio_attach()`` and ``snd_output_stdio_attach()``
   is ignored and the attached IO is always closed.
 
 
