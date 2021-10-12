@@ -144,7 +144,7 @@ For enabling the support for the string buffer with snd_output_*()
 function (e.g. used by PulseAudio), pass --enable-output-buffer option.
 
 The alsa-library version to be compatible can be given explicitly via
---with-compat-version option.  As default, 1.0.28 is set.
+--with-compat-version option.  As default, 1.2.5 is set.
 
 If the ALSA device files are not in /dev/snd, another directory can be
 specified with the --with-alsa-devdir option.
