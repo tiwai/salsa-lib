@@ -389,6 +389,18 @@ void snd_ctl_elem_id_set_index(snd_ctl_elem_id_t *obj, unsigned int val)
 	obj->index = val;
 }
 
+__SALSA_EXPORT_FUNC
+int snd_ctl_elem_id_compare_set(const snd_ctl_elem_id_t *id1, const snd_ctl_elem_id_t *id2)
+{
+	int d;
+	if ((d = id1->iface - id2->iface) ||
+	    (d = id1->device - id2->device) ||
+	    (d = id1->subdevice - id2->subdevice) ||
+	    (d = strcmp((const char *)id1->name, (const char *)id2->name)))
+		return d;
+	return id1->index - id2->index;
+}
+
 __snd_define_type(snd_ctl_card_info);
 
 __SALSA_EXPORT_FUNC
