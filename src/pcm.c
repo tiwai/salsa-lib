@@ -969,8 +969,16 @@ static snd_pcm_uframes_t snd_pcm_mmap_avail(snd_pcm_t *pcm)
 		return snd_pcm_mmap_capture_avail(pcm);
 }
 
-snd_pcm_sframes_t snd_pcm_hw_forwardable(snd_pcm_t *pcm)
+static snd_pcm_sframes_t snd_pcm_mmap_hw_avail(snd_pcm_t *pcm)
+{
+	return pcm->buffer_size - snd_pcm_mmap_avail(pcm);
+}
+
+snd_pcm_sframes_t snd_pcm_forwardable(snd_pcm_t *pcm)
 	__attribute__ ((alias("snd_pcm_mmap_avail")));
+
+snd_pcm_sframes_t snd_pcm_rewindable(snd_pcm_t *pcm)
+	__attribute__ ((alias("snd_pcm_mmap_hw_avail")));
 
 snd_pcm_sframes_t snd_pcm_avail_update(snd_pcm_t *pcm)
 {

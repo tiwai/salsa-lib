@@ -148,6 +148,9 @@ int snd_pcm_areas_copy(const snd_pcm_channel_area_t *dst_channels,
 		       unsigned int channels, snd_pcm_uframes_t frames,
 		       snd_pcm_format_t format);
 
+snd_pcm_sframes_t snd_pcm_forwardable(snd_pcm_t *pcm);
+snd_pcm_sframes_t snd_pcm_rewindable(snd_pcm_t *pcm);
+
 #if SALSA_HAS_ASYNC_SUPPORT
 int snd_async_add_pcm_handler(snd_async_handler_t **handler, snd_pcm_t *pcm, 
 			      snd_async_callback_t callback,
