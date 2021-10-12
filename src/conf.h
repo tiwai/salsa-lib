@@ -65,6 +65,20 @@ int snd_config_update_free(snd_config_update_t *update)
 	return 0;
 }
 
+__SALSA_EXPORT_FUNC
+int snd_config_update_ref(snd_config_t **top)
+{
+	/* an invalid address, but just mark to be non-NULL */
+	top = (snd_config_t*)1;
+	snd_config_update();
+	return 0;
+}
+
+__SALSA_EXPORT_FUNC
+void snd_config_unref(snd_config_t *cfg)
+{
+}
+
 #if SALSA_HAS_DUMMY_CONF
 __SALSA_EXPORT_FUNC
 int snd_config_update_free_global(void)
