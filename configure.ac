@@ -97,10 +97,10 @@ AC_ARG_ENABLE(chmap,
 		 [enable chmap API support]),
   chmap="$enableval", chmap="no")
 
-AC_ARG_ENABLE(libasound,
-  AS_HELP_STRING([--enable-libasound],
-		 [build a ABI-compatible libasound.so]),
-  libasound="$enableval", libasound="no")
+AC_ARG_ENABLE(abi-compat,
+  AS_HELP_STRING([--enable-abi-compat],
+		 [build ABI-compatible library with alsa-lib]),
+  abi_compat="$enableval", abi_compat="no")
 
 AC_ARG_ENABLE(deprecated,
   AS_HELP_STRING([--disable-deprecated],
@@ -164,7 +164,7 @@ if test "$everything" = "yes"; then
   user_elem="yes"
   async="yes"
   chmap="yes"
-  libasound="yes"
+  abi_compat="yes"
   symfuncs="yes"
   output_buffer="yes"
   support_float="yes"
@@ -220,7 +220,7 @@ else
 fi
 AC_SUBST(SALSA_HAS_DUMMY_CONF)
 
-AM_CONDITIONAL(COMPAT_ABI, test "$libasound" = "yes")
+AM_CONDITIONAL(COMPAT_ABI, test "$abi_compat" = "yes")
 
 if test "$markdeprecated" = "yes"; then
   SALSA_MARK_DEPRECATED=1
@@ -326,7 +326,7 @@ echo "  - TLV (dB) support: $tlv"
 echo "  - User-space control element support: $user_elem"
 echo "  - Async handler support: $async"
 echo "  - PCM chmap API support: $chmap"
-echo "  - Make ABI-compatible libasound.so: $libasound"
+echo "  - Make ABI-compatible libasound.so: $abi_compat"
 echo "  - Mark deprecated attribute: $markdeprecated"
 echo "  - Support string-output via snd_output: $output_buffer"
 echo "  - Support floating-point: $support_float"

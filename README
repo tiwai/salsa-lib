@@ -106,7 +106,7 @@ It's disabled as default.
 The PCM chmap API support is also optional, can be enabled via
 --enable-chmap option.
 
-With option --enable-libasound, libasound.so will be created as an
+With option --enable-abi-compat, libasound.so will be created as an
 opt-in ABI-compatible library with the genuine ALSA-lib.
 
 When --enable-abicheck is given, each open function checks the ABI
