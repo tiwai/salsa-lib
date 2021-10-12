@@ -90,6 +90,12 @@ int snd_pcm_nonblock(snd_pcm_t *pcm, int nonblock)
 	return _snd_set_nonblock(pcm->fd, nonblock);
 }
 
+static __inline__ int
+snd_pcm_abort(snd_pcm_t *pcm)
+{
+	return snd_pcm_nonblock(pcm, 2);
+}
+
 __SALSA_EXPORT_FUNC
 const char *snd_pcm_name(snd_pcm_t *pcm)
 {
