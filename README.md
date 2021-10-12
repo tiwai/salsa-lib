@@ -1,8 +1,8 @@
-		SALSA-Lib - Small ALSA Library
-		==============================
+SALSA-Lib - Small ALSA Library
+==============================
 
 GENERAL
--------
+=======
 
 SALSA-Lib is a small, light-weight, hot and spicy version of the ALSA
 library, mainly for embedded systems with limited resources.
@@ -13,76 +13,97 @@ Some components like ALSA sequencer aren't supported, and most of all,
 the alsa-lib plugins and configurations are completely dropped.  Thus,
 neither dmix nor format conversion is available with SALSA-lib.
 
-The current features are like below:
+The current features are found in the sections below.
 
 CONFIG
-  o All functions snd_config_*() are replaced with dummy ones since
-    SALSA-Lib doesn't support the configuration files.
-    The apps accessing config stuff won't work properly as expected.
-  o Disabled as default
+------
+
+* All functions snd_config_*() are replaced with dummy ones since
+  SALSA-Lib doesn't support the configuration files.
+  The apps accessing config stuff won't work properly as expected.
+* Disabled as default
 
 PCM
-  o Supports only the hw layer, i.e. no up/down-mixing, format
-    conversion, rate conversion, etc, and no external plug-in
-  o Accepts the limited PCM name, "hw", "default", "default:x",
-    and "hw:x,y,z"
-  o snd_pcm_mmap_read/write*() are declared but not implemented
-    (returns -ENXIO)
-  o The support of async handlers can be built in via configure
-    option, --enable-async.  For simplicity, SALSA-lib supports
-    only one async handler per PCM handler.
+---
+
+* Supports only the hw layer, i.e. no up/down-mixing, format
+  conversion, rate conversion, etc, and no external plug-in
+* Accepts the limited PCM name, ``hw``, ``default``, ``default:x``,
+  and ``hw:x,y,z``
+* snd_pcm_mmap_read/write*() are declared but not implemented (returns
+  -ENXIO)
+* The support of async handlers can be built in via configure option,
+  --enable-async.  For simplicity, SALSA-lib supports only one async
+  handler per PCM handler.
 
 CONTROL
-  o Supports only the hw layer, no plug-in
-  o Some H-control functions are not included
-  o The support of async handlers via --enable-async as well as
-    PCM async handlers.
+-------
+
+* Supports only the hw layer, no plug-in
+* Some H-control functions are not included
+* The support of async handlers via --enable-async as well as PCM
+  async handlers.
 
 MIXER
-  o No sort with weight as default, sorted in the order of numid
-  o Simple-none layer only
-  o "Capture Source" isn't split to switches but handled as an enum
-    (I personally like this better :)
-  o dB support can be selected via configure option
-  o Linear <-> log dB conversion enabled via configure option
+-----
+
+* No sort with weight as default, sorted in the order of numid
+* Simple-none layer only
+* "Capture Source" isn't split to switches but handled as an enum
+   (I personally like this better :)
+* dB support can be selected via configure option
+* Linear <-> log dB conversion enabled via configure option
 
 TIMER
-  o No query interface (returns errors)
-  o No async handler (returns -ENXIO)
-  o Disabled as default
+-----
+
+* No query interface (returns errors)
+* No async handler (returns -ENXIO)
+* Disabled as default
 
 RAWMIDI
-  o Should work
-  o Disabled as default
+-------
+
+* Should work
+* Disabled as default
 
 HWDEP
-  o Should work
-  o Disabled as default
+-----
+
+* Should work
+* Disabled as default
 
 SEQUENCER
-  o All replaced with dummy functions.  The apps using sequencer won't
-    work properly.
-  o Disabled as default
+---------
+
+* All replaced with dummy functions.  The apps using sequencer won't
+  work properly.
+* Disabled as default
 
 INSTRUMENT LAYER
-  o No APIs are provided
+----------------
+
+* No APIs are provided
 
 UCM
-  o Not supported yet at all
+---
+
+* Not supported yet at all
 
 MISC
-  o The API functions that are not supported but defined have
-    "deprecated" attribute.  You'll get compile warnings when
-    compiling the code using such functions.  (The same is true for
-    the all components below.)  They are just warnings that you can
-    usually ignore.  The warnings are given so that you can find the
-    non-functional features easily.  If warnings really matter, remove
-    the deprecated attribute via --disable-deprecated configure
-    option.
+----
+
+* The API functions that are not supported but defined have
+  "deprecated" attribute.  You'll get compile warnings when compiling
+  the code using such functions.  (The same is true for the all
+  components below.)  They are just warnings that you can usually
+  ignore.  The warnings are given so that you can find the
+  non-functional features easily.  If warnings really matter, remove
+  the deprecated attribute via --disable-deprecated configure option.
 
 
 INSTALLATION
-------------
+============
 
 Some configure options are available to reduce the binary size.
 As default, rawmidi, hwdep, timer, conf and seq components are
@@ -138,7 +159,7 @@ alsa/asoundlib.h should be compatible with the normal alsa-lib's one.
 
 
 CROSS-COMPILATION
------------------
+=================
 
 For compiling the library with a cross compiler, run like the
 following:
@@ -152,27 +173,27 @@ library won't be built properly.
 
 
 DOCUMENTATION
--------------
+=============
 
 See alsa-lib reference.  It's compatible!
 
 
 KNOWN PROBLEMS
---------------
+==============
 
-- Incomplete MMAP mode
+* Incomplete MMAP mode
 
   snd_pcm_mmap_*() are only partially implemented, and the mmap-mode
   is less tested, so far.
 
-- When built without --enable-output-buffer, the buffer output via 
+* When built without --enable-output-buffer, the buffer output via
   snd_output_*() functions doesn't work.  And, the last "close"
   argument in snd_input_stdio_attach() and snd_output_stdio_attach()
   is ignored and the attached IO is always closed.
 
 
 LICENSE
--------
+=======
 
 Distributed under LGPL.  See COPYING file.
 
