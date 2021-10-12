@@ -112,7 +112,7 @@ AC_ARG_ENABLE(output-buffer,
 		 [support the string output via snd_output_*() functions]),
   output_buffer="$enableval", output_buffer="no")
 
-AC_ARG_ENABLE(libasound,
+AC_ARG_ENABLE(delight-valgrind,
   AS_HELP_STRING([--disable-delight-valgrind],
 		 [do not initialize unnecessary fields for ioctls]),
   delight_valgrind="$enableval", delight_valgrind="yes")
