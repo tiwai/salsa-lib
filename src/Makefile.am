@@ -7,7 +7,7 @@ SYMFUNCS =
 endif
 
 lib_LTLIBRARIES = libsalsa.la
-libsalsa_la_SOURCES = control.c cards.c
+libsalsa_la_SOURCES = control.c cards.c output.c
 if BUILD_PCM
 libsalsa_la_SOURCES += pcm.c pcm_params.c pcm_misc.c
 endif
