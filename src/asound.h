@@ -403,8 +403,8 @@ typedef struct snd_pcm_sw_params {
 	snd_pcm_uframes_t silence_threshold;
 	snd_pcm_uframes_t silence_size;
 	snd_pcm_uframes_t boundary;
-	unsigned int tstamp_type;
-	int pads;
+	unsigned int proto;			/* protocol version */
+	unsigned int tstamp_type;		/* timestamp type (req. proto >= 2.0.12) */
 	unsigned char reserved[52];
 	unsigned int period_event;
 } snd_pcm_sw_params_t;
